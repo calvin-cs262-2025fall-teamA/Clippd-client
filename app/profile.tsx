@@ -1,8 +1,25 @@
-import React from "react";
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
 import { Stack } from "expo-router";
+import React from "react";
+import {
+  Button,
+  Image,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function Profile() {
+  const openDirections = () => {
+    const latitude = 42.9303;
+    const longitude = -85.5873;
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+    Linking.openURL(url);
+  };
+
   return (
     <>
       <Stack.Screen options={{ title: "Profile" }} />
@@ -22,9 +39,12 @@ export default function Profile() {
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Contact</Text>
-          <Text style={styles.field}>Location: Boston, MA</Text>
           <Text style={styles.field}>Phone: (555) 123-4567</Text>
           <Text style={styles.field}>Email: calvin.klein@calvin.edu</Text>
+          <Text style={styles.field}>Location: Boston, MA</Text>
+          <Pressable onPress={openDirections}>
+            <Button title="Get Directions" onPress={openDirections} />
+          </Pressable>
         </View>
 
         <View style={styles.card}>
