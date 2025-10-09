@@ -11,6 +11,8 @@ export default function RootLayout() {
             <Ionicons name="home-outline" size={24} color="black" />
           ),
           title: "Home",
+          headerTitleAlign: "center",
+          headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
         }}
       />
       <Tabs.Screen
@@ -27,6 +29,8 @@ export default function RootLayout() {
             <Ionicons name="heart-outline" size={24} color="black" />
           ),
           title: "Favorites",
+          headerTitleAlign: "center",
+          headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
         }}
       />
       <Tabs.Screen
@@ -36,6 +40,8 @@ export default function RootLayout() {
             <Ionicons name="person-outline" size={24} color="black" />
           ),
           title: "Profile",
+          headerTitleAlign: "center",
+          headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
         }}
       />
     </Tabs>
