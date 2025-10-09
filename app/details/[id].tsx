@@ -1,5 +1,13 @@
-import { useLocalSearchParams } from "expo-router";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import itemData from "../../data/item.json";
 import { itemType } from "../../type/itemType";
 
@@ -16,25 +24,48 @@ export default function DetailsPage() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Image source={{ uri: clippr.profilePic }} style={styles.headerImage} />
-      <View style={styles.content}>
-        <Text style={styles.name}>{clippr.name}</Text>
-        <Text style={styles.location}>📍 {clippr.location}</Text>
-        <Text style={styles.rating}>⭐ {clippr.rating}</Text>
+    <>
+      <Stack.Screen
+        options={{
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={router.back}
+              style={{ marginLeft: 15, marginRight: 10 }}
+            >
+              <Ionicons name="arrow-back" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <TouchableOpacity onPress={() => {}} style={{ marginRight: 15 }}>
+              <Ionicons name="heart-outline" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <ScrollView style={styles.container}>
+        <Image source={{ uri: clippr.profilePic }} style={styles.headerImage} />
+        <View style={styles.content}>
+          <Text style={styles.name}>{clippr.name}</Text>
+          <Text style={styles.location}>📍 {clippr.location}</Text>
+          <Text style={styles.rating}>⭐ {clippr.rating}</Text>
 
-        <Text style={styles.sectionTitle}>Portfolio</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {clippr.images?.map((img, index) => (
-            <Image
-              key={index}
-              source={{ uri: img }}
-              style={styles.portfolioImage}
-            />
-          ))}
-        </ScrollView>
-      </View>
-    </ScrollView>
+          <Text style={styles.sectionTitle}>Portfolio</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {clippr.images?.map((img, index) => (
+              <Image
+                key={index}
+                source={{ uri: img }}
+                style={styles.portfolioImage}
+              />
+            ))}
+          </ScrollView>
+        </View>
+      </ScrollView>
+    </>
   );
 }
 

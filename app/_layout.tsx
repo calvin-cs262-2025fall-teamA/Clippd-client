@@ -17,7 +17,7 @@ export default function RootLayout() {
         name="details/[id]"
         options={{
           href: null,
-          title: "Clippr Details",
+          title: "",
         }}
       />
       <Tabs.Screen
