@@ -23,6 +23,17 @@ export default function RootLayout() {
         }}
       />
       <Tabs.Screen
+        name="map"
+        options={{
+          tabBarIcon: () => (
+            <Ionicons name="map-outline" size={24} color="black" />
+          ),
+          title: "Map",
+          headerTitleAlign: "center",
+          headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
+        }}
+      />
+      <Tabs.Screen
         name="favorites"
         options={{
           tabBarIcon: () => (
