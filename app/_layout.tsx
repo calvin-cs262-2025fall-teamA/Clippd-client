@@ -18,6 +18,9 @@ export default function RootLayout() {
         },
       }}
     >
+      {/* Login screen */}
+      <Tabs.Screen name="login" options={{ href: null, headerShown: false }} />
+
       {/* Home */}
       <Tabs.Screen
         name="index"
