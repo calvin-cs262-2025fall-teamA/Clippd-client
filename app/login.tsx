@@ -1,4 +1,8 @@
+// used from https://github.com/divanov11/react-native-appwrite/blob/2-protected-routes/app/signin.jsx
+
+import { Href, router } from "expo-router";
 import {
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -7,6 +11,14 @@ import {
 } from "react-native";
 
 export default function Index() {
+  const handleLogin = () => {
+    router.replace("/(tabs)" as Href);
+  };
+
+  const handleSignup = () => {
+    router.replace("signup" as Href);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.headline}>SignIn</Text>
@@ -25,9 +37,15 @@ export default function Index() {
           placeholderTextColor={"gray"}
         />
       </View>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
+      <Text style={styles.signupText}>
+        Don&apos;t have and account?
+        <Pressable onPress={handleSignup}>
+          <Text style={styles.link}>Sign up</Text>
+        </Pressable>
+      </Text>
     </View>
   );
 }
@@ -73,5 +91,14 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 18,
+  },
+  link: {
+    color: "#4285F4",
+    textDecorationLine: "underline",
+    fontWeight: "600",
+  },
+  signupText: {
+    marginTop: 100,
+    textAlign: "center",
   },
 });

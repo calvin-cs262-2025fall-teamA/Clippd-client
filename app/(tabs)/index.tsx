@@ -1,8 +1,8 @@
 import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Card from "../components/Card";
-import itemData from "../data/item.json";
-import { itemType } from "../type/itemType";
+import Card from "../../components/Card";
+import itemData from "../../data/item.json";
+import { itemType } from "../../type/itemType";
 
 // type CardData = {
 //   name: string;
