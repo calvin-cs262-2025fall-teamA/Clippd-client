@@ -1,5 +1,11 @@
 import { Href, router } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Signup() {
   const handleSignup = () => {
@@ -8,9 +14,30 @@ export default function Signup() {
 
   return (
     <View style={styles.container}>
-      <Text>This is the signup page.</Text>
+      <Text style={styles.headline}>Sign Up</Text>
+      <View style={styles.formContainer}>
+        <Text style={styles.label}>First Name:</Text>
+        <TextInput style={styles.input} />
+
+        <Text style={styles.label}>Last Name:</Text>
+        <TextInput style={styles.input} />
+
+        <Text style={styles.label}>Email:</Text>
+        <TextInput
+          placeholder="Enter your email"
+          placeholderTextColor={"gray"}
+          style={styles.input}
+        />
+
+        <Text style={styles.label}>Password:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor={"gray"}
+        />
+      </View>
       <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Sign up</Text>
+        <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
     </View>
   );
@@ -22,6 +49,31 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: "center",
   },
+  headline: {
+    textAlign: "center",
+    marginTop: -100,
+    marginBottom: 50,
+    fontWeight: 700,
+    fontStyle: "italic",
+    fontSize: 72,
+  },
+  label: {
+    marginLeft: "10%",
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    width: "80%",
+    marginTop: 10,
+    marginBottom: 10,
+    borderColor: "grey",
+    alignSelf: "center",
+  },
+  formContainer: {
+    alignItems: "flex-start",
+    width: "100%",
+  },
   button: {
     backgroundColor: "black",
     padding: 12,
@@ -32,5 +84,14 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 18,
+  },
+  link: {
+    color: "#4285F4",
+    textDecorationLine: "underline",
+    fontWeight: "600",
+  },
+  signupText: {
+    marginTop: 100,
+    textAlign: "center",
   },
 });

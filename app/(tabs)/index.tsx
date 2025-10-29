@@ -17,7 +17,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 70 }}>
         {data.map((item) => (
           <Card
             id={item.id}
