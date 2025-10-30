@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 
+
 export default function Profile() {
   const openDirections = () => {
     const latitude = 42.9303;
@@ -49,10 +50,22 @@ export default function Profile() {
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Preferences</Text>
-          <Text style={styles.field}>Preferred Tools: Clippers, Shears</Text>
-          <Text style={styles.field}>Languages: English, Spanish</Text>
+
+          <Text style={styles.fieldTitle}>Preferred Tools</Text>
+          <View style={styles.chipContainer}>
+            <View style={styles.chip}><Text style={styles.chipText}>Clippers</Text></View>
+            <View style={styles.chip}><Text style={styles.chipText}>Shears</Text></View>
+          </View>
+
+          <Text style={styles.fieldTitle}>Languages</Text>
+          <View style={styles.chipContainer}>
+            <View style={styles.chip}><Text style={styles.chipText}>English</Text></View>
+            <View style={styles.chip}><Text style={styles.chipText}>Spanish</Text></View>
+          </View>
+
           <Text style={styles.field}>Availability: Mon-Fri, 9am - 5pm</Text>
         </View>
+
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>About</Text>
@@ -109,5 +122,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     marginBottom: 6,
+  },
+  fieldTitle: {
+    fontWeight: "600",
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  chipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 8,
+  },
+  chip: {
+    backgroundColor: "#e6e6e6",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  chipText: {
+    fontSize: 14,
+    color: "#333",
   },
 });
