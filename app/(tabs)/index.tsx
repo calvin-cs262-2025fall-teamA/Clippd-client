@@ -16,8 +16,11 @@ export default function App() {
   const data: itemType[] = itemData;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 70 }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["bottom"]}
+    >
+      <ScrollView contentContainerStyle={{ paddingTop: 5, paddingBottom: 70 }}>
         {data.map((item) => (
           <Card
             id={item.id}

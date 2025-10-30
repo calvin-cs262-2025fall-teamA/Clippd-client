@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import SmallCard from "../../components/SmallCard";
+import FavotitesCard from "../../components/FavoritesCard";
 import itemData from "../../data/item.json";
 import { itemType } from "../../type/itemType";
 
@@ -13,7 +13,7 @@ export default function Favorites() {
       <ScrollView style={styles.scrollView}>
         {data.length > 0 ? (
           data.map((item) => (
-            <SmallCard
+            <FavotitesCard
               key={item.id}
               id={item.id}
               name={item.name}
