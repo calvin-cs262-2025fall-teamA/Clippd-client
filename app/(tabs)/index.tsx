@@ -1,8 +1,8 @@
 import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Card from "../components/Card";
-import itemData from "../data/item.json";
-import { itemType } from "../type/itemType";
+import Card from "../../components/Card";
+import itemData from "../../data/item.json";
+import { itemType } from "../../type/itemType";
 
 // type CardData = {
 //   name: string;
@@ -16,8 +16,11 @@ export default function App() {
   const data: itemType[] = itemData;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ScrollView>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["bottom"]}
+    >
+      <ScrollView contentContainerStyle={{ paddingTop: 5, paddingBottom: 70 }}>
         {data.map((item) => (
           <Card
             id={item.id}
