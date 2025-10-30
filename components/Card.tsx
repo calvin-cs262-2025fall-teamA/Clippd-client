@@ -115,7 +115,7 @@ export default function Card({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
-    borderRadius: 15,
+    // borderRadius: 15,
     marginVertical: 15,
     marginHorizontal: 10,
     shadowColor: "#000",
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 5 },
     elevation: 4,
-    overflow: "hidden",
+    // overflow: "hidden",
   },
 
   textContainer: {
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   profileImg: {
     width: 60,
     height: 60,
-    borderRadius: 5,
+    // borderRadius: 5,
     marginBottom: 10,
   },
 

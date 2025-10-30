@@ -27,6 +27,7 @@ export default function DetailsPage() {
     <>
       <Stack.Screen
         options={{
+          title: "Clippr Details",
           headerLeft: () => (
             <TouchableOpacity
               onPress={router.back}
@@ -35,10 +36,6 @@ export default function DetailsPage() {
               <Ionicons name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
           ),
-        }}
-      />
-      <Stack.Screen
-        options={{
           headerRight: () => (
             <TouchableOpacity onPress={() => {}} style={{ marginRight: 15 }}>
               <Ionicons name="heart-outline" size={24} color="black" />
