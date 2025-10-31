@@ -17,7 +17,7 @@ export default function App() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: "#252525ff" }}
       edges={["bottom"]}
     >
       <ScrollView contentContainerStyle={{ paddingTop: 5, paddingBottom: 70 }}>
