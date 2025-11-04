@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 20,
     flex: 1,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#ffffffff",
   },
   scrollView: {
     flex: 1,

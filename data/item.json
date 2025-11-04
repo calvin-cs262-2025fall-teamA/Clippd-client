@@ -1,38 +1,38 @@
 [
   {
     "id": "1",
-    "name": "Firstname Lastname",
-    "location": "Beets Veenstra",
+    "name": "George Best",
+    "location": "Grand Rapids",
     "images": [
-      "https://picsum.photos/400/200?random=11",
-      "https://picsum.photos/400/200?random=4",
-      "https://picsum.photos/400/200?random=5"
+      "https://picsum.photos/1920/900?random=11",
+      "https://picsum.photos/1920/900?random=4",
+      "https://picsum.photos/1920/900?random=5"
     ],
     "rating": 4.5,
-    "profilePic": "https://picsum.photos/400/200?random=15"
+    "profilePic": "https://picsum.photos/1920/900?random=15"
   },
   {
     "id": "2",
-    "name": "Prototype 2",
-    "location": "Boer Bennink",
+    "name": "Tim Smith",
+    "location": "Grand Rapids",
     "images": [
-      "https://picsum.photos/400/200?random=2",
-      "https://picsum.photos/400/200?random=6"
+      "https://picsum.photos/1920/900?random=29",
+      "https://picsum.photos/1920/900?random=6"
     ],
     "rating": 3.8,
-    "profilePic": "https://picsum.photos/400/200?random=19"
+    "profilePic": "https://picsum.photos/1920/900?random=13"
   },
   {
     "id": "3",
-    "name": "Another Card",
-    "location": "Commons Dining Hall",
+    "name": "Will Johnson",
+    "location": "Hudsonville",
     "images": [
-      "https://picsum.photos/400/200?random=3",
-      "https://picsum.photos/400/200?random=7",
-      "https://picsum.photos/400/200?random=8",
-      "https://picsum.photos/400/200?random=9"
+      "https://picsum.photos/1920/900?random=1",
+      "https://picsum.photos/1920/900?random=7",
+      "https://picsum.photos/1920/900?random=99",
+      "https://picsum.photos/1920/900?random=9"
     ],
     "rating": 5.0,
-    "profilePic": "https://picsum.photos/400/200?random=42"
+    "profilePic": "https://picsum.photos/1920/900?random=42"
   }
 ]

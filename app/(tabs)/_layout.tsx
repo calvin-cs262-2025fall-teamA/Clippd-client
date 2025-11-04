@@ -1,4 +1,4 @@
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { Tabs } from "expo-router";
 import { Scissors } from "lucide-react-native";
@@ -7,8 +7,11 @@ import { Platform, StyleSheet, View } from "react-native";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    "Lato-Regular": require("../../assets/fonts/Lato-Regular.ttf"),
     "Lato-Bold": require("../../assets/fonts/Lato-Bold.ttf"),
+    "Lato-Regular": require("../../assets/fonts/Lato-Regular.ttf"),
+    "PlayfairDisplay-SemiBold": require("../../assets/fonts/PlayfairDisplay-SemiBold.ttf"),
+    "PlayfairDisplay-Regular": require("../../assets/fonts/PlayfairDisplay-Regular.ttf"),
+    "PlayfairDisplay-Bold": require("../../assets/fonts/PlayfairDisplay-Bold.ttf"),
   });
 
   if (!fontsLoaded) {
@@ -22,27 +25,22 @@ export default function RootLayout() {
         tabBarActiveTintColor: "#ff1a47",
         tabBarInactiveTintColor: "#9c9c9cff",
         headerStyle: {
-          height: 105,
-          backgroundColor: "#111",
+          height: 100,
+          backgroundColor: "#ffffffff",
         },
         headerTintColor: "#fff",
         tabBarStyle: {
-          height: 75,
+          height: 80,
           borderTopWidth: 0,
           elevation: 0,
-          backgroundColor: "#1f1f1fff",
+          backgroundColor: "#ffffffff",
           position: "absolute",
-          marginBottom: 20,
-          borderRadius: 30,
-          width: "96%",
-          marginHorizontal: "2%",
-          opacity: 0.95,
-          paddingTop: 11,
+          paddingTop: 5,
           paddingBottom: 13,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontFamily: "Lato-Bold",
+          fontSize: 12,
+          fontFamily: "PlayfairDisplay-Regular",
         },
       }}
     >
@@ -51,15 +49,14 @@ export default function RootLayout() {
         name="index"
         options={{
           title: "Home",
-          headerTitleAlign: "left",
+          headerTitleAlign: "center",
           headerTitleStyle: {
-            fontSize: 22,
-            fontFamily: "Lato-Bold",
-            marginLeft: 5,
-            color: "#fff",
+            fontSize: 27,
+            fontFamily: "PlayfairDisplay-SemiBold",
+            color: "#000000ff",
           },
           headerLeft: () => (
-            <View style={{ marginLeft: 15 }}>
+            <View style={{ marginLeft: 137 }}>
               <Scissors color="#ff1a47" size={32} />
             </View>
           ),
@@ -75,7 +72,10 @@ export default function RootLayout() {
         options={{
           title: "Explore",
           headerTitleAlign: "center",
-          headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
+          headerTitleStyle: {
+            fontSize: 20,
+            fontFamily: "PlayfairDisplay-Bold",
+          },
           tabBarIcon: ({ color }) => (
             <Ionicons name="map-outline" size={24} color={color} />
           ),
@@ -83,7 +83,7 @@ export default function RootLayout() {
       />
 
       {/* Booking (center floating button) */}
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="booking"
         options={{
           title: "",
@@ -96,7 +96,7 @@ export default function RootLayout() {
           href: null,
           tabBarLabel: () => null,
         }}
-      />
+      /> */}
 
       {/* Favorites */}
       <Tabs.Screen
@@ -104,7 +104,11 @@ export default function RootLayout() {
         options={{
           title: "Favorites",
           headerTitleAlign: "center",
-          headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
+          headerTitleStyle: {
+            fontSize: 25,
+            fontFamily: "PlayfairDisplay-Bold",
+            color: "black",
+          },
           tabBarIcon: ({ color }) => (
             <Ionicons name="heart-outline" size={24} color={color} />
           ),

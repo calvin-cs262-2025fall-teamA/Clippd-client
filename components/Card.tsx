@@ -83,18 +83,19 @@ export default function Card({
         {/*Row: Rating, Name+Location, profile picture*/}
         <View style={styles.infoRow}>
           {/*Left: rating*/}
-          <View style={styles.ratingBlock}>
-            <Ionicons name="star" size={16} color="gold" />
-            {rating && <Text style={styles.ratingText}>{rating}</Text>}
-          </View>
+
+          {/*Right: profile picture*/}
+          {profilePic && (
+            <Image source={{ uri: profilePic }} style={styles.profileImg} />
+          )}
 
           {/*Middle: Name + Location*/}
           <View style={styles.textContainer}>
-            <Text style={styles.title}>{name}</Text>
+            <Text style={styles.name}>{name}</Text>
             {/*short-circuit*/}
             {location && (
               <View style={styles.locationRow}>
-                <Text style={styles.subtitle}>
+                <Text style={styles.location}>
                   <Ionicons name="location-sharp"></Ionicons>
                   {location}
                 </Text>
@@ -102,10 +103,10 @@ export default function Card({
             )}
           </View>
 
-          {/*Right: profile picture*/}
-          {profilePic && (
-            <Image source={{ uri: profilePic }} style={styles.profileImg} />
-          )}
+          <View style={styles.ratingBlock}>
+            <Ionicons name="star" size={16} color="gold" />
+            {rating && <Text style={styles.ratingText}>{rating}</Text>}
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -115,7 +116,7 @@ export default function Card({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
-    // borderRadius: 15,
+    borderRadius: 15,
     marginVertical: 15,
     marginHorizontal: 10,
     shadowColor: "#000",
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 5 },
     elevation: 4,
-    // overflow: "hidden",
+    overflow: "hidden",
   },
 
   textContainer: {
@@ -131,26 +132,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  title: {
-    fontSize: 24,
-    fontWeight: "600",
-    textAlign: "right",
+  name: {
+    fontSize: 22,
+    fontFamily: "PlayfairDisplay-SemiBold",
+    textAlign: "left",
   },
 
-  subtitle: {
+  location: {
     fontSize: 14,
+    fontFamily: "Lato-Regular",
     color: "#666",
     marginTop: 4,
-    textAlign: "right",
+    textAlign: "left",
   },
 
   galleryContainer: {
-    backgroundColor: "grey",
     height: 300,
   },
 
   galleryImage: {
-    width: screenWidth - 50,
+    width: screenWidth - 20,
     height: 300,
   },
 
@@ -160,17 +161,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginLeft: 15,
     marginRight: 15,
+    marginTop: 35,
   },
 
   ratingBlock: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 15,
   },
 
   ratingText: {
     marginLeft: 4,
-    fontSize: 24,
-    fontWeight: "500",
+    fontSize: 20,
+    fontFamily: "Lato-Bold",
     color: "grey",
   },
 
@@ -179,35 +182,45 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 1,
     marginBottom: 5,
-    justifyContent: "flex-end",
+    justifyContent: "flex-start",
   },
 
   profileImg: {
     width: 60,
     height: 60,
-    // borderRadius: 5,
+    borderRadius: 5,
     marginBottom: 10,
   },
 
   photoFrame: {
     backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 15,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
 
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 1,
+    marginTop: 5,
+    marginBottom: 5,
+    position: "absolute",
+    bottom: -40,
+    left: 0,
+    right: 0,
   },
   pagingDot: {
-    color: "#bbb",
-    fontSize: 30,
+    color: "#cfcfcfff",
+    fontSize: 25,
     marginHorizontal: 2,
+    textShadowColor: "rgba(66, 66, 66, 0.5)", // ✅ Add shadow for visibility
+    textShadowRadius: 3,
   },
   pagingDotActive: {
-    color: "#333",
-    fontSize: 30,
+    color: "#6e6e6eff", // ✅ Changed to white
+    fontSize: 25,
     marginHorizontal: 2,
+    textShadowColor: "rgba(82, 82, 82, 0.5)", // ✅ Darker shadow when active
+    // textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 });
