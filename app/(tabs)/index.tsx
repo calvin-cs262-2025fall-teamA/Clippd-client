@@ -1,28 +1,29 @@
+import { Ionicons } from "@expo/vector-icons"; // ✅ ADDED: icon for the button
+import { BlurView } from "expo-blur"; // ✅ ADDED: for frosted-glass effect
 import {
-  ScrollView,
+  ScrollView, // ✅ ADDED
+  StyleSheet,
   TouchableOpacity, // ✅ ADDED
-  Platform,        // ✅ ADDED
-  StyleSheet,      // ✅ ADDED
-  View,            // ✅ ADDED
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../components/Card";
 import itemData from "../../data/item.json";
 import { itemType } from "../../type/itemType";
-import { Ionicons } from "@expo/vector-icons"; // ✅ ADDED: icon for the button
-import { BlurView } from "expo-blur";          // ✅ ADDED: for frosted-glass effect
 
 export default function App() {
   const data: itemType[] = itemData;
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#252525ff" }}
+      style={{ flex: 1, backgroundColor: "#ffffffff" }}
       edges={["bottom"]}
     >
       {/* ✅ ADDED: wrapper so the floating button can be absolutely positioned */}
       <View style={{ flex: 1, position: "relative" }}>
-        <ScrollView contentContainerStyle={{ paddingTop: 5, paddingBottom: 70 }}>
+        <ScrollView
+          contentContainerStyle={{ paddingTop: 5, paddingBottom: 70 }}
+        >
           {data.map((item) => (
             <Card
               id={item.id}
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
   fabContainer: {
     position: "absolute",
     right: 16,
-    bottom: Platform.OS === "ios" ? 70 : 24, // hard-coded as you prefer; tweak to sit above your tab bar
+    bottom: 74, // hard-coded as you prefer; tweak to sit above your tab bar
     width: 70,
     height: 70,
     borderRadius: 35,

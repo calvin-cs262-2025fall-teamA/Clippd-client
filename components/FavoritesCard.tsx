@@ -1,5 +1,6 @@
 import { itemType } from "@/type/itemType";
 import { Ionicons } from "@expo/vector-icons";
+import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -16,6 +17,16 @@ export default function SmallCard({
   const handlePress = () => {
     return () => router.push(`/details/${id}` as any);
   };
+
+  const [fontsLoaded] = useFonts({
+    "Lato-Regular": require("../assets/fonts/Lato-Regular.ttf"),
+    "Lato-Bold": require("../assets/fonts/Lato-Bold.ttf"),
+    "PlayfairDisplay-SemiBold": require("../assets/fonts/PlayfairDisplay-SemiBold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <TouchableOpacity onPress={handlePress()} activeOpacity={0.9}>
@@ -56,7 +67,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginVertical: 8,
     marginHorizontal: 16,
-    padding: 12,
+    padding: 18,
+    height: 110,
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000",
@@ -66,9 +78,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   profileImg: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 80,
+    height: 80,
+    borderRadius: 8,
     marginRight: 12,
   },
   textContainer: {
@@ -76,8 +88,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   name: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 20,
+    fontFamily: "PlayfairDisplay-SemiBold",
     marginBottom: 2,
   },
   locationContainer: {
@@ -85,21 +97,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   location: {
-    fontSize: 12,
+    fontSize: 13,
+    fontFamily: "Lato-Regular",
     color: "#666",
     marginLeft: 2,
   },
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8f8f8",
     padding: 6,
-    borderRadius: 8,
   },
   rating: {
     marginLeft: 4,
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 15,
+    fontFamily: "Lato-Bold",
     color: "#333",
   },
 });

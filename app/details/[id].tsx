@@ -31,7 +31,7 @@ export default function DetailsPage() {
           headerLeft: () => (
             <TouchableOpacity
               onPress={router.back}
-              style={{ marginLeft: 15, marginRight: 10 }}
+              style={{ marginLeft: 6, marginRight: 10 }}
             >
               <Ionicons name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
