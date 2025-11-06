@@ -37,7 +37,7 @@ export default function DetailsPage() {
             </TouchableOpacity>
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={() => {}} style={{ marginRight: 15 }}>
+            <TouchableOpacity onPress={() => { }} style={{ marginRight: 15 }}>
               <Ionicons name="heart-outline" size={24} color="black" />
             </TouchableOpacity>
           ),
@@ -47,7 +47,12 @@ export default function DetailsPage() {
         <Image source={{ uri: clippr.profilePic }} style={styles.headerImage} />
         <View style={styles.content}>
           <Text style={styles.name}>{clippr.name}</Text>
-          <Text style={styles.location}>📍 {clippr.location}</Text>
+          <View style={styles.chipContainer}>
+            <View style={styles.chip}>
+              <Text style={styles.chipText}>📍 {clippr.location}</Text>
+            </View>
+          </View>
+
           <Text style={styles.rating}>⭐ {clippr.rating}</Text>
 
           <Text style={styles.sectionTitle}>Portfolio</Text>
@@ -103,5 +108,20 @@ const styles = StyleSheet.create({
     height: 150,
     marginRight: 10,
     borderRadius: 8,
+  },
+  chipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  chip: {
+    backgroundColor: "#333",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  chipText: {
+    fontSize: 14,
+    color: "#fff",
   },
 });
