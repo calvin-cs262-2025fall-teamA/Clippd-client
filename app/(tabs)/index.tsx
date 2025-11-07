@@ -1,10 +1,13 @@
-import { Ionicons } from "@expo/vector-icons"; // ✅ ADDED: icon for the button
-import { BlurView } from "expo-blur"; // ✅ ADDED: for frosted-glass effect
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import React, { useState } from "react"; // Import useState for modal visibility
 import {
-  ScrollView, // ✅ ADDED
+  ScrollView,
   StyleSheet,
-  TouchableOpacity, // ✅ ADDED
+  TouchableOpacity,
   View,
+  Modal,
+  Text,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../components/Card";
@@ -13,13 +16,13 @@ import { itemType } from "../../type/itemType";
 
 export default function App() {
   const data: itemType[] = itemData;
+  const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
 
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#ffffffff" }}
       edges={["bottom"]}
     >
-      {/* ✅ ADDED: wrapper so the floating button can be absolutely positioned */}
       <View style={{ flex: 1, position: "relative" }}>
         <ScrollView
           contentContainerStyle={{ paddingTop: 5, paddingBottom: 70 }}
@@ -37,35 +40,53 @@ export default function App() {
           ))}
         </ScrollView>
 
-        {/* ✅ ADDED: Glassmorphic Floating Button (bottom-right, above tab bar) */}
+        {/* Floating Filter Button */}
         <View style={styles.fabContainer}>
           <BlurView intensity={80} tint="light" style={styles.blurLayer}>
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => {}} // intentionally no functionality
+              onPress={() => setModalVisible(true)} // Open the modal
               accessibilityRole="button"
-              accessibilityLabel="Close"
+              accessibilityLabel="Filter"
             >
               <Ionicons name="options-outline" size={30} color="white" />
             </TouchableOpacity>
           </BlurView>
         </View>
+
+        {/* Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)} // Close the modal
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalText}>Hello</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)} // Close the modal
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
 }
 
-// ✅ ADDED: styles for the glassy (frosted) circular button
 const styles = StyleSheet.create({
   fabContainer: {
     position: "absolute",
     right: 16,
-    bottom: 74, // hard-coded as you prefer; tweak to sit above your tab bar
+    bottom: 74,
     width: 70,
     height: 70,
     borderRadius: 35,
-    overflow: "hidden", // keeps the blur inside the circle
-    // subtle depth like iOS
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -78,10 +99,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 35,
-    // translucent white tint over the blur for a glassy look
     backgroundColor: "rgba(255, 255, 255, 0.15)",
-    // fine highlight edge like iOS
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.4)",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: "#FF4500",
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
