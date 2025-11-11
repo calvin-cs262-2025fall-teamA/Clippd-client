@@ -4,35 +4,66 @@
     "name": "George Best",
     "location": "Grand Rapids",
     "images": [
-      "https://picsum.photos/1920/900?random=11",
-      "https://picsum.photos/1920/900?random=4",
-      "https://picsum.photos/1920/900?random=5"
+      "https://picsum.photos/1280/900?random=9",
+      "https://picsum.photos/1280/900?random=12",
+      "https://picsum.photos/1280/900?random=56",
+      "https://picsum.photos/1280/900?random=51"
     ],
     "rating": 4.5,
-    "profilePic": "https://picsum.photos/1920/900?random=15"
+    "profilePic": "https://picsum.photos/1280/900?random=24",
+    "reviews": [
+      {
+        "id": 1,
+        "reviewerName": "Harry",
+        "reviewContent": "I love the haircut! Would recommend the stylist to anyone!"
+      },
+      {
+        "id": 2,
+        "reviewerName": "Sarah",
+        "reviewContent": "Best barber in town! Very professional."
+      },
+      {
+        "id": 3,
+        "reviewerName": "Tom",
+        "reviewContent": "Best barber in town! Very professional."
+      }
+    ]
   },
   {
     "id": "2",
     "name": "Tim Smith",
     "location": "Grand Rapids",
     "images": [
-      "https://picsum.photos/1920/900?random=29",
-      "https://picsum.photos/1920/900?random=6"
+      "https://picsum.photos/1280/900?random=72",
+      "https://picsum.photos/1280/900?random=29",
+      "https://picsum.photos/1280/900?random=6",
+      "https://picsum.photos/1280/900?random=1",
+      "https://picsum.photos/1280/900?random=45",
+      "https://picsum.photos/1280/900?random=55"
     ],
     "rating": 3.8,
-    "profilePic": "https://picsum.photos/1920/900?random=13"
+    "profilePic": "https://picsum.photos/1280/900?random=13",
+    "reviews": [
+      {
+        "id": 1,
+        "reviewerName": "Bob",
+        "reviewContent": "Not the best, but good enough."
+      }
+    ]
   },
   {
     "id": "3",
     "name": "Will Johnson",
     "location": "Hudsonville",
     "images": [
-      "https://picsum.photos/1920/900?random=1",
-      "https://picsum.photos/1920/900?random=7",
-      "https://picsum.photos/1920/900?random=99",
-      "https://picsum.photos/1920/900?random=9"
+      "https://picsum.photos/1280/900?random=28",
+      "https://picsum.photos/1280/900?random=7",
+      "https://picsum.photos/1280/900?random=91",
+      "https://picsum.photos/1280/900?random=92",
+      "https://picsum.photos/1280/900?random=99",
+      "https://picsum.photos/1280/900?random=19"
     ],
     "rating": 5.0,
-    "profilePic": "https://picsum.photos/1920/900?random=42"
+    "profilePic": "https://picsum.photos/1280/900?random=76"
   }
 ]

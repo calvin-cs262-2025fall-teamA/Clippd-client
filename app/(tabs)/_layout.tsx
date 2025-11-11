@@ -1,11 +1,14 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { Scissors } from "lucide-react-native";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
-export default function RootLayout() {
+export default function TabLayout() {
+  const { user, isLoading } = useAuth();
+
   const [fontsLoaded] = useFonts({
     "Lato-Bold": require("../../assets/fonts/Lato-Bold.ttf"),
     "Lato-Regular": require("../../assets/fonts/Lato-Regular.ttf"),
@@ -16,6 +19,20 @@ export default function RootLayout() {
 
   if (!fontsLoaded) {
     return null;
+  }
+
+  // Show loading spinner while checking auth
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return <Redirect href="/login" />;
   }
 
   return (

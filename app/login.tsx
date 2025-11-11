@@ -1,7 +1,8 @@
-// used from https://github.com/divanov11/react-native-appwrite/blob/2-protected-routes/app/signin.jsx
-
 import { Href, router } from "expo-router";
+import { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -9,14 +10,33 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useAuth } from "../contexts/AuthContext";
 
-export default function Index() {
-  const handleLogin = () => {
-    router.replace("/(tabs)" as Href);
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await login(email, password);
+      router.replace("/" as Href);
+    } catch (error: any) {
+      Alert.alert("Login Failed", error.message || "Invalid credentials");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignup = () => {
-    router.replace("signup" as Href);
+    router.push("signup" as Href);
   };
 
   return (
@@ -28,6 +48,10 @@ export default function Index() {
           placeholder="Enter your email"
           placeholderTextColor={"gray"}
           style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
 
         <Text style={styles.label}>Password:</Text>
@@ -35,13 +59,24 @@ export default function Index() {
           style={styles.input}
           placeholder="Password"
           placeholderTextColor={"gray"}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
         />
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleLogin}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <Text style={styles.buttonText}>Login</Text>
+        )}
       </TouchableOpacity>
       <Text style={styles.signupText}>
-        Don&apos;t have and account?
+        Don&apos;t have an account?{" "}
         <Pressable onPress={handleSignup}>
           <Text style={styles.link}>Sign up</Text>
         </Pressable>
@@ -60,7 +95,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: -100,
     marginBottom: 50,
-    fontWeight: 700,
+    fontWeight: "700",
     fontStyle: "italic",
     fontSize: 72,
   },
