@@ -2,12 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import React, { useState } from "react"; // Import useState for modal visibility
 import {
+  Modal,
   ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
-  Modal,
-  Text,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../components/Card";
@@ -25,7 +25,7 @@ export default function App() {
     >
       <View style={{ flex: 1, position: "relative" }}>
         <ScrollView
-          contentContainerStyle={{ paddingTop: 5, paddingBottom: 70 }}
+          contentContainerStyle={{ paddingTop: 5, paddingBottom: 65 }}
         >
           {data.map((item) => (
             <Card
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   fabContainer: {
     position: "absolute",
     right: 16,
-    bottom: 74,
+    bottom: 72,
     width: 70,
     height: 70,
     borderRadius: 35,
