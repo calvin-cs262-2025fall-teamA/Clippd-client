@@ -53,7 +53,11 @@ export default function DetailsPage() {
             </View>
           </View>
 
-          <Text style={styles.rating}>⭐ {clippr.rating}</Text>
+          <View style={styles.chipContainer}>
+            <View style={styles.chip}>
+              <Text style={styles.chipText}>⭐ {clippr.rating}</Text>
+            </View>
+          </View>
 
           <Text style={styles.sectionTitle}>Portfolio</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -95,7 +99,6 @@ const styles = StyleSheet.create({
   },
   rating: {
     fontSize: 18,
-    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
