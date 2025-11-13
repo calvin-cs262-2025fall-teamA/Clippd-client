@@ -1,21 +1,41 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { Scissors } from "lucide-react-native";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
-export default function RootLayout() {
+export default function TabLayout() {
+  const { user, isLoading } = useAuth();
+
   const [fontsLoaded] = useFonts({
     "Lato-Bold": require("../../assets/fonts/Lato-Bold.ttf"),
     "Lato-Regular": require("../../assets/fonts/Lato-Regular.ttf"),
     "PlayfairDisplay-SemiBold": require("../../assets/fonts/PlayfairDisplay-SemiBold.ttf"),
     "PlayfairDisplay-Regular": require("../../assets/fonts/PlayfairDisplay-Regular.ttf"),
     "PlayfairDisplay-Bold": require("../../assets/fonts/PlayfairDisplay-Bold.ttf"),
+    "DMSans-Bold": require("../../assets/fonts/DMSans-Bold.ttf"),
+    "DMSans-SemiBold": require("../../assets/fonts/DMSans-SemiBold.ttf"),
+    "DMSans-Regular": require("../../assets/fonts/DMSans-Regular.ttf"),
   });
 
   if (!fontsLoaded) {
     return null;
+  }
+
+  // Show loading spinner while checking auth
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return <Redirect href="/login" />;
   }
 
   return (
@@ -40,7 +60,6 @@ export default function RootLayout() {
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontFamily: "PlayfairDisplay-Regular",
         },
       }}
     >
@@ -52,7 +71,7 @@ export default function RootLayout() {
           headerTitleAlign: "center",
           headerTitleStyle: {
             fontSize: 27,
-            fontFamily: "PlayfairDisplay-SemiBold",
+            fontFamily: "Lato-Bold",
             color: "#000000ff",
           },
           headerLeft: () => (

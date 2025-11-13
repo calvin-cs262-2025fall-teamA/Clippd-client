@@ -1,15 +1,44 @@
 import { Href, router } from "expo-router";
+import { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Signup() {
-  const handleSignup = () => {
-    router.replace("../(tabs)" as Href);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { signup } = useAuth();
+
+  const handleSignup = async () => {
+    if (!firstName || !lastName || !email || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await signup(firstName, lastName, email, password);
+      router.replace("/(tabs)" as Href);
+    } catch (error: any) {
+      Alert.alert("Signup Failed", error.message || "Unable to create account");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -17,16 +46,32 @@ export default function Signup() {
       <Text style={styles.headline}>Sign Up</Text>
       <View style={styles.formContainer}>
         <Text style={styles.label}>First Name:</Text>
-        <TextInput style={styles.input} />
+        <TextInput
+          style={styles.input}
+          value={firstName}
+          onChangeText={setFirstName}
+          placeholder="First Name"
+          placeholderTextColor="gray"
+        />
 
         <Text style={styles.label}>Last Name:</Text>
-        <TextInput style={styles.input} />
+        <TextInput
+          style={styles.input}
+          value={lastName}
+          onChangeText={setLastName}
+          placeholder="Last Name"
+          placeholderTextColor="gray"
+        />
 
         <Text style={styles.label}>Email:</Text>
         <TextInput
           placeholder="Enter your email"
           placeholderTextColor={"gray"}
           style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
 
         <Text style={styles.label}>Password:</Text>
@@ -34,10 +79,21 @@ export default function Signup() {
           style={styles.input}
           placeholder="Password"
           placeholderTextColor={"gray"}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
         />
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Sign Up</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSignup}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <Text style={styles.buttonText}>Sign Up</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -53,7 +109,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: -100,
     marginBottom: 50,
-    fontWeight: 700,
+    fontWeight: "700",
     fontStyle: "italic",
     fontSize: 72,
   },
@@ -84,14 +140,5 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 18,
-  },
-  link: {
-    color: "#4285F4",
-    textDecorationLine: "underline",
-    fontWeight: "600",
-  },
-  signupText: {
-    marginTop: 100,
-    textAlign: "center",
   },
 });
