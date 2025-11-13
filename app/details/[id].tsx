@@ -103,6 +103,11 @@ export default function DetailsPage() {
           </View>
         </View>
 
+          <View style={styles.chipContainer}>
+            <View style={styles.chip}>
+              <Text style={styles.chipText}>⭐ {clippr.rating}</Text>
+            </View>
+          </View>
         {/* ---- Reviews ---- */}
         <View style={styles.reviewContainer}>
           <Text style={styles.sectionTitle}>Reviews</Text>
@@ -183,7 +188,6 @@ const styles = StyleSheet.create({
   },
   rating: {
     fontSize: 18,
-    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
