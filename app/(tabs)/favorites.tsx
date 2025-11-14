@@ -5,7 +5,6 @@ import itemData from "../../data/item.json";
 import { itemType } from "../../type/itemType";
 
 export default function Favorites() {
-  // This is temporary data - you'll want to replace this with actual favorites data later
   const data: itemType[] = itemData;
 
   return (
@@ -41,7 +40,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    marginTop: -20, // Reduces space between header and content
+    marginTop: -20,
   },
   emptyState: {
     flex: 1,

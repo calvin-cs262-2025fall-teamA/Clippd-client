@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 20,
-    fontFamily: "PlayfairDisplay-SemiBold",
+    fontFamily: "Lato-Bold",
     marginBottom: 2,
   },
   locationContainer: {
