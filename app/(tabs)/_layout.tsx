@@ -93,7 +93,7 @@ export default function TabLayout() {
           headerTitleAlign: "center",
           headerTitleStyle: {
             fontSize: 20,
-            fontFamily: "PlayfairDisplay-Bold",
+            fontFamily: "Lato-Bold",
           },
           tabBarIcon: ({ color }) => (
             <Ionicons name="map-outline" size={24} color={color} />
@@ -125,7 +125,7 @@ export default function TabLayout() {
           headerTitleAlign: "center",
           headerTitleStyle: {
             fontSize: 25,
-            fontFamily: "PlayfairDisplay-Bold",
+            fontFamily: "Lato-Bold",
             color: "black",
           },
           tabBarIcon: ({ color }) => (
