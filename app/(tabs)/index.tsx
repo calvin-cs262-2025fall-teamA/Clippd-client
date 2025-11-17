@@ -5,6 +5,7 @@ import {
   Modal,
   ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -25,7 +26,7 @@ export default function Home() {
       <View style={{ flex: 1, position: "relative" }}>
         {/* Scrollable list of cards */}
         <ScrollView
-          contentContainerStyle={{ paddingTop: 5, paddingBottom: 70 }}
+          contentContainerStyle={{ paddingTop: 5, paddingBottom: 65 }}
         >
           {data.map((item) => (
             <Card

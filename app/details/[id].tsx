@@ -188,7 +188,6 @@ const styles = StyleSheet.create({
   },
   rating: {
     fontSize: 18,
-    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
