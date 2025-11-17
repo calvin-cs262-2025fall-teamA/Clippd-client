@@ -15,6 +15,9 @@ export default function TabLayout() {
     "PlayfairDisplay-SemiBold": require("../../assets/fonts/PlayfairDisplay-SemiBold.ttf"),
     "PlayfairDisplay-Regular": require("../../assets/fonts/PlayfairDisplay-Regular.ttf"),
     "PlayfairDisplay-Bold": require("../../assets/fonts/PlayfairDisplay-Bold.ttf"),
+    "DMSans-Bold": require("../../assets/fonts/DMSans-Bold.ttf"),
+    "DMSans-SemiBold": require("../../assets/fonts/DMSans-SemiBold.ttf"),
+    "DMSans-Regular": require("../../assets/fonts/DMSans-Regular.ttf"),
   });
 
   if (!fontsLoaded) {
@@ -57,7 +60,6 @@ export default function TabLayout() {
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontFamily: "PlayfairDisplay-Regular",
         },
       }}
     >
@@ -69,7 +71,7 @@ export default function TabLayout() {
           headerTitleAlign: "center",
           headerTitleStyle: {
             fontSize: 27,
-            fontFamily: "PlayfairDisplay-SemiBold",
+            fontFamily: "Lato-Bold",
             color: "#000000ff",
           },
           headerLeft: () => (

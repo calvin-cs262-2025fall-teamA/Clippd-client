@@ -22,77 +22,70 @@ export default function Card({
   rating,
   profilePic,
 }: itemType) {
-  const [activeIndex, setActiveIndex] = useState(0); // for pagination dots ("Instagram scrollbar")
+  const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
 
   const handlePress = () => {
-    return () => router.push(`/details/${id}` as any);
+    router.push(`/details/${id}` as any);
   };
 
   return (
-    <TouchableOpacity onPress={handlePress()} activeOpacity={0.9}>
-      <View style={styles.card}>
-        <View style={styles.photoFrame}>
-          {/*short-circuit*/}
-          {images && images.length > 0 && (
-            <>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false} // ugly scrollbar, used pagination instead
-                pagingEnabled
-                contentContainerStyle={styles.galleryContainer}
-                //Calculate the active index based on scroll position
-                onScroll={(event) => {
-                  const slide = Math.ceil(
-                    event.nativeEvent.contentOffset.x /
-                      event.nativeEvent.layoutMeasurement.width
-                  );
-                  if (slide !== activeIndex) {
-                    setActiveIndex(slide);
+    <View style={styles.card}>
+      <View style={styles.photoFrame}>
+        {images && images.length > 0 && (
+          <>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              pagingEnabled
+              contentContainerStyle={styles.galleryContainer}
+              onScroll={(event) => {
+                const slide = Math.ceil(
+                  event.nativeEvent.contentOffset.x /
+                    event.nativeEvent.layoutMeasurement.width
+                );
+                if (slide !== activeIndex) {
+                  setActiveIndex(slide);
+                }
+              }}
+              scrollEventThrottle={16}
+            >
+              {images.map((img, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: img }}
+                  style={styles.galleryImage}
+                />
+              ))}
+            </ScrollView>
+
+            <View style={styles.pagination}>
+              {images.map((_, index) => (
+                <Text
+                  key={index}
+                  style={
+                    index === activeIndex
+                      ? styles.pagingDotActive
+                      : styles.pagingDot
                   }
-                }}
-                scrollEventThrottle={16}
-              >
-                {images.map((img, index) => (
-                  <Image
-                    key={index}
-                    source={{ uri: img }}
-                    style={styles.galleryImage}
-                  />
-                ))}
-              </ScrollView>
+                >
+                  •
+                </Text>
+              ))}
+            </View>
+          </>
+        )}
+      </View>
 
-              <View style={styles.pagination}>
-                {images.map((_, index) => (
-                  <Text
-                    key={index}
-                    style={
-                      index === activeIndex
-                        ? styles.pagingDotActive
-                        : styles.pagingDot
-                    }
-                  >
-                    •
-                  </Text>
-                ))}
-              </View>
-            </>
-          )}
-        </View>
-
-        {/*Row: Rating, Name+Location, profile picture*/}
+      {/* ✅ Only wrap the info section with TouchableOpacity */}
+      <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
         <View style={styles.infoRow}>
-          {/*Left: rating*/}
-
-          {/*Right: profile picture*/}
           {profilePic && (
             <Image source={{ uri: profilePic }} style={styles.profileImg} />
           )}
 
-          {/*Middle: Name + Location*/}
           <View style={styles.textContainer}>
             <Text style={styles.name}>{name}</Text>
-            {/*short-circuit*/}
             {location && (
               <View style={styles.locationRow}>
                 <Text style={styles.location}>
@@ -108,8 +101,8 @@ export default function Card({
             {rating && <Text style={styles.ratingText}>{rating}</Text>}
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -134,7 +127,7 @@ const styles = StyleSheet.create({
 
   name: {
     fontSize: 22,
-    fontFamily: "PlayfairDisplay-SemiBold",
+    fontFamily: "Lato-Bold",
     textAlign: "left",
   },
 
@@ -212,15 +205,14 @@ const styles = StyleSheet.create({
     color: "#cfcfcfff",
     fontSize: 25,
     marginHorizontal: 2,
-    textShadowColor: "rgba(66, 66, 66, 0.5)", // ✅ Add shadow for visibility
+    textShadowColor: "rgba(66, 66, 66, 0.5)",
     textShadowRadius: 3,
   },
   pagingDotActive: {
-    color: "#6e6e6eff", // ✅ Changed to white
+    color: "#6e6e6eff",
     fontSize: 25,
     marginHorizontal: 2,
-    textShadowColor: "rgba(82, 82, 82, 0.5)", // ✅ Darker shadow when active
-    // textShadowOffset: { width: 0, height: 1 },
+    textShadowColor: "rgba(82, 82, 82, 0.5)",
     textShadowRadius: 3,
   },
 });
