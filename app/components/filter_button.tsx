@@ -1,85 +1,50 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import React from "react";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { BlurView } from "expo-blur";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 export default function FilterButton() {
-  const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
-      {/* Filter Button */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => setModalVisible(true)} // Open the modal
-      >
-        <Text style={styles.buttonText}>Filter</Text>
-      </TouchableOpacity>
-
-      {/* Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)} // Close the modal when back button is pressed
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {/* Display "Hello" when the modal is opened */}
-            <Text style={styles.modalText}>Hello</Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)} // Close the modal
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <View style={styles.fabContainer}>
+        <BlurView intensity={80} tint="light" style={styles.blurLayer}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push("/filter")} // 👈 navigates to new full-screen page
+            accessibilityRole="button"
+            accessibilityLabel="Filter"
+          >
+            <Ionicons name="options-outline" size={30} color="white" />
+          </TouchableOpacity>
+        </BlurView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: { position: "absolute", right: 16, bottom: 74, zIndex: 10 },
+  fabContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  blurLayer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  button: {
-    backgroundColor: '#1E90FF',
-    padding: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-  },
-  modalContent: {
-    width: '80%',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 20,
-  },
-  closeButton: {
-    backgroundColor: '#FF4500',
-    padding: 10,
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 35,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
   },
 });

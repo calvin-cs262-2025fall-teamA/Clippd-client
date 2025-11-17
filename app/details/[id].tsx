@@ -103,11 +103,11 @@ export default function DetailsPage() {
           </View>
         </View>
 
-          <View style={styles.chipContainer}>
+          {/* <View style={styles.chipContainer}>
             <View style={styles.chip}>
               <Text style={styles.chipText}>⭐ {clippr.rating}</Text>
             </View>
-          </View>
+          </View> */}
         {/* ---- Reviews ---- */}
         <View style={styles.reviewContainer}>
           <Text style={styles.sectionTitle}>Reviews</Text>

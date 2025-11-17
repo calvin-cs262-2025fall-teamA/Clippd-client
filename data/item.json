@@ -1,20 +1,20 @@
 [
   {
     "id": "1",
-    "name": "George Best",
+    "name": "Mrs. VanderLinden",
     "location": "Grand Rapids",
     "images": [
-      "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=1280&h=900&fit=crop",
+      "https://ca.slack-edge.com/T09EKMT6T2B-U09F0SH41RB-g2975a4c0597-512",
       "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=1280&h=900&fit=crop",
       "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=1280&h=900&fit=crop"
     ],
-    "rating": 4.5,
-    "profilePic": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1280&h=900&fit=crop",
+    "rating": 4.9,
+    "profilePic": "https://cdn-icons-png.flaticon.com/512/9159/9159760.png",
     "reviews": [
       {
         "id": 1,
-        "reviewerName": "Harry",
-        "reviewContent": "I love the haircut! Would recommend the stylist to anyone!"
+        "reviewerName": "Keith VanderLinden",
+        "reviewContent": "I love my wife, but not sure about the haircut."
       },
       {
         "id": 2,
