@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Dimensions, Image } from 'react-native';
 import Slider from '@react-native-community/slider';
 
 export default function MapScreen() {
@@ -11,7 +11,12 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>🗺️ This is where the Google map will be displayed</Text>
+      {/* Replace text with an image */}
+      <Image
+        source={require('../../assets/map.png')} // Replace with your image path
+        style={styles.image}
+        resizeMode="contain"
+      />
       <TextInput
         style={styles.input}
         placeholder="Enter your address, neighborhood, or ZIP code"
@@ -54,9 +59,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  text: {
-    fontSize: 22,
-    fontWeight: '600',
+  image: {
+    width: Dimensions.get('window').width * 0.8, // Adjust width dynamically
+    height: 500, // Set a fixed height for the image
     marginBottom: 20,
   },
   input: {
