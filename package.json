@@ -36,6 +36,8 @@
     "expo-web-browser": "~15.0.7",
     "lightningcss": "^1.30.2",
     "lucide-react-native": "^0.548.0",
+    "pg": "^8.16.3",
+    "pg-promise": "^12.3.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.4",
@@ -50,6 +52,7 @@
     "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
+    "@types/pg": "^8.15.6",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",

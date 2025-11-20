@@ -147,13 +147,25 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Hide details/[id] route
+      {/* Barber Profile */}
+      <Tabs.Screen
+        name="barber-profile"
+        options={{
+          title: "Barber",
+          headerTitleAlign: "center",
+          headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="cut-outline" size={24} color={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="details/[id]"
         options={{
           href: null, // hides this route from the tab bar
         }}
-      /> */}
+      />
     </Tabs>
   );
 }
