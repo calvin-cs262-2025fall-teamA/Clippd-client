@@ -1,6 +1,6 @@
 import js from "@eslint/js";
 import globals from "globals";
-import tseslint from "typescript-eslint";
+import { configs as tseslintConfigs } from "typescript-eslint";
 
 export default [
   {
@@ -13,5 +13,5 @@ export default [
     }
   },
   js.configs.recommended,
-  ...tseslint.configs.recommended,
+  ...tseslintConfigs.recommended,
 ];
