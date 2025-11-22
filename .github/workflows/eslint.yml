@@ -16,10 +16,19 @@ jobs:
       - name: set up node
         uses: actions/setup-node@v3
         with:
+<<<<<<< HEAD
             node-version: 16
+=======
+          node-version: 16
+>>>>>>> 0b9f1ed562673ef9ed047a13232d356bee7f97de
 
       - name: npm install
         run: npm ci
 
       - name: eslint
+<<<<<<< HEAD
         run: npm run lint
+=======
+        run: npm run lint
+# force trigger
+>>>>>>> 0b9f1ed562673ef9ed047a13232d356bee7f97de
