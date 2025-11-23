@@ -1,10 +1,10 @@
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { Redirect, Tabs } from "expo-router";
 import { Scissors } from "lucide-react-native";
 import React from "react";
-import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 export default function TabLayout() {
   const { user, isLoading } = useAuth();
@@ -170,19 +170,19 @@ export default function TabLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  centerButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#ff1a47",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: Platform.OS === "ios" ? 25 : 20,
-    shadowColor: "#ff1a47",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-});
+// const styles = StyleSheet.create({
+//   centerButton: {
+//     width: 60,
+//     height: 60,
+//     borderRadius: 30,
+//     backgroundColor: "#ff1a47",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     marginBottom: Platform.OS === "ios" ? 25 : 20,
+//     shadowColor: "#ff1a47",
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.3,
+//     shadowRadius: 8,
+//     elevation: 5,
+//   },
+// });
