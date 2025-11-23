@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  eslint:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,11 +16,10 @@ jobs:
       - name: set up node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+            node-version: 18
 
       - name: npm install
         run: npm ci
 
       - name: eslint
         run: npm run lint
-# force trigger
