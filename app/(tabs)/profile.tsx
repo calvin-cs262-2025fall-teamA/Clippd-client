@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import React from "react";
 import {
   Image,
-  Linking,
+  // Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,12 +10,12 @@ import {
 } from "react-native";
 
 export default function Profile() {
-  const openDirections = () => {
-    const latitude = 42.9303;
-    const longitude = -85.5873;
-    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    Linking.openURL(url);
-  };
+  // const openDirections = () => {
+  //   const latitude = 42.9303;
+  //   const longitude = -85.5873;
+  //   const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+  //   Linking.openURL(url);
+  // };
 
   return (
     <>
