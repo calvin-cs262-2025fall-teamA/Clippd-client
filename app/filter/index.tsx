@@ -12,7 +12,7 @@ export default function FilterScreen() {
       <Stack.Screen
         options={{
           title: "Personal Settings",
-          headerLargeTitle: true,
+          headerLargeTitle: false,
           headerTitleStyle: { fontSize: 24, fontWeight: "700" },
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 10 }}>
@@ -23,19 +23,47 @@ export default function FilterScreen() {
       />
 
       {/* Main content */}
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.heading}>Personal Settings</Text>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        contentInsetAdjustmentBehavior="automatic"
+        alwaysBounceVertical={true}
+      >
 
         {/* Hair Type Dropdown */}
         <DropdownSection
           label="Hair Type"
-          values={["Straight", "Curly", "Coily"]}
+          values={["Straight", "Wavy", "Curly", "Coily"]}
         />
 
-        {/* Clippr Specialty Dropdown */}
+        {/* Secondary Hair Type */}
+        <DropdownSection
+          label="Secondary Hair Type"
+          values={["Thick", "Thin", "Frizzy", "Damaged"]}
+        />
+
+        {/* Clippr Specialty (NESTED) */}
         <DropdownSection
           label="Clippr Specialty"
-          values={["Haircut", "Perm", "Beard Trim"]}
+          values={[
+            {
+              label: "Haircuts",
+              values: ["Fade", "Taper", "Scissor Cut", "Layer cut", "Bob/Long Bob", "Buzz Cut", "Trim & Shape up"]
+            },
+            {label: "Styling",
+              values: ["Blowout", "Curling/Waves", "Straightening", "Special Event Hairstlye"]
+            },
+            {
+              label: "Coloring",
+              values: ["Full Color", "Highlights", "Balayage", "Root Touch-up", "Bleach + Tone"]
+            },
+            {
+              label: "Treatments",
+              values: ["Perm", "Keratin", "Relaxer"]
+            },
+            {label: "Facial / Beard Care",
+              values: ["Beard Trim", "Beard Shaping", "Hot Towel Shave"]
+            }
+          ]}
         />
 
         {/* Language Dropdown */}
@@ -43,21 +71,30 @@ export default function FilterScreen() {
           label="Language"
           values={["Spanish", "Korean", "Nepali"]}
         />
+
+        {/* Price Range Dropdown */}
+        <DropdownSection
+          label="Price Range"
+          values={["$0 – $20", "$20 – $40", "$40 – $60", "$60 – $100", "$100+"]}
+        />
       </ScrollView>
     </>
   );
 }
 
 /* -------------------------------------------------------
-   Dropdown Component (rotating chevron + selectable values)
+   Nested + normal Dropdown Component
 -------------------------------------------------------- */
 function DropdownSection({ label, values }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
 
+  // Detect if values contain nested sections
+  const isNested = values.length > 0 && typeof values[0] === "object";
+
   return (
     <View style={styles.section}>
-      {/* Header row with rotating chevron */}
+      {/* Header */}
       <TouchableOpacity
         onPress={() => setOpen(!open)}
         style={styles.dropdownHeader}
@@ -70,17 +107,24 @@ function DropdownSection({ label, values }) {
           color="#666"
           style={{
             transform: [{ rotate: open ? "180deg" : "0deg" }],
-            transition: "transform 0.2s",
           }}
         />
       </TouchableOpacity>
 
-      {/* Expandable content */}
-      {open &&
+      {/* NESTED DROPDOWNS */}
+      {open && isNested &&
+        values.map((section, idx) => (
+          <View key={idx} style={{ paddingLeft: 15 }}>
+            <DropdownSection label={section.label} values={section.values} />
+          </View>
+        ))}
+
+      {/* FLAT VALUES */}
+      {open && !isNested &&
         values.map((v, idx) => (
           <TouchableOpacity
             key={idx}
-            onPress={() => setSelected(v)}
+            onPress={() => setSelected(selected === v ? null : v)}
             style={styles.valueRow}
           >
             <Text style={styles.value}>{v}</Text>
@@ -100,12 +144,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 20,
     paddingBottom: 20,
-    paddingTop: 80,
-  },
-  heading: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 16,
   },
   section: {
     marginBottom: 18,
