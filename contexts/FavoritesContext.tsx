@@ -2,7 +2,7 @@ import * as SecureStore from "expo-secure-store";
 import { createContext, useContext, useEffect, useState } from 'react';
 
 type FavoritesContextType = {
-    favorites: string[]; // Array of clippr IDs
+    favorites: string[];
     addFavorite: (id: string) => void;
     removeFavorite: (id: string) => void;
     isFavorited: (id: string) => boolean;
