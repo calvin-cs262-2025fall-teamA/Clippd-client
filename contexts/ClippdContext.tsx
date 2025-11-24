@@ -36,9 +36,10 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
   const [clippersError, setClippersError] = useState<string | null>(null);
 
   // Prefer environment variable if provided
-  // Use your machine's local IP address for device/emulator access
+  // Use Azure web service for shared team access
   const BaseURL =
-    process.env.EXPO_PUBLIC_API_URL || "http://153.106.223.189:3000";
+    process.env.EXPO_PUBLIC_API_URL ||
+    "https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net";
 
   const refreshUsers = useCallback(async () => {
     try {
