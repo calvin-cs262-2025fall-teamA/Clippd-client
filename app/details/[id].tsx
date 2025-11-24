@@ -1,3 +1,4 @@
+import { useFavorites } from "@/contexts/FavoritesContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import {
@@ -13,7 +14,18 @@ import { itemType } from "../../type/itemType";
 
 export default function DetailsPage() {
   const { id } = useLocalSearchParams();
+  const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const clippr: itemType | undefined = itemData.find((item) => item.id === id);
+
+  const favorited = isFavorited(id as string);
+
+  const toggleFavorite = () => {
+    if (favorited) {
+      removeFavorite(id as string);
+    } else {
+      addFavorite(id as string);
+    }
+  };
 
   if (!clippr) {
     return (
@@ -45,8 +57,12 @@ export default function DetailsPage() {
             </TouchableOpacity>
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={() => {}} style={{ marginRight: 15 }}>
-              <Ionicons name="heart-outline" size={24} color="black" />
+            <TouchableOpacity onPress={toggleFavorite} style={{ marginRight: 15 }}>
+              <Ionicons
+                name={favorited ? "heart" : "heart-outline"}
+                size={24}
+                color={favorited ? "red" : "black"}
+              />
             </TouchableOpacity>
           ),
         }}
@@ -103,7 +119,7 @@ export default function DetailsPage() {
           </View>
         </View>
 
-          {/* <View style={styles.chipContainer}>
+        {/* <View style={styles.chipContainer}>
             <View style={styles.chip}>
               <Text style={styles.chipText}>⭐ {clippr.rating}</Text>
             </View>
