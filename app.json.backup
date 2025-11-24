@@ -22,7 +22,7 @@
   //       "supportsTablet": true,
   //       "bundleIdentifier": "com.anonymous.demoapp",
   //       "config": {
-  //         "googleMapsApiKey": "AIzaSyB8Sd2BC5jb_1v2WKa0ekLC2AY-jlMrhtA"
+  //         "googleMapsApiKey": "asdf"
   //       }
   //     },
   //     "android": {
@@ -37,7 +37,7 @@
   //       "package": "com.anonymous.demoapp",
   //       "config": {
   //         "googleMaps": {
-  //           "apiKey": "AIzaSyB8Sd2BC5jb_1v2WKa0ekLC2AY-jlMrhtA"
+  //           "apiKey": "asdf"
   //         }
   //       }
   //     },
@@ -67,7 +67,7 @@
   //       "reactCompiler": true
   //     },
   //     "extra": {
-  //       "googleMapsApiKey": "AIzaSyB8Sd2BC5jb_1v2WKa0ekLC2AY-jlMrhtA"
+  //       "googleMapsApiKey": "asdf"
   //     }
   //   }
   // }
