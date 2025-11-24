@@ -1,5 +1,5 @@
 import itemData from "@/data/item.json";
-import { itemType } from "@/type/itemType";
+import { itemType } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useEffect, useState } from "react";

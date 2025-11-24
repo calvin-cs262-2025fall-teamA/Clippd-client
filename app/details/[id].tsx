@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import itemData from "../../data/item.json";
-import { itemType } from "../../type/itemType";
+import { itemType } from "../../type/clippdTypes";
 
 export default function DetailsPage() {
   const { id } = useLocalSearchParams();
