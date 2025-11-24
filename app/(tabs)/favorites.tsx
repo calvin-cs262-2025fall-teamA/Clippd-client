@@ -1,18 +1,20 @@
+import { useFavorites } from "@/contexts/FavoritesContext";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import FavotitesCard from "../../components/FavoritesCard";
+import FavoritesCard from "../../components/FavoritesCard";
 import itemData from "../../data/item.json";
-import { itemType } from "../../type/itemType";
 
 export default function Favorites() {
-  const data: itemType[] = itemData;
+  const { favorites } = useFavorites();
+
+  const favoritedItems = itemData.filter(item => favorites.includes(item.id));
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       <ScrollView style={styles.scrollView}>
-        {data.length > 0 ? (
-          data.map((item) => (
-            <FavotitesCard
+        {favoritedItems.length > 0 ? (
+          favoritedItems.map((item) => (
+            <FavoritesCard
               key={item.id}
               id={item.id}
               name={item.name}
