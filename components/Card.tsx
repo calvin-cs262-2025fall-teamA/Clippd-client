@@ -1,4 +1,4 @@
-import { itemType } from "@/type/itemType";
+import { itemType } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -88,10 +88,8 @@ export default function Card({
             <Text style={styles.name}>{name}</Text>
             {location && (
               <View style={styles.locationRow}>
-                <Text style={styles.location}>
-                  <Ionicons name="location-sharp"></Ionicons>
-                  {location}
-                </Text>
+                <Ionicons name="location-sharp" size={14} color="#666" />
+                <Text style={styles.location}>{location}</Text>
               </View>
             )}
           </View>
@@ -136,6 +134,7 @@ const styles = StyleSheet.create({
     fontFamily: "Lato-Regular",
     color: "#666",
     marginTop: 4,
+    marginLeft: 4,
     textAlign: "left",
   },
 

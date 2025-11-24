@@ -1,4 +1,4 @@
-import { itemType } from "@/type/itemType";
+import { itemType } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
