@@ -87,6 +87,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
+  nameWrapper: {
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
   name: {
     fontSize: 20,
     fontFamily: "Lato-Bold",

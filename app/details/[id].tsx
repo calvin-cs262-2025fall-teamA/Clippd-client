@@ -283,13 +283,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginRight: 10,
   },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-  },
   locationText: {
     fontSize: 16,
     color: "#666",
+  },
+  rating: {
+    fontSize: 18,
   },
 });
