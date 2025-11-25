@@ -1,10 +1,10 @@
 import * as Network from 'expo-network';
 import { Platform } from 'react-native';
 
-// 캐시: 한번 찾은 URL을 저장해서 매번 재감지하지 않음
+// Cache: Store the found URL to avoid re-detection every time
 let cachedApiUrl: string | null = null;
 let lastDetectionTime: number = 0;
-const CACHE_DURATION_MS = 5 * 60 * 1000; // 5분 캐시
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5-minute cache duration
 
 /**
  * Dynamically determines the API URL based on device platform and network
@@ -17,7 +17,7 @@ const CACHE_DURATION_MS = 5 * 60 * 1000; // 5분 캐시
  * 5. Fall back to Azure production URL
  */
 export async function getApiUrl(): Promise<string> {
-  // 캐시된 URL이 있고 유효하면 사용
+  // If cached URL exists and is still valid, use it
   const now = Date.now();
   if (cachedApiUrl && (now - lastDetectionTime) < CACHE_DURATION_MS) {
     console.log('[NetworkConfig] Using cached URL:', cachedApiUrl);
@@ -41,11 +41,11 @@ export async function getApiUrl(): Promise<string> {
     // For physical devices with real IP, try to find backend server
     if (deviceIP && deviceIP !== '127.0.0.1' && !deviceIP.startsWith('127.')) {
       // First, try common backend IPs on different networks
-      // PC가 다른 서브넷에 있을 수 있으므로 다양한 IP 범위를 시도
+      // PC may be on a different subnet, so try various IP ranges
       const commonBackendIPs = [
-        'http://153.106.84.166:3000',   // PC (다른 서브넷)
-        'http://153.106.84.1:3000',     // PC 네트워크 게이트웨이
-        'http://153.106.84.100:3000',   // PC 네트워크 서버
+        'http://153.106.84.166:3000',   // PC (different subnet)
+        'http://153.106.84.1:3000',     // PC network gateway
+        'http://153.106.84.100:3000',   // PC network server
       ];
       
       // Extract network prefix (e.g., "153.106.82" from "153.106.82.150")
@@ -110,9 +110,9 @@ export async function getApiUrl(): Promise<string> {
   }
   
   if (Platform.OS === 'ios') {
-    // iOS 물리 기기는 localhost 사용 불가
-    // iOS 시뮬레이터는 localhost 작동
-    // 하지만 물리 기기에서 localhost가 실패하면 Azure로 자동 폴백됨
+    // iOS physical devices cannot use localhost
+    // iOS simulator can use localhost
+    // However, if localhost fails on physical devices, it will automatically fall back to Azure
     console.log('[NetworkConfig] Using iOS fallback: Azure URL');
     const fallbackUrl = 'https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net';
     cachedApiUrl = fallbackUrl;
