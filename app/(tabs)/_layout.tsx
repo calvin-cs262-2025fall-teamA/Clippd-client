@@ -159,13 +159,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
-      <Tabs.Screen
-        name="details/[id]"
-        options={{
-          href: null, // hides this route from the tab bar
-        }}
-      />
     </Tabs>
   );
 }

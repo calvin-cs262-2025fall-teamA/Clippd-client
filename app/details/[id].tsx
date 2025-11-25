@@ -197,11 +197,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 0,
   },
-  location: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 4,
-  },
   rating: {
     fontSize: 18,
   },
@@ -282,14 +277,5 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 8,
     marginRight: 10,
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  locationText: {
-    fontSize: 16,
-    color: "#666",
   },
 });

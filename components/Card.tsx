@@ -59,18 +59,19 @@ export default function Card({
               ))}
             </ScrollView>
 
-            <View style={styles.pagination}>
+            <View style={styles.paginationContainer}>
               {images.map((_, index) => (
-                <Text
-                  key={index}
-                  style={
-                    index === activeIndex
-                      ? styles.pagingDotActive
-                      : styles.pagingDot
-                  }
-                >
-                  •
-                </Text>
+                <View key={index} style={styles.pagingDotWrapper}>
+                  <Text
+                    style={
+                      index === activeIndex
+                        ? styles.pagingDotActive
+                        : styles.pagingDot
+                    }
+                  >
+                    •
+                  </Text>
+                </View>
               ))}
             </View>
           </>
@@ -160,6 +161,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 15,
+    gap: 4,
+  },
+
+  profileImgWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  ratingContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  starWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  ratingTextWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   ratingText: {
@@ -200,6 +222,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+
+  paginationContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 5,
+    marginBottom: 5,
+    position: "absolute",
+    bottom: -40,
+    left: 0,
+    right: 0,
+  },
+
+  pagingDotWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   pagingDot: {
     color: "#cfcfcfff",
     fontSize: 25,
