@@ -1,20 +1,15 @@
-import * as Network from 'expo-network';
-import { Platform } from 'react-native';
-
-// Cache: Store the found URL to avoid re-detection every time
+// Cache: Store the found URL to avoid re-initialization
 let cachedApiUrl: string | null = null;
 let lastDetectionTime: number = 0;
-const CACHE_DURATION_MS = 5 * 60 * 1000; // 5-minute cache duration
+const CACHE_DURATION_MS = 10 * 1000; // 10 second cache duration (for testing)
 
 /**
- * Dynamically determines the API URL based on device platform and network
+ * Gets the API URL - uses Azure production URL by default
  * 
  * Strategy:
  * 1. If explicit environment variable is set (non-empty), use it
  * 2. If cached URL is available and fresh, use it
- * 3. Try to auto-detect backend on local network (physical devices)
- * 4. Use platform-specific fallbacks (emulators/simulators)
- * 5. Fall back to Azure production URL
+ * 3. Use Azure production URL (no local network detection)
  */
 export async function getApiUrl(): Promise<string> {
   // If cached URL exists and is still valid, use it
@@ -33,95 +28,8 @@ export async function getApiUrl(): Promise<string> {
     return explicitUrl;
   }
 
-  try {
-    // Get the device's own IP address
-    const deviceIP = await Network.getIpAddressAsync();
-    console.log('[NetworkConfig] Device IP:', deviceIP, 'Platform:', Platform.OS);
-    
-    // For physical devices with real IP, try to find backend server
-    if (deviceIP && deviceIP !== '127.0.0.1' && !deviceIP.startsWith('127.')) {
-      // First, try common backend IPs on different networks
-      // PC may be on a different subnet, so try various IP ranges
-      const commonBackendIPs = [
-        'http://153.106.84.166:3000',   // PC (different subnet)
-        'http://153.106.84.1:3000',     // PC network gateway
-        'http://153.106.84.100:3000',   // PC network server
-      ];
-      
-      // Extract network prefix (e.g., "153.106.82" from "153.106.82.150")
-      const parts = deviceIP.split('.');
-      if (parts.length === 4) {
-        const [a, b, c] = parts;
-        const networkPrefix = `${a}.${b}.${c}`;
-        
-        // Try common gateway/server IPs on the device's own network (.1, .100, .166, .254)
-        const deviceNetworkIPs = [
-          `http://${networkPrefix}.1:3000`,      // Gateway (often .1)
-          `http://${networkPrefix}.100:3000`,    // Common server IP
-          `http://${networkPrefix}.166:3000`,    // Common server IP
-          `http://${networkPrefix}.254:3000`,    // Broadcast adjacent
-        ];
-        
-        // Combine both lists: first try device's network, then try common backend IPs
-        const hostsToTry = [...deviceNetworkIPs, ...commonBackendIPs];
-        
-        console.log('[NetworkConfig] Attempting to detect backend (not in cache)');
-        
-        for (const hostUrl of hostsToTry) {
-          try {
-            console.log('[NetworkConfig] Attempting:', hostUrl);
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout per attempt
-            
-            const response = await fetch(`${hostUrl}/clippers`, { 
-              method: 'HEAD',
-              signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (response.ok || response.status === 405) {
-              console.log('[NetworkConfig] ✓ Found backend at:', hostUrl);
-              cachedApiUrl = hostUrl;
-              lastDetectionTime = now;
-              return hostUrl;
-            }
-          } catch {
-            // Continue to next host
-            console.log('[NetworkConfig] ✗ Not reachable:', hostUrl);
-          }
-        }
-        
-        console.warn('[NetworkConfig] Could not find backend on local network, using fallback');
-      }
-    }
-  } catch (error) {
-    console.warn('[NetworkConfig] Error detecting network:', error);
-  }
-
-  // Platform-specific fallbacks for emulators/simulators
-  if (Platform.OS === 'android') {
-    console.log('[NetworkConfig] Using Android emulator fallback: 10.0.2.2:3000');
-    const fallbackUrl = 'http://10.0.2.2:3000';
-    cachedApiUrl = fallbackUrl;
-    lastDetectionTime = now;
-    return fallbackUrl;
-  }
-  
-  if (Platform.OS === 'ios') {
-    // iOS physical devices cannot use localhost
-    // iOS simulator can use localhost
-    // However, if localhost fails on physical devices, it will automatically fall back to Azure
-    console.log('[NetworkConfig] Using iOS fallback: Azure URL');
-    const fallbackUrl = 'https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net';
-    cachedApiUrl = fallbackUrl;
-    lastDetectionTime = now;
-    return fallbackUrl;
-  }
-
-  // Final fallback: Azure production URL
-  console.warn('[NetworkConfig] Using Azure production URL');
+  // Use Azure production URL (instant, no waiting for IP detection)
+  console.log('[NetworkConfig] Using Azure production URL');
   const azureUrl = 'https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net';
   cachedApiUrl = azureUrl;
   lastDetectionTime = now;

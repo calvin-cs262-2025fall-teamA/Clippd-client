@@ -1,4 +1,5 @@
 import { useFavorites } from "@/contexts/FavoritesContext";
+import { useClippd } from "@/contexts/ClippdContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import {
@@ -8,14 +9,34 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
-import itemData from "../../data/item.json";
 import { itemType } from "../../type/clippdTypes";
+import itemData from "../../data/item.json";
+
+/**
+ * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
+ */
+function formatRating(rating: number | string | undefined): string {
+  if (!rating) return "";
+  const num = typeof rating === "string" ? parseFloat(rating) : rating;
+  if (isNaN(num)) return "";
+  
+  const rounded = Math.round(num * 10) / 10;
+  if (rounded % 1 === 0) {
+    return rounded.toString();
+  }
+  return rounded.toFixed(1);
+}
 
 export default function DetailsPage() {
   const { id } = useLocalSearchParams();
   const { isFavorited, addFavorite, removeFavorite } = useFavorites();
-  const clippr: itemType | undefined = itemData.find((item) => item.id === id);
+  const { clippers, isClippersLoading } = useClippd();
+  
+  // Find clipper from API data, fallback to item.json
+  const clippr: itemType | undefined = clippers.find((item) => item.id === id) || 
+    itemData.find((item) => item.id === id);
 
   const favorited = isFavorited(id as string);
 
@@ -26,6 +47,14 @@ export default function DetailsPage() {
       addFavorite(id as string);
     }
   };
+
+  if (isClippersLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   if (!clippr) {
     return (
@@ -114,7 +143,7 @@ export default function DetailsPage() {
             </View>
             <Text style={styles.rating}>
               <Ionicons name="star" size={20} color="gold" />
-              {clippr.rating}
+              {formatRating(clippr.rating)}
             </Text>
           </View>
         </View>
@@ -196,6 +225,11 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     marginBottom: 0,
+  },
+  locationText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 4,
   },
   rating: {
     fontSize: 18,

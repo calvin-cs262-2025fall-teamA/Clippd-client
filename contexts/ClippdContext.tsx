@@ -113,12 +113,10 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
         images: c.images || [], // Use images from database
         rating:
           typeof c.rating === "string"
-            ? parseFloat(c.rating)
-            : typeof c.rating === "number"
             ? c.rating
-            : 0,
+            : String(c.rating ?? "0"),
         profilePic: c.profileimage || "",
-        reviews: [],
+        reviews: c.reviews || [], // Use reviews from database
       }));
       setClippers(mapped);
       console.log("[ClippdContext] fetchClippers: mapped to", mapped.length, "items");

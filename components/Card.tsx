@@ -14,6 +14,27 @@ import {
 
 const screenWidth = Dimensions.get("window").width;
 
+/**
+ * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
+ * 예: 4.0 → "4", 4.5 → "4.5", 4.33 → "4.3"
+ */
+function formatRating(rating: number | string | undefined): string {
+  if (!rating) return "";
+  const num = typeof rating === "string" ? parseFloat(rating) : rating;
+  if (isNaN(num)) return "";
+  
+  // Round to 1 decimal place
+  const rounded = Math.round(num * 10) / 10;
+  
+  // If no decimal part, return as integer
+  if (rounded % 1 === 0) {
+    return rounded.toString();
+  }
+  
+  // Otherwise return with 1 decimal place
+  return rounded.toFixed(1);
+}
+
 export default function Card({
   id,
   name,
@@ -97,7 +118,7 @@ export default function Card({
 
           <View style={styles.ratingBlock}>
             <Ionicons name="star" size={16} color="gold" />
-            {rating && <Text style={styles.ratingText}>{rating}</Text>}
+            {rating && <Text style={styles.ratingText}>{formatRating(rating)}</Text>}
           </View>
         </View>
       </TouchableOpacity>
