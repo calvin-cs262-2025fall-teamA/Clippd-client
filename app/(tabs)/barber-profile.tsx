@@ -1,4 +1,4 @@
-import itemData from "@/data/item.json";
+import { useClippd } from "@/contexts/ClippdContext";
 import { itemType } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
@@ -12,17 +12,39 @@ import {
   View,
 } from "react-native";
 
+/**
+ * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
+ * 예: 4.0 → "4", 4.5 → "4.5", 4.33 → "4.3"
+ */
+function formatRating(rating: number | string | undefined): string {
+  if (!rating) return "";
+  const num = typeof rating === "string" ? parseFloat(rating) : rating;
+  if (isNaN(num)) return "";
+  
+  // Round to 1 decimal place
+  const rounded = Math.round(num * 10) / 10;
+  
+  // If no decimal part, return as integer
+  if (rounded % 1 === 0) {
+    return rounded.toString();
+  }
+  
+  // Otherwise return with 1 decimal place
+  return rounded.toFixed(1);
+}
+
 export default function BarberProfile() {
   const [barberData, setBarberData] = useState<itemType | null>(null);
+  const { clippers, isClippersLoading } = useClippd();
 
   useEffect(() => {
-    // Use the first barber from the data (you can change this to select a specific one)
-    if (itemData && itemData.length > 0) {
-      setBarberData(itemData[0]);
-      console.log("Barber data loaded:", itemData[0]);
-      console.log("Images:", itemData[0].images);
+    // Use the first barber from the API data
+    if (clippers && clippers.length > 0) {
+      setBarberData(clippers[0]);
+      console.log("Barber data loaded:", clippers[0]);
+      console.log("Images:", clippers[0].images);
     }
-  }, []);
+  }, [clippers]);
 
   if (!barberData) {
     return null;
@@ -61,7 +83,7 @@ export default function BarberProfile() {
             <View style={styles.ratingContainer}>
               <Ionicons name="star" size={18} color="#FFB800" />
               <Text style={styles.ratingText}>
-                {barberData.rating} ({totalReviews} reviews)
+                {formatRating(barberData.rating)} ({totalReviews} reviews)
               </Text>
             </View>
             <View style={styles.locationContainer}>
@@ -192,7 +214,7 @@ export default function BarberProfile() {
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Avg Rating</Text>
-                <Text style={styles.statValue}>4.9</Text>
+                <Text style={styles.statValue}>{formatRating(barberData.rating)}</Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Response Time</Text>

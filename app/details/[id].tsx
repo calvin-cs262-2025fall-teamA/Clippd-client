@@ -12,7 +12,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { itemType } from "../../type/clippdTypes";
-import itemData from "../../data/item.json";
 
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
@@ -34,9 +33,8 @@ export default function DetailsPage() {
   const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const { clippers, isClippersLoading } = useClippd();
   
-  // Find clipper from API data, fallback to item.json
-  const clippr: itemType | undefined = clippers.find((item) => item.id === id) || 
-    itemData.find((item) => item.id === id);
+  // Find clipper from API data
+  const clippr: itemType | undefined = clippers.find((item) => item.id === id);
 
   const favorited = isFavorited(id as string);
 
