@@ -1,4 +1,5 @@
 import { useClippd } from "@/contexts/ClippdContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { itemType } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
@@ -36,15 +37,34 @@ function formatRating(rating: number | string | undefined): string {
 export default function BarberProfile() {
   const [barberData, setBarberData] = useState<itemType | null>(null);
   const { clippers, isClippersLoading } = useClippd();
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Use the first barber from the API data
+    // If logged-in user is a Barber, find their profile in clippers array
+    // Otherwise, use the first barber from the API data
     if (clippers && clippers.length > 0) {
-      setBarberData(clippers[0]);
-      console.log("Barber data loaded:", clippers[0]);
-      console.log("Images:", clippers[0].images);
+      if (user && user.role === "Clipper") {
+        // Find barber with matching name
+        const userBarber = clippers.find(
+          (clipper) =>
+            clipper.name === `${user.firstName} ${user.lastName}` ||
+            clipper.firstName === user.firstName
+        );
+        if (userBarber) {
+          setBarberData(userBarber);
+          console.log("Logged-in barber data loaded:", userBarber);
+        } else {
+          // Fallback to first barber if not found
+          setBarberData(clippers[0]);
+        }
+      } else {
+        // For regular clients, show first barber
+        setBarberData(clippers[0]);
+        console.log("First barber data loaded:", clippers[0]);
+      }
+      console.log("Images:", clippers[0]?.images);
     }
-  }, [clippers]);
+  }, [clippers, user]);
 
   if (!barberData) {
     return null;
