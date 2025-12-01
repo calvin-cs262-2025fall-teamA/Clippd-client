@@ -41,9 +41,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const initializeUrl = async () => {
       try {
-        console.log("[ClippdContext] Starting to detect API URL...");
         const url = await getApiUrl();
-        console.log("[ClippdContext] API URL detected:", url);
         setBaseUrl(url);
       } catch (error) {
         console.error("[ClippdContext] Failed to detect API URL:", error);
@@ -55,21 +53,17 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
 
   const refreshUsers = useCallback(async () => {
     if (!baseUrl) {
-      console.log("[ClippdContext] refreshUsers: baseUrl not set yet");
       return;
     }
-    console.log("[ClippdContext] refreshUsers: fetching from", baseUrl);
     try {
       const response = await fetch(`${baseUrl}/users`);
       if (!response.ok) throw new Error("Failed to fetch users");
       const data: Users[] = await response.json();
       setUsers(data);
-      console.log("[ClippdContext] refreshUsers: success, got", data.length, "users");
     } catch (error) {
-      console.log("Error fetching users:", error);
+      console.error("Error fetching users:", error);
     }
   }, [baseUrl]);
-
   const fetchUserById = useCallback(
     async (id: number): Promise<Users | null> => {
       if (!baseUrl) return null;
@@ -93,18 +87,13 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
       console.log("[ClippdContext] fetchClippers: baseUrl not set yet");
       return;
     }
-    console.log("[ClippdContext] fetchClippers: starting, baseUrl =", baseUrl);
     setIsClippersLoading(true);
     setClippersError(null);
     try {
-      console.log("[ClippdContext] fetchClippers: fetching from", `${baseUrl}/clippers`);
       const response = await fetch(`${baseUrl}/clippers`);
-      console.log("[ClippdContext] fetchClippers: response status =", response.status);
       if (!response.ok)
         throw new Error(`Failed to fetch clippers (${response.status})`);
       const raw = await response.json();
-      console.log("[ClippdContext] fetchClippers: got", raw.length, "clippers");
-      console.log("[ClippdContext] fetchClippers: raw data sample:", JSON.stringify(raw[0], null, 2));
       // Map API response to itemType expected by Card
       const mapped: itemType[] = (raw || []).map((c: any) => ({
         id: String(c.id),
@@ -119,15 +108,15 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
         reviews: c.reviews || [], // Use reviews from database
       }));
       setClippers(mapped);
-      console.log("[ClippdContext] fetchClippers: mapped to", mapped.length, "items");
     } catch (error: any) {
-      console.error("[ClippdContext] fetchClippers: error =", error.message);
+      console.error("[ClippdContext] fetchClippers error:", error.message);
       setClippersError(error.message || "Unknown error fetching clippers");
     } finally {
       setIsClippersLoading(false);
     }
   }, [baseUrl]);
 
+  // Auto-fetch data when baseUrl is ready
   useEffect(() => {
     if (baseUrl) {
       console.log("[ClippdContext] baseUrl is ready, fetching data...");
@@ -142,7 +131,6 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
       if (baseUrl) {
         const url = await getApiUrl();
         if (url !== baseUrl) {
-          console.log("[ClippdContext] API URL changed from", baseUrl, "to", url);
           setBaseUrl(url);
         }
       }
@@ -150,7 +138,6 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
 
     return () => clearInterval(intervalId);
   }, [baseUrl]);
-
   return React.createElement(
     ClippdContext.Provider,
     {
