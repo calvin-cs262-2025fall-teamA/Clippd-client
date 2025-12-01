@@ -35,7 +35,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
   const [clippers, setClippers] = useState<itemType[]>([]);
   const [isClippersLoading, setIsClippersLoading] = useState(false);
   const [clippersError, setClippersError] = useState<string | null>(null);
-  const [baseUrl, setBaseUrl] = useState<string>("");
+  const [baseUrl, setBaseUrl] = useState<string>("153.106.223.189:3000");
 
   // Initialize API URL on component mount
   useEffect(() => {
@@ -47,7 +47,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
         console.error("[ClippdContext] Failed to detect API URL:", error);
       }
     };
-    
+
     initializeUrl();
   }, []);
 
@@ -60,6 +60,14 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
       if (!response.ok) throw new Error("Failed to fetch users");
       const data: Users[] = await response.json();
       setUsers(data);
+<<<<<<< Updated upstream
+=======
+      console.log(
+        "[ClippdContext] refreshUsers: success, got",
+        data.length,
+        "users"
+      );
+>>>>>>> Stashed changes
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -90,10 +98,30 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
     setIsClippersLoading(true);
     setClippersError(null);
     try {
+<<<<<<< Updated upstream
       const response = await fetch(`${baseUrl}/clippers`);
       if (!response.ok)
         throw new Error(`Failed to fetch clippers (${response.status})`);
       const raw = await response.json();
+=======
+      console.log(
+        "[ClippdContext] fetchClippers: fetching from",
+        `${baseUrl}/clippers`
+      );
+      const response = await fetch(`${baseUrl}/clippers`);
+      console.log(
+        "[ClippdContext] fetchClippers: response status =",
+        response.status
+      );
+      if (!response.ok)
+        throw new Error(`Failed to fetch clippers (${response.status})`);
+      const raw = await response.json();
+      console.log("[ClippdContext] fetchClippers: got", raw.length, "clippers");
+      console.log(
+        "[ClippdContext] fetchClippers: raw data sample:",
+        JSON.stringify(raw[0], null, 2)
+      );
+>>>>>>> Stashed changes
       // Map API response to itemType expected by Card
       const mapped: itemType[] = (raw || []).map((c: any) => ({
         id: String(c.id),
@@ -101,13 +129,19 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
         location: [c.city, c.state].filter(Boolean).join(", "),
         images: c.images || [], // Use images from database
         rating:
-          typeof c.rating === "string"
-            ? c.rating
-            : String(c.rating ?? "0"),
+          typeof c.rating === "string" ? c.rating : String(c.rating ?? "0"),
         profilePic: c.profileimage || "",
         reviews: c.reviews || [], // Use reviews from database
       }));
       setClippers(mapped);
+<<<<<<< Updated upstream
+=======
+      console.log(
+        "[ClippdContext] fetchClippers: mapped to",
+        mapped.length,
+        "items"
+      );
+>>>>>>> Stashed changes
     } catch (error: any) {
       console.error("[ClippdContext] fetchClippers error:", error.message);
       setClippersError(error.message || "Unknown error fetching clippers");
@@ -131,6 +165,15 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
       if (baseUrl) {
         const url = await getApiUrl();
         if (url !== baseUrl) {
+<<<<<<< Updated upstream
+=======
+          console.log(
+            "[ClippdContext] API URL changed from",
+            baseUrl,
+            "to",
+            url
+          );
+>>>>>>> Stashed changes
           setBaseUrl(url);
         }
       }
