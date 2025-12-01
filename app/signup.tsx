@@ -3,6 +3,9 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -42,68 +45,81 @@ export default function Signup() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.headline}>Sign Up</Text>
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>First Name:</Text>
-        <TextInput
-          style={styles.input}
-          value={firstName}
-          onChangeText={setFirstName}
-          placeholder="First Name"
-          placeholderTextColor="gray"
-        />
-
-        <Text style={styles.label}>Last Name:</Text>
-        <TextInput
-          style={styles.input}
-          value={lastName}
-          onChangeText={setLastName}
-          placeholder="Last Name"
-          placeholderTextColor="gray"
-        />
-
-        <Text style={styles.label}>Email:</Text>
-        <TextInput
-          placeholder="Enter your email"
-          placeholderTextColor={"gray"}
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
-        <Text style={styles.label}>Password:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor={"gray"}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-      </View>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSignup}
-        disabled={isLoading}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
       >
-        {isLoading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Text style={styles.buttonText}>Sign Up</Text>
-        )}
-      </TouchableOpacity>
-    </View>
+        <Text style={styles.headline}>Sign Up</Text>
+        <View style={styles.formContainer}>
+          <Text style={styles.label}>First Name:</Text>
+          <TextInput
+            style={styles.input}
+            value={firstName}
+            onChangeText={setFirstName}
+            placeholder="First Name"
+            placeholderTextColor="gray"
+          />
+
+          <Text style={styles.label}>Last Name:</Text>
+          <TextInput
+            style={styles.input}
+            value={lastName}
+            onChangeText={setLastName}
+            placeholder="Last Name"
+            placeholderTextColor="gray"
+          />
+
+          <Text style={styles.label}>Email:</Text>
+          <TextInput
+            placeholder="Enter your email"
+            placeholderTextColor={"gray"}
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+
+          <Text style={styles.label}>Password:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor={"gray"}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSignup}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.buttonText}>Sign Up</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     padding: 20,
     justifyContent: "center",
+    minHeight: "100%",
   },
   headline: {
     textAlign: "center",
