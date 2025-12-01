@@ -10,14 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
   const handleLogin = async () => {
@@ -57,26 +55,14 @@ export default function Login() {
         />
 
         <Text style={styles.label}>Password:</Text>
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.passwordInput}
-            placeholder="Password"
-            placeholderTextColor={"gray"}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-          />
-          <TouchableOpacity
-            style={styles.passwordToggle}
-            onPress={() => setShowPassword(!showPassword)}
-          >
-            <Ionicons
-              name={showPassword ? "eye" : "eye-off"}
-              size={24}
-              color="#666"
-            />
-          </TouchableOpacity>
-        </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor={"gray"}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
       </View>
       <TouchableOpacity
         style={styles.button}
@@ -129,25 +115,6 @@ const styles = StyleSheet.create({
   formContainer: {
     alignItems: "flex-start",
     width: "100%",
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 10,
-    borderColor: "grey",
-    width: "80%",
-    marginTop: 10,
-    marginBottom: 10,
-    paddingRight: 10,
-    alignSelf: "center",
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 10,
-  },
-  passwordToggle: {
-    padding: 8,
   },
   button: {
     backgroundColor: "black",
