@@ -35,7 +35,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
   const [clippers, setClippers] = useState<itemType[]>([]);
   const [isClippersLoading, setIsClippersLoading] = useState(false);
   const [clippersError, setClippersError] = useState<string | null>(null);
-  const [baseUrl, setBaseUrl] = useState<string>("");
+  const [baseUrl, setBaseUrl] = useState<string>("153.106.223.189:3000");
 
   // Initialize API URL on component mount
   useEffect(() => {
@@ -47,7 +47,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
         console.error("[ClippdContext] Failed to detect API URL:", error);
       }
     };
-    
+
     initializeUrl();
   }, []);
 
@@ -101,9 +101,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
         location: [c.city, c.state].filter(Boolean).join(", "),
         images: c.images || [], // Use images from database
         rating:
-          typeof c.rating === "string"
-            ? c.rating
-            : String(c.rating ?? "0"),
+          typeof c.rating === "string" ? c.rating : String(c.rating ?? "0"),
         profilePic: c.profileimage || "",
         reviews: c.reviews || [], // Use reviews from database
       }));

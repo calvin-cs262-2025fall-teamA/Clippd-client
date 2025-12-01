@@ -75,7 +75,10 @@ export default function BarberProfile() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <ScrollView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 60 }}
+        style={styles.container}
+      >
         {/* Profile Card */}
         <View style={styles.profileCard}>
           {/* Edit Button */}

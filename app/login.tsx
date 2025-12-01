@@ -3,7 +3,10 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -82,28 +85,69 @@ export default function Login() {
         style={styles.button}
         onPress={handleLogin}
         disabled={isLoading}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
       >
-        {isLoading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Text style={styles.buttonText}>Login</Text>
-        )}
-      </TouchableOpacity>
-      <Text style={styles.signupText}>
-        Don&apos;t have an account?{" "}
-        <Pressable onPress={handleSignup}>
-          <Text style={styles.link}>Sign up</Text>
-        </Pressable>
-      </Text>
-    </View>
+        <Text style={styles.headline}>SignIn</Text>
+        <View style={styles.formContainer}>
+          <Text style={styles.label}>Email:</Text>
+          <TextInput
+            placeholder="Enter your email"
+            placeholderTextColor={"gray"}
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+
+          <Text style={styles.label}>Password:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor={"gray"}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
+        </TouchableOpacity>
+        <Text style={styles.signupText}>
+          Don&apos;t have an account?{" "}
+          <Pressable onPress={handleSignup}>
+            <Text style={styles.link}>Sign up</Text>
+          </Pressable>
+        </Text>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     padding: 20,
     justifyContent: "center",
+    minHeight: "100%",
   },
   headline: {
     textAlign: "center",
