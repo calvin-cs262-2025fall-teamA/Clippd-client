@@ -8,7 +8,7 @@ export default function RootLayout() {
     <AuthProvider>
       <FavoritesProvider>
         <ClippdProvider>
-          <Stack screenOptions={{ headerShown: true }}>
+          <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="signup" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

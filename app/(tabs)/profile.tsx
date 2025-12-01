@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Image,
   // Linking,
@@ -8,8 +8,16 @@ import {
   Text,
   View,
 } from "react-native";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Profile() {
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    console.log('[Profile] User:', user);
+    console.log('[Profile] Is Loading:', isLoading);
+  }, [user, isLoading]);
+
   // const openDirections = () => {
   //   const latitude = 42.9303;
   //   const longitude = -85.5873;
@@ -31,7 +39,9 @@ export default function Profile() {
             style={styles.headerImage}
           />
 
-          <Text style={styles.name}>Calvin Klein</Text>
+          <Text style={styles.name}>
+            {user ? `${user.firstName} ${user.lastName}` : "Guest User"}
+          </Text>
           <Text style={styles.location}>Grand Rapids, MI</Text>
         </View>
 
@@ -41,7 +51,7 @@ export default function Profile() {
           <View style={styles.contactCard}>
             <Text style={styles.fieldHeader}>Contact</Text>
             <Text style={styles.field}>Phone: (555) 123-4567</Text>
-            <Text style={styles.field}>Email: customer@email.com</Text>
+            <Text style={styles.field}>Email: {user ? user.email : "customer@email.com"}</Text>
           </View>
 
           {/* Preferences */}

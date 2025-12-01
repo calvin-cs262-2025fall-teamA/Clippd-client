@@ -10,8 +10,12 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { itemType } from "../../type/clippdTypes";
+import { useState } from "react";
 
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
@@ -33,6 +37,10 @@ export default function DetailsPage() {
   const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const { clippers, isClippersLoading } = useClippd();
   
+  const [showReviewInput, setShowReviewInput] = useState(false);
+  const [reviewText, setReviewText] = useState("");
+  const [reviews, setReviews] = useState<any[]>([]);
+  
   // Find clipper from API data
   const clippr: itemType | undefined = clippers.find((item) => item.id === id);
 
@@ -43,6 +51,20 @@ export default function DetailsPage() {
       removeFavorite(id as string);
     } else {
       addFavorite(id as string);
+    }
+  };
+
+  const handleAddReview = () => {
+    if (reviewText.trim()) {
+      const newReview = {
+        id: (reviews.length || 0) + 1,
+        reviewerName: "You",
+        reviewContent: reviewText,
+        date: new Date().toLocaleDateString(),
+      };
+      setReviews([newReview, ...(clippr?.reviews || [])]);
+      setReviewText("");
+      setShowReviewInput(false);
     }
   };
 
@@ -153,10 +175,50 @@ export default function DetailsPage() {
           </View> */}
         {/* ---- Reviews ---- */}
         <View style={styles.reviewContainer}>
-          <Text style={styles.sectionTitle}>Reviews</Text>
+          <View style={styles.reviewHeaderRow}>
+            <Text style={styles.sectionTitle}>Reviews</Text>
+            <TouchableOpacity
+              onPress={() => setShowReviewInput(!showReviewInput)}
+              style={styles.editButton}
+            >
+              <Ionicons name="pencil" size={20} color="#333" />
+            </TouchableOpacity>
+          </View>
 
-          {clippr.reviews && clippr.reviews.length > 0 ? (
-            clippr.reviews.map((review) => (
+          {showReviewInput && (
+            <View style={styles.reviewInputContainer}>
+              <TextInput
+                style={styles.reviewInput}
+                placeholder="Write your review here..."
+                placeholderTextColor="#999"
+                multiline
+                numberOfLines={4}
+                value={reviewText}
+                onChangeText={setReviewText}
+              />
+              <View style={styles.reviewButtonContainer}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setShowReviewInput(false);
+                    setReviewText("");
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={handleAddReview}
+                  disabled={!reviewText.trim()}
+                >
+                  <Text style={styles.submitButtonText}>Submit</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {(reviews.length > 0 || clippr?.reviews?.length) ? (
+            (reviews.length > 0 ? reviews : clippr?.reviews || []).map((review) => (
               <View key={review.id} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
                   <Text style={styles.reviewerName}>{review.reviewerName}</Text>
@@ -264,6 +326,61 @@ const styles = StyleSheet.create({
   reviewContainer: {
     padding: 20,
     paddingTop: 0,
+  },
+  reviewHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  editButton: {
+    padding: 8,
+  },
+  reviewInputContainer: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  reviewInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    color: "#333",
+    textAlignVertical: "top",
+    marginBottom: 12,
+  },
+  reviewButtonContainer: {
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "flex-end",
+  },
+  cancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "600",
+  },
+  submitButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 6,
+    backgroundColor: "#333",
+  },
+  submitButtonText: {
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "600",
   },
   reviewCard: {
     backgroundColor: "#f5f5f5",
