@@ -5,6 +5,27 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+/**
+ * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
+ * 예: 4.0 → "4", 4.5 → "4.5", 4.33 → "4.3"
+ */
+function formatRating(rating: number | string | undefined): string {
+  if (!rating) return "";
+  const num = typeof rating === "string" ? parseFloat(rating) : rating;
+  if (isNaN(num)) return "";
+  
+  // Round to 1 decimal place
+  const rounded = Math.round(num * 10) / 10;
+  
+  // If no decimal part, return as integer
+  if (rounded % 1 === 0) {
+    return rounded.toString();
+  }
+  
+  // Otherwise return with 1 decimal place
+  return rounded.toFixed(1);
+}
+
 export default function SmallCard({
   id,
   name,
@@ -54,7 +75,7 @@ export default function SmallCard({
         {/* Right: Rating */}
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={14} color="gold" />
-          <Text style={styles.rating}>{rating}</Text>
+          <Text style={styles.rating}>{formatRating(rating)}</Text>
         </View>
       </View>
     </TouchableOpacity>

@@ -1,13 +1,14 @@
 import { useFavorites } from "@/contexts/FavoritesContext";
+import { useClippd } from "@/contexts/ClippdContext";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FavoritesCard from "../../components/FavoritesCard";
-import itemData from "../../data/item.json";
 
 export default function Favorites() {
   const { favorites } = useFavorites();
+  const { clippers } = useClippd();
 
-  const favoritedItems = itemData.filter(item => favorites.includes(item.id));
+  const favoritedItems = clippers.filter(item => favorites.includes(item.id));
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>

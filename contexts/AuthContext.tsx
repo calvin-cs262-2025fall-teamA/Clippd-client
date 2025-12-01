@@ -49,25 +49,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      // TODO: Replace with actual API call
-      // For now, mock login
-      if (email && password) {
-        const mockUser = {
-          id: "1",
-          email: email,
-          firstName: "John",
-          lastName: "Doe",
-        };
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net'}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-        const mockToken = `token_${Date.now()}`;
-
-        await SecureStore.setItemAsync("userToken", mockToken);
-        await SecureStore.setItemAsync("userData", JSON.stringify(mockUser));
-
-        setUser(mockUser);
-      } else {
-        throw new Error("Invalid credentials");
+      if (!response.ok) {
+        throw new Error('Login failed');
       }
+
+      const data = await response.json();
+      const token = data.token || `token_${Date.now()}`;
+      const user = {
+        id: data.id || "1",
+        email: data.email || email,
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+      };
+
+      await SecureStore.setItemAsync("userToken", token);
+      await SecureStore.setItemAsync("userData", JSON.stringify(user));
+      setUser(user);
     } catch (error) {
       throw error;
     }
@@ -80,25 +83,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string
   ) => {
     try {
-      // TODO: Replace with actual API call
-      // For now, mock signup
-      if (firstName && lastName && email && password) {
-        const newUser = {
-          id: Date.now().toString(),
-          email,
-          firstName,
-          lastName,
-        };
-
-        const mockToken = `token_${Date.now()}`;
-
-        await SecureStore.setItemAsync("userToken", mockToken);
-        await SecureStore.setItemAsync("userData", JSON.stringify(newUser));
-
-        setUser(newUser);
-      } else {
+      if (!firstName || !lastName || !email || !password) {
         throw new Error("All fields are required");
       }
+
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net'}/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Signup failed');
+      }
+
+      const data = await response.json();
+      const token = data.token || `token_${Date.now()}`;
+      const newUser = {
+        id: data.id || Date.now().toString(),
+        email: data.email || email,
+        firstName: data.firstName || firstName,
+        lastName: data.lastName || lastName,
+      };
+
+      await SecureStore.setItemAsync("userToken", token);
+      await SecureStore.setItemAsync("userData", JSON.stringify(newUser));
+      setUser(newUser);
     } catch (error) {
       throw error;
     }
