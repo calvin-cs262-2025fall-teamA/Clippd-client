@@ -35,7 +35,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
   const [clippers, setClippers] = useState<itemType[]>([]);
   const [isClippersLoading, setIsClippersLoading] = useState(false);
   const [clippersError, setClippersError] = useState<string | null>(null);
-  const [baseUrl, setBaseUrl] = useState<string>("153.106.223.189:3000");
+  const [baseUrl, setBaseUrl] = useState<string>("");
 
   // Initialize API URL on component mount
   useEffect(() => {
