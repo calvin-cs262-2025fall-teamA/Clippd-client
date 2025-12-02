@@ -24,7 +24,7 @@ function formatRating(rating: number | string | undefined): string {
   if (!rating) return "";
   const num = typeof rating === "string" ? parseFloat(rating) : rating;
   if (isNaN(num)) return "";
-  
+
   const rounded = Math.round(num * 10) / 10;
   if (rounded % 1 === 0) {
     return rounded.toString();
@@ -36,11 +36,11 @@ export default function DetailsPage() {
   const { id } = useLocalSearchParams();
   const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const { clippers, isClippersLoading } = useClippd();
-  
+
   const [showReviewInput, setShowReviewInput] = useState(false);
   const [reviewText, setReviewText] = useState("");
   const [reviews, setReviews] = useState<any[]>([]);
-  
+
   // Find clipper from API data
   const clippr: itemType | undefined = clippers.find((item) => item.id === id);
 
@@ -79,7 +79,7 @@ export default function DetailsPage() {
   if (!clippr) {
     return (
       <View style={styles.container}>
-        <Text>Clippr not found</Text>
+        <Text>Clipper not found</Text>
       </View>
     );
   }
@@ -96,7 +96,7 @@ export default function DetailsPage() {
     <>
       <Stack.Screen
         options={{
-          title: "Clippr Details",
+          title: "Clipper Details",
           headerLeft: () => (
             <TouchableOpacity
               onPress={router.back}
@@ -106,7 +106,10 @@ export default function DetailsPage() {
             </TouchableOpacity>
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={toggleFavorite} style={{ marginRight: 15 }}>
+            <TouchableOpacity
+              onPress={toggleFavorite}
+              style={{ marginRight: 15 }}
+            >
               <Ionicons
                 name={favorited ? "heart" : "heart-outline"}
                 size={24}
@@ -217,18 +220,24 @@ export default function DetailsPage() {
             </View>
           )}
 
-          {(reviews.length > 0 || clippr?.reviews?.length) ? (
-            (reviews.length > 0 ? reviews : clippr?.reviews || []).map((review) => (
-              <View key={review.id} style={styles.reviewCard}>
-                <View style={styles.reviewHeader}>
-                  <Text style={styles.reviewerName}>{review.reviewerName}</Text>
-                  {review.date && (
-                    <Text style={styles.reviewDate}>{review.date}</Text>
-                  )}
+          {reviews.length > 0 || clippr?.reviews?.length ? (
+            (reviews.length > 0 ? reviews : clippr?.reviews || []).map(
+              (review) => (
+                <View key={review.id} style={styles.reviewCard}>
+                  <View style={styles.reviewHeader}>
+                    <Text style={styles.reviewerName}>
+                      {review.reviewerName}
+                    </Text>
+                    {review.date && (
+                      <Text style={styles.reviewDate}>{review.date}</Text>
+                    )}
+                  </View>
+                  <Text style={styles.reviewContent}>
+                    {review.reviewContent}
+                  </Text>
                 </View>
-                <Text style={styles.reviewContent}>{review.reviewContent}</Text>
-              </View>
-            ))
+              )
+            )
           ) : (
             <Text style={styles.noReviews}>No reviews yet</Text>
           )}

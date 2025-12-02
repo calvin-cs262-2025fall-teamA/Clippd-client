@@ -1,13 +1,13 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, router, Tabs } from "expo-router";
 import { Scissors } from "lucide-react-native";
 import React from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View, Text } from "react-native";
 
 export default function TabLayout() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout } = useAuth();
 
   const [fontsLoaded] = useFonts({
     "Lato-Bold": require("../../assets/fonts/Lato-Bold.ttf"),
@@ -76,6 +76,17 @@ export default function TabLayout() {
               <Scissors color="#ff1a47" size={32} />
             </View>
           ),
+          headerRight: () => (
+            <Text
+              onPress={async () => {
+                await logout();
+                router.push("/login");
+              }}
+              style={{ marginRight: 15, color: "#ff1a47", fontSize: 16 }}
+            >
+              Log Out
+            </Text>
+          ),
           tabBarIcon: ({ color }) => (
             <Ionicons name="home-outline" size={24} color={color} />
           ),
@@ -95,6 +106,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="map-outline" size={24} color={color} />
           ),
+          href: user.role === "Clipper" ? null : undefined,
         }}
       />
 
@@ -125,6 +137,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-outline" size={24} color={color} />
           ),
+          href: user.role === "Clipper" ? null : undefined,
         }}
       />
 
@@ -132,7 +145,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="barber-profile"
         options={{
-          title: "Clipper",
+          title: "Profile",
           headerTitleAlign: "center",
           headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
           tabBarIcon: ({ color }) => (
