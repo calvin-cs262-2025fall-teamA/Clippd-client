@@ -20,6 +20,8 @@ interface ClippdContextType {
   isClippersLoading: boolean;
   clippersError: string | null;
   fetchClippers: () => Promise<void>;
+  // Update clipper rating
+  updateClipperRating: (clipperId: string, newRating: number) => void;
 }
 
 export const ClippdContext = createContext<ClippdContextType | undefined>(
@@ -114,6 +116,17 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [baseUrl]);
 
+  // Update a specific clipper's rating
+  const updateClipperRating = useCallback((clipperId: string, newRating: number) => {
+    setClippers((prevClippers) =>
+      prevClippers.map((clipper) =>
+        clipper.id === clipperId
+          ? { ...clipper, rating: String(newRating) }
+          : clipper
+      )
+    );
+  }, []);
+
   // Auto-fetch data when baseUrl is ready
   useEffect(() => {
     if (baseUrl) {
@@ -148,6 +161,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
         isClippersLoading,
         clippersError,
         fetchClippers,
+        updateClipperRating,
       },
     },
     children
