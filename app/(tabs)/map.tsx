@@ -1,16 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
-import MapView, { Circle, Marker } from "react-native-maps";
-import * as Location from "expo-location";
+import { Ionicons } from "@expo/vector-icons";
+import Slider from "@react-native-community/slider"; // ✅ from your original
 import Constants from "expo-constants";
+import * as Location from "expo-location";
+import React, { useEffect, useRef, useState } from "react";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import Slider from "@react-native-community/slider"; // ✅ FIXED IMPORT
+import MapView, { Circle } from "react-native-maps";
 
 const { width } = Dimensions.get("window");
 
 export default function MapScreen() {
-  const [location, setLocation] = useState(null);
-  const [region, setRegion] = useState(null);
+  const [region, setRegion] = useState(null);     // current “you” location = map center
   const [radiusMiles, setRadiusMiles] = useState(10);
   const mapRef = useRef(null);
 
@@ -41,6 +41,7 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Search bar */}
       <View style={styles.searchContainer}>
         <GooglePlacesAutocomplete
           placeholder="Search address"
@@ -69,24 +70,37 @@ export default function MapScreen() {
         />
       </View>
 
+      {/* Map + draggable “you” behavior */}
       {region && (
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          initialRegion={region}
-          showsUserLocation={true}
-          showsMyLocationButton={true}
-        >
-          <Marker coordinate={region} />
-          <Circle
-            center={region}
-            radius={milesToMeters(radiusMiles)}
-            fillColor="rgba(255, 50, 50, 0.15)"
-            strokeColor="rgba(255, 50, 50, 0.8)"
-          />
-        </MapView>
+        <>
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            initialRegion={region}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
+            onRegionChangeComplete={(reg) => {
+              // 🔥 This is the key: when user drags the map,
+              // update our “you” location to be the map center.
+              setRegion(reg);
+            }}
+          >
+            <Circle
+              center={region}
+              radius={milesToMeters(radiusMiles)}
+              fillColor="rgba(255, 50, 50, 0.15)"
+              strokeColor="rgba(255, 50, 50, 0.8)"
+            />
+          </MapView>
+
+          {/* Hinge-style center pin (no fake assets, just Ionicon) */}
+          <View pointerEvents="none" style={styles.centerPinContainer}>
+            <Ionicons name="location-sharp" size={32} color="#FF1744" />
+          </View>
+        </>
       )}
 
+      {/* Radius slider */}
       <View style={styles.sliderContainer}>
         <Text style={styles.radiusLabel}>{radiusMiles} miles</Text>
 
@@ -109,6 +123,7 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
+
   searchContainer: {
     position: "absolute",
     top: 50,
@@ -116,6 +131,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     zIndex: 10,
   },
+
   inputContainer: {
     backgroundColor: "#fff",
     borderRadius: 10,
@@ -125,9 +141,10 @@ const styles = StyleSheet.create({
     height: 50,
     fontSize: 16,
   },
+
   sliderContainer: {
     position: "absolute",
-    bottom: 40,
+    bottom: 75,
     width: width * 0.9,
     alignSelf: "center",
     backgroundColor: "#fff",
@@ -146,5 +163,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 5,
+  },
+
+  // Center pin overlay (Hinge-style)
+  centerPinContainer: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -16 }, { translateY: -32 }],
+    zIndex: 20,
   },
 });

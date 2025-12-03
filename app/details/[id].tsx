@@ -1,28 +1,26 @@
-import { useFavorites } from "@/contexts/FavoritesContext";
-import { useClippd } from "@/contexts/ClippdContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClippd } from "@/contexts/ClippdContext";
+import { useFavorites } from "@/contexts/FavoritesContext";
 import { Ionicons } from "@expo/vector-icons";
 import {
   router,
   Stack,
-  useLocalSearchParams,
   useFocusEffect,
+  useLocalSearchParams,
 } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
 } from "react-native";
 import { itemType } from "../../type/clippdTypes";
-import { useState, useEffect, useCallback } from "react";
 
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
@@ -69,7 +67,7 @@ export default function DetailsPage() {
   const [reviewRating, setReviewRating] = useState(5);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [, setIsLoadingReviews] = useState(false);
 
   // Find clipper from API data
   const clippr: itemType | undefined = clippers.find((item) => item.id === id);
@@ -126,7 +124,7 @@ export default function DetailsPage() {
     } finally {
       setIsLoadingReviews(false);
     }
-  }, [id]);
+  }, [id, user]);
 
   // Load reviews when component mounts or id changes
   useEffect(() => {

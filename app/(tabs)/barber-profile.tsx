@@ -36,7 +36,7 @@ function formatRating(rating: number | string | undefined): string {
 
 export default function BarberProfile() {
   const [barberData, setBarberData] = useState<itemType | null>(null);
-  const { clippers, isClippersLoading } = useClippd();
+  const { clippers } = useClippd();
   const { user, logout } = useAuth();
 
   const handleLogout = async () => {
