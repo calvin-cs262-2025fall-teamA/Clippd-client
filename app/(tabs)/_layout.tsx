@@ -1,13 +1,13 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
-import { Redirect, router, Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { Scissors } from "lucide-react-native";
 import React from "react";
-import { ActivityIndicator, View, Text } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 export default function TabLayout() {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading } = useAuth();
 
   const [fontsLoaded] = useFonts({
     "Lato-Bold": require("../../assets/fonts/Lato-Bold.ttf"),
@@ -75,17 +75,6 @@ export default function TabLayout() {
             <View style={{ marginLeft: 137 }}>
               <Scissors color="#ff1a47" size={32} />
             </View>
-          ),
-          headerRight: () => (
-            <Text
-              onPress={async () => {
-                await logout();
-                router.push("/login");
-              }}
-              style={{ marginRight: 15, color: "#ff1a47", fontSize: 16 }}
-            >
-              Log Out
-            </Text>
           ),
           tabBarIcon: ({ color }) => (
             <Ionicons name="home-outline" size={24} color={color} />

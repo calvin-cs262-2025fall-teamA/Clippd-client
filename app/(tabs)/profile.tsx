@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import React, { useEffect } from "react";
 import {
   Image,
@@ -7,23 +7,22 @@ import {
   StyleSheet,
   Text,
   View,
+  TouchableOpacity,
 } from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Profile() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout } = useAuth();
 
   useEffect(() => {
-    console.log('[Profile] User:', user);
-    console.log('[Profile] Is Loading:', isLoading);
+    console.log("[Profile] User:", user);
+    console.log("[Profile] Is Loading:", isLoading);
   }, [user, isLoading]);
 
-  // const openDirections = () => {
-  //   const latitude = 42.9303;
-  //   const longitude = -85.5873;
-  //   const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-  //   Linking.openURL(url);
-  // };
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login");
+  };
 
   return (
     <>
@@ -32,6 +31,10 @@ export default function Profile() {
       <ScrollView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Log Out</Text>
+          </TouchableOpacity>
+
           <Image
             source={{
               uri: "https://cdn-icons-png.flaticon.com/512/149/149071.png", // generic customer avatar
@@ -51,7 +54,9 @@ export default function Profile() {
           <View style={styles.contactCard}>
             <Text style={styles.fieldHeader}>Contact</Text>
             <Text style={styles.field}>Phone: (555) 123-4567</Text>
-            <Text style={styles.field}>Email: {user ? user.email : "customer@email.com"}</Text>
+            <Text style={styles.field}>
+              Email: {user ? user.email : "customer@email.com"}
+            </Text>
           </View>
 
           {/* Preferences */}
@@ -158,5 +163,20 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 14,
     color: "#222",
+  },
+  logoutButton: {
+    position: "absolute",
+    top: -25,
+    right: 10,
+    backgroundColor: "#ff1a47",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  logoutText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
