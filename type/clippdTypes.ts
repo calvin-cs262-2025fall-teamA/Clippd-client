@@ -10,9 +10,13 @@ export interface itemType {
 
 export interface Review {
   id: number;
+  clientID?: number;
   reviewerName: string;
-  reviewContent: string;
+  reviewContent?: string;
+  comment?: string;
+  rating?: number;
   date?: string;
+  createdAt?: string;
 }
 
 export interface Users {
