@@ -10,7 +10,6 @@ import MapView, { Circle } from "react-native-maps";
 const { width } = Dimensions.get("window");
 
 export default function MapScreen() {
-  const [location, setLocation] = useState(null); // real GPS (kept from original, in case you need later)
   const [region, setRegion] = useState(null);     // current “you” location = map center
   const [radiusMiles, setRadiusMiles] = useState(10);
   const mapRef = useRef(null);
