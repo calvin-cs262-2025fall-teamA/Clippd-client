@@ -2,7 +2,12 @@ import { useFavorites } from "@/contexts/FavoritesContext";
 import { useClippd } from "@/contexts/ClippdContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack, useLocalSearchParams, useFocusEffect } from "expo-router";
+import {
+  router,
+  Stack,
+  useLocalSearchParams,
+  useFocusEffect,
+} from "expo-router";
 import {
   Image,
   ScrollView,
@@ -26,7 +31,7 @@ function formatRating(rating: number | string | undefined): string {
   if (!rating) return "";
   const num = typeof rating === "string" ? parseFloat(rating) : rating;
   if (isNaN(num)) return "";
-  
+
   const rounded = Math.round(num * 10) / 10;
   if (rounded % 1 === 0) {
     return rounded.toString();
@@ -42,11 +47,11 @@ function formatDate(dateString: string | undefined): string {
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "";
-    
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     const year = date.getFullYear();
-    
+
     return `${month}-${day}-${year}`;
   } catch {
     return "";
@@ -58,51 +63,66 @@ export default function DetailsPage() {
   const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const { clippers, isClippersLoading, updateClipperRating } = useClippd();
   const { user } = useAuth();
-  
+
   const [showReviewInput, setShowReviewInput] = useState(false);
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
-  
+
   // Find clipper from API data
   const clippr: itemType | undefined = clippers.find((item) => item.id === id);
 
   // Load reviews from database
   const loadReviews = useCallback(async () => {
     if (!id) return;
-    
+
     try {
       setIsLoadingReviews(true);
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net';
-      
+      const apiUrl =
+        process.env.EXPO_PUBLIC_API_URL ||
+        "https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net";
+
       const response = await fetch(`${apiUrl}/clippers/${id}/reviews`);
       const responseText = await response.text();
-      
-      console.log('[DetailsPage] Response status:', response.status);
-      console.log('[DetailsPage] Response text:', responseText);
-      
+
+      console.log("[DetailsPage] Response status:", response.status);
+      console.log("[DetailsPage] Response text:", responseText);
+
       if (!response.ok) {
-        throw new Error(`Failed to load reviews: ${response.status} - ${responseText}`);
+        throw new Error(
+          `Failed to load reviews: ${response.status} - ${responseText}`
+        );
       }
-      
+
       const data = JSON.parse(responseText);
-      
-      console.log('[DetailsPage] Loaded reviews:', data?.length || 0);
-      console.log('[DetailsPage] ALL reviews:', JSON.stringify(data, null, 2));
-      console.log('[DetailsPage] Current user:', user ? `ID: ${user.id}, Type: ${typeof user.id}` : 'Not logged in');
-      
+
+      console.log("[DetailsPage] Loaded reviews:", data?.length || 0);
+      console.log("[DetailsPage] ALL reviews:", JSON.stringify(data, null, 2));
+      console.log(
+        "[DetailsPage] Current user:",
+        user ? `ID: ${user.id}, Type: ${typeof user.id}` : "Not logged in"
+      );
+
       // Log ownership check for each review
       if (data && Array.isArray(data)) {
         data.forEach((review, index) => {
-          console.log(`[DetailsPage] Review ${index}: clientid=${review.clientid} (type: ${typeof review.clientid}), userId=${user?.id} (type: ${typeof user?.id}), Match: ${parseInt(user?.id || '0') === review.clientid}`);
+          console.log(
+            `[DetailsPage] Review ${index}: clientid=${
+              review.clientid
+            } (type: ${typeof review.clientid}), userId=${
+              user?.id
+            } (type: ${typeof user?.id}), Match: ${
+              parseInt(user?.id || "0") === review.clientid
+            }`
+          );
         });
       }
-      
+
       setReviews(data || []);
     } catch (error) {
-      console.error('[DetailsPage] Error loading reviews:', error);
+      console.error("[DetailsPage] Error loading reviews:", error);
     } finally {
       setIsLoadingReviews(false);
     }
@@ -143,44 +163,51 @@ export default function DetailsPage() {
 
     setIsSubmittingReview(true);
     try {
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net';
-      
+      const apiUrl =
+        process.env.EXPO_PUBLIC_API_URL ||
+        "https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net";
+
       const endpoint = `${apiUrl}/clippers/${id}/reviews`;
-      
+
       const requestBody = {
         clientID: parseInt(user.id),
         clipperID: parseInt(id as string),
         rating: reviewRating,
         comment: reviewText,
       };
-      
-      console.log('[DetailsPage] Submitting review:', JSON.stringify(requestBody));
-      
+
+      console.log(
+        "[DetailsPage] Submitting review:",
+        JSON.stringify(requestBody)
+      );
+
       const response = await fetch(endpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
       });
 
       const responseText = await response.text();
-      console.log('[DetailsPage] Response status:', response.status);
-      console.log('[DetailsPage] Response text:', responseText);
+      console.log("[DetailsPage] Response status:", response.status);
+      console.log("[DetailsPage] Response text:", responseText);
 
       if (!response.ok) {
-        throw new Error(`Failed to submit review: ${response.status} - ${responseText}`);
+        throw new Error(
+          `Failed to submit review: ${response.status} - ${responseText}`
+        );
       }
 
       const result = JSON.parse(responseText);
-      console.log('[DetailsPage] Review submitted successfully:', result);
+      console.log("[DetailsPage] Review submitted successfully:", result);
 
       // Update clipper rating in context (for main screen)
       if (result.averageRating !== undefined) {
         updateClipperRating(id as string, result.averageRating);
         // Also update local clippr object
         if (clippr) {
-          clippr.rating = String(result.averageRating);
+          clippr.rating = result.averageRating;
         }
       }
 
@@ -189,11 +216,11 @@ export default function DetailsPage() {
       setReviewRating(5);
       setShowReviewInput(false);
       Alert.alert("Success", "Review submitted successfully!");
-      
+
       // Reload reviews from database
       await loadReviews();
     } catch (error: any) {
-      console.error('[DetailsPage] Error submitting review:', error);
+      console.error("[DetailsPage] Error submitting review:", error);
       Alert.alert("Error", error.message || "Failed to submit review");
     } finally {
       setIsSubmittingReview(false);
@@ -210,12 +237,14 @@ export default function DetailsPage() {
           text: "Delete",
           onPress: async () => {
             try {
-              const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net';
-              
+              const apiUrl =
+                process.env.EXPO_PUBLIC_API_URL ||
+                "https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net";
+
               const response = await fetch(`${apiUrl}/reviews/${reviewId}`, {
-                method: 'DELETE',
+                method: "DELETE",
                 headers: {
-                  'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                 },
               });
 
@@ -224,23 +253,23 @@ export default function DetailsPage() {
               }
 
               const result = await response.json();
-              console.log('[DetailsPage] Review deleted successfully:', result);
-              
+              console.log("[DetailsPage] Review deleted successfully:", result);
+
               // Update clipper rating in context (for main screen)
               if (result.averageRating !== undefined) {
                 updateClipperRating(id as string, result.averageRating);
                 // Also update local clippr object
                 if (clippr) {
-                  clippr.rating = String(result.averageRating);
+                  clippr.rating = result.averageRating;
                 }
               }
-              
+
               Alert.alert("Success", "Review deleted successfully!");
-              
+
               // Reload reviews from database
               await loadReviews();
             } catch (error: any) {
-              console.error('[DetailsPage] Error deleting review:', error);
+              console.error("[DetailsPage] Error deleting review:", error);
               Alert.alert("Error", error.message || "Failed to delete review");
             }
           },
@@ -267,7 +296,7 @@ export default function DetailsPage() {
   if (!clippr) {
     return (
       <View style={styles.container}>
-        <Text>Clippr not found</Text>
+        <Text>Clipper not found</Text>
       </View>
     );
   }
@@ -284,7 +313,7 @@ export default function DetailsPage() {
     <>
       <Stack.Screen
         options={{
-          title: "Clippr Details",
+          title: "Clipper Details",
           headerLeft: () => (
             <TouchableOpacity
               onPress={router.back}
@@ -294,7 +323,10 @@ export default function DetailsPage() {
             </TouchableOpacity>
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={toggleFavorite} style={{ marginRight: 15 }}>
+            <TouchableOpacity
+              onPress={toggleFavorite}
+              style={{ marginRight: 15 }}
+            >
               <Ionicons
                 name={favorited ? "heart" : "heart-outline"}
                 size={24}
@@ -408,7 +440,10 @@ export default function DetailsPage() {
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.submitButton, isSubmittingReview && styles.submitButtonDisabled]}
+                  style={[
+                    styles.submitButton,
+                    isSubmittingReview && styles.submitButtonDisabled,
+                  ]}
                   onPress={handleAddReview}
                   disabled={isSubmittingReview || !reviewText.trim()}
                 >
@@ -422,46 +457,56 @@ export default function DetailsPage() {
             </View>
           )}
 
-          {(reviews.length > 0 || clippr?.reviews?.length) ? (
-            (reviews.length > 0 ? reviews : clippr?.reviews || []).map((review) => (
-              <View key={review.id} style={styles.reviewCard}>
-                <View style={styles.reviewHeader}>
-                  <View style={styles.reviewHeaderLeft}>
-                    <Text style={styles.reviewerName}>{review.reviewerName}</Text>
-                    {(review.rating || review.rating === 0) && (
-                      <View style={styles.ratingStars}>
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Ionicons
-                            key={star}
-                            name={star <= review.rating ? "star" : "star-outline"}
-                            size={16}
-                            color={star <= review.rating ? "#FFB800" : "#ccc"}
-                          />
-                        ))}
-                      </View>
-                    )}
-                  </View>
-                  <View style={styles.reviewHeaderRight}>
-                    {review.createdat && (
-                      <Text style={styles.reviewDate}>
-                        {formatDate(review.createdat)}
+          {reviews.length > 0 || clippr?.reviews?.length ? (
+            (reviews.length > 0 ? reviews : clippr?.reviews || []).map(
+              (review) => (
+                <View key={review.id} style={styles.reviewCard}>
+                  <View style={styles.reviewHeader}>
+                    <View style={styles.reviewHeaderLeft}>
+                      <Text style={styles.reviewerName}>
+                        {review.reviewerName}
                       </Text>
-                    )}
-                    {user && review.clientid && parseInt(user.id) === review.clientid ? (
-                      <View style={styles.reviewActions}>
-                        <TouchableOpacity
-                          onPress={() => handleDeleteReview(review.id)}
-                          style={styles.deleteActionButton}
-                        >
-                          <Ionicons name="trash" size={18} color="#FF3B30" />
-                        </TouchableOpacity>
-                      </View>
-                    ) : null}
+                      {(review.rating || review.rating === 0) && (
+                        <View style={styles.ratingStars}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Ionicons
+                              key={star}
+                              name={
+                                star <= review.rating ? "star" : "star-outline"
+                              }
+                              size={16}
+                              color={star <= review.rating ? "#FFB800" : "#ccc"}
+                            />
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.reviewHeaderRight}>
+                      {review.createdat && (
+                        <Text style={styles.reviewDate}>
+                          {formatDate(review.createdat)}
+                        </Text>
+                      )}
+                      {user &&
+                      review.clientid &&
+                      parseInt(user.id) === review.clientid ? (
+                        <View style={styles.reviewActions}>
+                          <TouchableOpacity
+                            onPress={() => handleDeleteReview(review.id)}
+                            style={styles.deleteActionButton}
+                          >
+                            <Ionicons name="trash" size={18} color="#FF3B30" />
+                          </TouchableOpacity>
+                        </View>
+                      ) : null}
+                    </View>
                   </View>
+                  <Text style={styles.reviewContent}>
+                    {review.reviewContent || review.comment}
+                  </Text>
                 </View>
-                <Text style={styles.reviewContent}>{review.reviewContent || review.comment}</Text>
-              </View>
-            ))
+              )
+            )
           ) : (
             <Text style={styles.noReviews}>No reviews yet</Text>
           )}

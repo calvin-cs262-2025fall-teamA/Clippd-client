@@ -3,7 +3,7 @@ import { ScrollView, View, ActivityIndicator, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../components/Card";
 import { useClippd } from "../../contexts/ClippdContext";
-import FilterButton from "../components/filter_button"; // ✅ new import
+import FilterButton from "../components/filter_button";
 
 export default function Home() {
   const { clippers, isClippersLoading, clippersError, fetchClippers } =

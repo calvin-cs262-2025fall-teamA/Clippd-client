@@ -2,7 +2,7 @@ import { useClippd } from "@/contexts/ClippdContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { itemType } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -21,15 +21,15 @@ function formatRating(rating: number | string | undefined): string {
   if (!rating) return "";
   const num = typeof rating === "string" ? parseFloat(rating) : rating;
   if (isNaN(num)) return "";
-  
+
   // Round to 1 decimal place
   const rounded = Math.round(num * 10) / 10;
-  
+
   // If no decimal part, return as integer
   if (rounded % 1 === 0) {
     return rounded.toString();
   }
-  
+
   // Otherwise return with 1 decimal place
   return rounded.toFixed(1);
 }
@@ -37,7 +37,12 @@ function formatRating(rating: number | string | undefined): string {
 export default function BarberProfile() {
   const [barberData, setBarberData] = useState<itemType | null>(null);
   const { clippers, isClippersLoading } = useClippd();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login");
+  };
 
   useEffect(() => {
     // If logged-in user is a Barber, find their profile in clippers array
@@ -48,7 +53,7 @@ export default function BarberProfile() {
         const userBarber = clippers.find(
           (clipper) =>
             clipper.name === `${user.firstName} ${user.lastName}` ||
-            clipper.firstName === user.firstName
+            clipper.name === user.firstName
         );
         if (userBarber) {
           setBarberData(userBarber);
@@ -79,6 +84,13 @@ export default function BarberProfile() {
         contentContainerStyle={{ paddingBottom: 60 }}
         style={styles.container}
       >
+        {/* Logout Button - Inside ScrollView */}
+        <View style={styles.logoutContainer}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Log Out</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Profile Card */}
         <View style={styles.profileCard}>
           {/* Edit Button */}
@@ -234,7 +246,9 @@ export default function BarberProfile() {
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Avg Rating</Text>
-                <Text style={styles.statValue}>{formatRating(barberData.rating)}</Text>
+                <Text style={styles.statValue}>
+                  {formatRating(barberData.rating)}
+                </Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Response Time</Text>
@@ -255,10 +269,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-    paddingTop: 60,
+    paddingTop: 0,
   },
 
-  /* Profile Card */
+  logoutContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    alignItems: "flex-end",
+    marginTop: 40,
+  },
+
+  logoutButton: {
+    backgroundColor: "#ff1a47",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
   profileCard: {
     backgroundColor: "#ffffff",
     marginHorizontal: 20,
@@ -426,5 +453,10 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     color: "#222",
+  },
+  logoutText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

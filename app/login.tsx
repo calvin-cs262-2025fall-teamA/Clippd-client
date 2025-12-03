@@ -5,7 +5,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -56,9 +55,9 @@ export default function Login() {
       >
         <Text style={styles.headline}>SignIn</Text>
         <View style={styles.formContainer}>
-          <Text style={styles.label}>Email:</Text>
+          <Text style={styles.label}>User ID:</Text>
           <TextInput
-            placeholder="Enter your email"
+            placeholder="Enter your user ID"
             placeholderTextColor={"gray"}
             style={styles.input}
             value={email}
@@ -71,7 +70,7 @@ export default function Login() {
           <View style={styles.passwordContainer}>
             <TextInput
               style={styles.passwordInput}
-              placeholder="Password"
+              placeholder="Enter your password"
               placeholderTextColor={"gray"}
               value={password}
               onChangeText={setPassword}
@@ -102,9 +101,9 @@ export default function Login() {
         </TouchableOpacity>
         <Text style={styles.signupText}>
           Don&apos;t have an account?{" "}
-          <Pressable onPress={handleSignup}>
-            <Text style={styles.link}>Sign up</Text>
-          </Pressable>
+          <Text onPress={handleSignup} style={styles.link}>
+            Sign up
+          </Text>
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -177,12 +176,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   link: {
-    color: "#4285F4",
+    color: "#ff1a47",
     textDecorationLine: "underline",
-    fontWeight: "600",
   },
   signupText: {
     marginTop: 100,
     textAlign: "center",
+    fontSize: 15,
   },
 });
