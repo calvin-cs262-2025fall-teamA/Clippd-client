@@ -1,4 +1,4 @@
-import { itemType } from "@/type/itemType";
+import { itemType } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -13,6 +13,27 @@ import {
 } from "react-native";
 
 const screenWidth = Dimensions.get("window").width;
+
+/**
+ * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
+ * 예: 4.0 → "4", 4.5 → "4.5", 4.33 → "4.3"
+ */
+function formatRating(rating: number | string | undefined): string {
+  if (!rating) return "";
+  const num = typeof rating === "string" ? parseFloat(rating) : rating;
+  if (isNaN(num)) return "";
+  
+  // Round to 1 decimal place
+  const rounded = Math.round(num * 10) / 10;
+  
+  // If no decimal part, return as integer
+  if (rounded % 1 === 0) {
+    return rounded.toString();
+  }
+  
+  // Otherwise return with 1 decimal place
+  return rounded.toFixed(1);
+}
 
 export default function Card({
   id,
@@ -59,18 +80,19 @@ export default function Card({
               ))}
             </ScrollView>
 
-            <View style={styles.pagination}>
+            <View style={styles.paginationContainer}>
               {images.map((_, index) => (
-                <Text
-                  key={index}
-                  style={
-                    index === activeIndex
-                      ? styles.pagingDotActive
-                      : styles.pagingDot
-                  }
-                >
-                  •
-                </Text>
+                <View key={index} style={styles.pagingDotWrapper}>
+                  <Text
+                    style={
+                      index === activeIndex
+                        ? styles.pagingDotActive
+                        : styles.pagingDot
+                    }
+                  >
+                    •
+                  </Text>
+                </View>
               ))}
             </View>
           </>
@@ -88,17 +110,15 @@ export default function Card({
             <Text style={styles.name}>{name}</Text>
             {location && (
               <View style={styles.locationRow}>
-                <Text style={styles.location}>
-                  <Ionicons name="location-sharp"></Ionicons>
-                  {location}
-                </Text>
+                <Ionicons name="location-sharp" size={14} color="#666" />
+                <Text style={styles.location}>{location}</Text>
               </View>
             )}
           </View>
 
           <View style={styles.ratingBlock}>
             <Ionicons name="star" size={16} color="gold" />
-            {rating && <Text style={styles.ratingText}>{rating}</Text>}
+            {rating && <Text style={styles.ratingText}>{formatRating(rating)}</Text>}
           </View>
         </View>
       </TouchableOpacity>
@@ -136,6 +156,7 @@ const styles = StyleSheet.create({
     fontFamily: "Lato-Regular",
     color: "#666",
     marginTop: 4,
+    marginLeft: 4,
     textAlign: "left",
   },
 
@@ -161,6 +182,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 15,
+    gap: 4,
+  },
+
+  profileImgWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  ratingContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  starWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  ratingTextWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   ratingText: {
@@ -201,6 +243,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+
+  paginationContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 5,
+    marginBottom: 5,
+    position: "absolute",
+    bottom: -40,
+    left: 0,
+    right: 0,
+  },
+
+  pagingDotWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   pagingDot: {
     color: "#cfcfcfff",
     fontSize: 25,

@@ -12,9 +12,6 @@ export default function TabLayout() {
   const [fontsLoaded] = useFonts({
     "Lato-Bold": require("../../assets/fonts/Lato-Bold.ttf"),
     "Lato-Regular": require("../../assets/fonts/Lato-Regular.ttf"),
-    "PlayfairDisplay-SemiBold": require("../../assets/fonts/PlayfairDisplay-SemiBold.ttf"),
-    "PlayfairDisplay-Regular": require("../../assets/fonts/PlayfairDisplay-Regular.ttf"),
-    "PlayfairDisplay-Bold": require("../../assets/fonts/PlayfairDisplay-Bold.ttf"),
     "DMSans-Bold": require("../../assets/fonts/DMSans-Bold.ttf"),
     "DMSans-SemiBold": require("../../assets/fonts/DMSans-SemiBold.ttf"),
     "DMSans-Regular": require("../../assets/fonts/DMSans-Regular.ttf"),
@@ -98,24 +95,9 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="map-outline" size={24} color={color} />
           ),
+          href: user.role === "Clipper" ? null : undefined,
         }}
       />
-
-      {/* Booking (center floating button) */}
-      {/* <Tabs.Screen
-        name="booking"
-        options={{
-          title: "",
-          headerShown: false,
-          tabBarIcon: () => (
-            <View style={styles.centerButton}>
-              <FontAwesome5 name="cut" size={24} color="#fff" />
-            </View>
-          ),
-          href: null,
-          tabBarLabel: () => null,
-        }}
-      /> */}
 
       {/* Favorites */}
       <Tabs.Screen
@@ -144,26 +126,21 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-outline" size={24} color={color} />
           ),
+          href: user.role === "Clipper" ? null : undefined,
         }}
       />
 
-      {/* Barber Profile */}
+      {/* Barber Profile - Only visible for Clipper role */}
       <Tabs.Screen
         name="barber-profile"
         options={{
-          title: "Barber",
+          title: "Profile",
           headerTitleAlign: "center",
           headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
           tabBarIcon: ({ color }) => (
             <Ionicons name="cut-outline" size={24} color={color} />
           ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="details/[id]"
-        options={{
-          href: null, // hides this route from the tab bar
+          href: user?.role === "Clipper" ? undefined : null,
         }}
       />
     </Tabs>

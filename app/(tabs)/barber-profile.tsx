@@ -1,7 +1,8 @@
-import itemData from "@/data/item.json";
-import { itemType } from "@/type/itemType";
+import { useClippd } from "@/contexts/ClippdContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { itemType } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -12,17 +13,63 @@ import {
   View,
 } from "react-native";
 
+/**
+ * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
+ * 예: 4.0 → "4", 4.5 → "4.5", 4.33 → "4.3"
+ */
+function formatRating(rating: number | string | undefined): string {
+  if (!rating) return "";
+  const num = typeof rating === "string" ? parseFloat(rating) : rating;
+  if (isNaN(num)) return "";
+
+  // Round to 1 decimal place
+  const rounded = Math.round(num * 10) / 10;
+
+  // If no decimal part, return as integer
+  if (rounded % 1 === 0) {
+    return rounded.toString();
+  }
+
+  // Otherwise return with 1 decimal place
+  return rounded.toFixed(1);
+}
+
 export default function BarberProfile() {
   const [barberData, setBarberData] = useState<itemType | null>(null);
+  const { clippers, isClippersLoading } = useClippd();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login");
+  };
 
   useEffect(() => {
-    // Use the first barber from the data (you can change this to select a specific one)
-    if (itemData && itemData.length > 0) {
-      setBarberData(itemData[0]);
-      console.log("Barber data loaded:", itemData[0]);
-      console.log("Images:", itemData[0].images);
+    // If logged-in user is a Barber, find their profile in clippers array
+    // Otherwise, use the first barber from the API data
+    if (clippers && clippers.length > 0) {
+      if (user && user.role === "Clipper") {
+        // Find barber with matching name
+        const userBarber = clippers.find(
+          (clipper) =>
+            clipper.name === `${user.firstName} ${user.lastName}` ||
+            clipper.name === user.firstName
+        );
+        if (userBarber) {
+          setBarberData(userBarber);
+          console.log("Logged-in barber data loaded:", userBarber);
+        } else {
+          // Fallback to first barber if not found
+          setBarberData(clippers[0]);
+        }
+      } else {
+        // For regular clients, show first barber
+        setBarberData(clippers[0]);
+        console.log("First barber data loaded:", clippers[0]);
+      }
+      console.log("Images:", clippers[0]?.images);
     }
-  }, []);
+  }, [clippers, user]);
 
   if (!barberData) {
     return null;
@@ -33,7 +80,17 @@ export default function BarberProfile() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <ScrollView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 60 }}
+        style={styles.container}
+      >
+        {/* Logout Button - Inside ScrollView */}
+        <View style={styles.logoutContainer}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Log Out</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Profile Card */}
         <View style={styles.profileCard}>
           {/* Edit Button */}
@@ -58,7 +115,7 @@ export default function BarberProfile() {
             <View style={styles.ratingContainer}>
               <Ionicons name="star" size={18} color="#FFB800" />
               <Text style={styles.ratingText}>
-                {barberData.rating} ({totalReviews} reviews)
+                {formatRating(barberData.rating)} ({totalReviews} reviews)
               </Text>
             </View>
             <View style={styles.locationContainer}>
@@ -189,7 +246,9 @@ export default function BarberProfile() {
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Avg Rating</Text>
-                <Text style={styles.statValue}>4.9</Text>
+                <Text style={styles.statValue}>
+                  {formatRating(barberData.rating)}
+                </Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Response Time</Text>
@@ -210,10 +269,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-    paddingTop: 60,
+    paddingTop: 0,
   },
 
-  /* Profile Card */
+  logoutContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    alignItems: "flex-end",
+    marginTop: 40,
+  },
+
+  logoutButton: {
+    backgroundColor: "#ff1a47",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
   profileCard: {
     backgroundColor: "#ffffff",
     marginHorizontal: 20,
@@ -381,5 +453,10 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     color: "#222",
+  },
+  logoutText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

@@ -15,7 +15,7 @@ export default function MapScreen() {
   const [radiusMiles, setRadiusMiles] = useState(10);
   const mapRef = useRef(null);
 
-  const apiKey = Constants.expoConfig.extra.googleMapsApiKey;
+  const apiKey = Constants.expoConfig!.extra!.googleMapsApiKey;
 
   useEffect(() => {
     (async () => {
@@ -38,7 +38,7 @@ export default function MapScreen() {
     })();
   }, []);
 
-  const milesToMeters = (miles) => miles * 1609.34;
+  const milesToMeters = (miles: number) => miles * 1609.34;
 
   return (
     <View style={styles.container}>
@@ -48,7 +48,7 @@ export default function MapScreen() {
           placeholder="Search address"
           fetchDetails={true}
           onPress={(data, details) => {
-            const { lat, lng } = details.geometry.location;
+            const { lat, lng } = details!.geometry.location;
 
             const newRegion = {
               latitude: lat,
