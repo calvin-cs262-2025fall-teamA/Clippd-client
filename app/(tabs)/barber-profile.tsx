@@ -583,7 +583,10 @@ export default function BarberProfile() {
                 />
               ))
             ) : (
-              <Text>No images available</Text>
+              <View style={styles.noPortfolioContainer}>
+                <Ionicons name="image-outline" size={60} color="#ccc" />
+                <Text style={styles.noPortfolioText}>No images yet</Text>
+              </View>
             )}
             {barberData.images && barberData.images.length < 9 && (
               <View style={styles.portfolioImagePlaceholder}>
@@ -1088,6 +1091,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#e0e0e0",
     borderStyle: "dashed",
+  },
+  noPortfolioContainer: {
+    width: "100%",
+    height: 200,
+    borderRadius: 12,
+    backgroundColor: "#f9f9f9",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#e8e8e8",
+    borderStyle: "dashed",
+  },
+  noPortfolioText: {
+    fontSize: 14,
+    color: "#bbb",
+    marginTop: 12,
   },
   statItem: {
     flex: 1,

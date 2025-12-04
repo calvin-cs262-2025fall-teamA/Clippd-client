@@ -341,29 +341,36 @@ export default function DetailsPage() {
 
       <ScrollView style={styles.container}>
         {/* ---- Image Grid Section ---- */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.imageScroll}
-        >
-          {imageGroups.map((group, groupIndex) => (
-            <View key={groupIndex} style={styles.imageGroup}>
-              {/* Large image on left */}
-              <Image source={{ uri: group[0] }} style={styles.largeImage} />
+        {imageGroups.length > 0 ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.imageScroll}
+          >
+            {imageGroups.map((group, groupIndex) => (
+              <View key={groupIndex} style={styles.imageGroup}>
+                {/* Large image on left */}
+                <Image source={{ uri: group[0] }} style={styles.largeImage} />
 
-              {/* Two stacked images on right */}
-              <View style={styles.sideImageGrid}>
-                {group.slice(1, 3).map((img, index) => (
-                  <Image
-                    key={index}
-                    source={{ uri: img }}
-                    style={styles.sideImage}
-                  />
-                ))}
+                {/* Two stacked images on right */}
+                <View style={styles.sideImageGrid}>
+                  {group.slice(1, 3).map((img, index) => (
+                    <Image
+                      key={index}
+                      source={{ uri: img }}
+                      style={styles.sideImage}
+                    />
+                  ))}
+                </View>
               </View>
-            </View>
-          ))}
-        </ScrollView>
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={styles.noImagesPlaceholder}>
+            <Ionicons name="image-outline" size={60} color="#ccc" />
+            <Text style={styles.noImagesText}>No images</Text>
+          </View>
+        )}
 
         <View style={styles.details}>
           <View style={styles.headerRow}>
@@ -826,5 +833,16 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 100,
     padding: 10,
+  },
+  noImagesPlaceholder: {
+    height: 300,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f9f9f9",
+  },
+  noImagesText: {
+    fontSize: 14,
+    color: "#bbb",
+    marginTop: 12,
   },
 });

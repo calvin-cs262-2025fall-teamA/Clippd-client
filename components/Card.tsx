@@ -53,7 +53,7 @@ export default function Card({
   return (
     <View style={styles.card}>
       <View style={styles.photoFrame}>
-        {images && images.length > 0 && (
+        {images && images.length > 0 ? (
           <>
             <ScrollView
               horizontal
@@ -96,6 +96,11 @@ export default function Card({
               ))}
             </View>
           </>
+        ) : (
+          <View style={styles.noImagesContainer}>
+            <Ionicons name="image-outline" size={60} color="#ccc" />
+            <Text style={styles.noImagesText}>No images</Text>
+          </View>
         )}
       </View>
 
@@ -244,6 +249,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
+  },
+  noImagesContainer: {
+    width: screenWidth - 20,
+    height: 300,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f9f9f9",
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+  },
+  noImagesText: {
+    fontSize: 14,
+    color: "#bbb",
+    marginTop: 12,
   },
 
   pagination: {
