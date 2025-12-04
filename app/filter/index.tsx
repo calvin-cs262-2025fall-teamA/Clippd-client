@@ -8,23 +8,22 @@ export default function FilterScreen() {
 
   return (
     <>
-      {/* Configure header for this page */}
       <Stack.Screen
         options={{
           title: "Personal Settings",
-          headerLargeTitle: false,
-          headerTitleStyle: { fontSize: 24, fontWeight: "700" },
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 10 }}>
-              <Ionicons name="arrow-back" size={26} color="black" />
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ marginLeft: 6, marginRight: 10 }}
+            >
+              <Ionicons name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
           ),
         }}
       />
 
-      {/* Main content */}
-      <ScrollView
-        contentContainerStyle={styles.container}
+      <ScrollView 
+        style={styles.container}
         contentInsetAdjustmentBehavior="automatic"
         alwaysBounceVertical={true}
       >
@@ -140,9 +139,10 @@ function DropdownSection({ label, values }) {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 20,
+    paddingTop: 20,
     paddingBottom: 20,
   },
   section: {

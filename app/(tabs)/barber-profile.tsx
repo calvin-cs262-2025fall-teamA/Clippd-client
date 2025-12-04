@@ -9,9 +9,82 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
+  Modal,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system/legacy";
+import { getApiUrl } from "@/utils/networkConfig";
+
+// US States and Major Cities
+const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
+  "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+  "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
+  "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+  "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia",
+  "Wisconsin", "Wyoming"
+];
+
+const CITIES_BY_STATE: { [key: string]: string[] } = {
+  "Alabama": ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa"],
+  "Alaska": ["Anchorage", "Juneau", "Fairbanks", "Sitka", "Ketchikan"],
+  "Arizona": ["Phoenix", "Mesa", "Scottsdale", "Chandler", "Tempe"],
+  "Arkansas": ["Little Rock", "Fort Smith", "Fayetteville", "Springdale", "Jonesboro"],
+  "California": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "San Jose"],
+  "Colorado": ["Denver", "Colorado Springs", "Aurora", "Fort Collins", "Pueblo"],
+  "Connecticut": ["Bridgeport", "New Haven", "Hartford", "Stamford", "Waterbury"],
+  "Delaware": ["Wilmington", "Dover", "Newark", "Middletown", "Smyrna"],
+  "Florida": ["Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg"],
+  "Georgia": ["Atlanta", "Augusta", "Savannah", "Athens", "Macon"],
+  "Hawaii": ["Honolulu", "Hilo", "Kailua", "Kaneohe", "Waipahu"],
+  "Idaho": ["Boise", "Nampa", "Meridian", "Idaho Falls", "Pocatello"],
+  "Illinois": ["Chicago", "Aurora", "Rockford", "Joliet", "Naperville"],
+  "Indiana": ["Indianapolis", "Fort Wayne", "Evansville", "South Bend", "Bloomington"],
+  "Iowa": ["Des Moines", "Cedar Rapids", "Davenport", "Sioux City", "Iowa City"],
+  "Kansas": ["Kansas City", "Wichita", "Topeka", "Overland Park", "Lawrence"],
+  "Kentucky": ["Louisville", "Lexington", "Bowling Green", "Owensboro", "Covington"],
+  "Louisiana": ["New Orleans", "Baton Rouge", "Shreveport", "Lafayette", "Lake Charles"],
+  "Maine": ["Portland", "Lewiston", "Bangor", "Augusta", "Waterville"],
+  "Maryland": ["Baltimore", "Frederick", "Rockville", "Gaithersburg", "Bowie"],
+  "Massachusetts": ["Boston", "Worcester", "Springfield", "Lowell", "Cambridge"],
+  "Michigan": ["Detroit", "Grand Rapids", "Warren", "Sterling Heights", "Ann Arbor"],
+  "Minnesota": ["Minneapolis", "St. Paul", "Rochester", "Duluth", "Bloomington"],
+  "Mississippi": ["Jackson", "Gulfport", "Southhaven", "Hattiesburg", "Biloxi"],
+  "Missouri": ["Kansas City", "St. Louis", "Springfield", "Independence", "Columbia"],
+  "Montana": ["Billings", "Missoula", "Great Falls", "Bozeman", "Helena"],
+  "Nebraska": ["Omaha", "Lincoln", "Bellevue", "Grand Island", "Kearney"],
+  "Nevada": ["Las Vegas", "Henderson", "Reno", "North Las Vegas", "Sparks"],
+  "New Hampshire": ["Manchester", "Nashua", "Concord", "Derry", "Rochester"],
+  "New Jersey": ["Newark", "Jersey City", "Paterson", "Elizabeth", "Trenton"],
+  "New Mexico": ["Albuquerque", "Las Cruces", "Rio Rancho", "Santa Fe", "Roswell"],
+  "New York": ["New York City", "Buffalo", "Rochester", "Yonkers", "Syracuse"],
+  "North Carolina": ["Charlotte", "Raleigh", "Greensboro", "Durham", "Winston-Salem"],
+  "North Dakota": ["Bismarck", "Fargo", "Grand Forks", "Minot", "Williston"],
+  "Ohio": ["Columbus", "Cleveland", "Cincinnati", "Toledo", "Akron"],
+  "Oklahoma": ["Oklahoma City", "Tulsa", "Norman", "Broken Arrow", "Lawton"],
+  "Oregon": ["Portland", "Eugene", "Salem", "Gresham", "Hillsboro"],
+  "Pennsylvania": ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading"],
+  "Rhode Island": ["Providence", "Warwick", "Cranston", "Pawtucket", "Woonsocket"],
+  "South Carolina": ["Charleston", "Columbia", "Greenville", "Summerville", "Goose Creek"],
+  "South Dakota": ["Sioux Falls", "Rapid City", "Aberdeen", "Brookings", "Watertown"],
+  "Tennessee": ["Nashville", "Memphis", "Knoxville", "Chattanooga", "Clarksville"],
+  "Texas": ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth"],
+  "Utah": ["Salt Lake City", "Provo", "Ogden", "Sandy", "Orem"],
+  "Vermont": ["Burlington", "Rutland", "South Burlington", "Montpelier", "Barre"],
+  "Virginia": ["Virginia Beach", "Richmond", "Arlington", "Alexandria", "Roanoke"],
+  "Washington": ["Seattle", "Tacoma", "Vancouver", "Spokane", "Bellevue"],
+  "West Virginia": ["Charleston", "Huntington", "Parkersburg", "Wheeling", "Weirton"],
+  "Wisconsin": ["Milwaukee", "Madison", "Green Bay", "Kenosha", "Racine"],
+  "Wyoming": ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs"],
+};
 
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
@@ -34,43 +107,398 @@ function formatRating(rating: number | string | undefined): string {
   return rounded.toFixed(1);
 }
 
+// Service Categories Data
+const SERVICE_CATEGORIES = [
+  {
+    label: "Haircuts",
+    values: ["Fade", "Taper", "Scissor Cut", "Layer cut", "Bob/Long Bob", "Buzz Cut", "Trim & Shape up"]
+  },
+  {
+    label: "Styling",
+    values: ["Blowout", "Curling/Waves", "Straightening", "Special Event Hairstyle"]
+  },
+  {
+    label: "Coloring",
+    values: ["Full Color", "Highlights", "Balayage", "Root Touch-up", "Bleach + Tone"]
+  },
+  {
+    label: "Treatments",
+    values: ["Perm", "Keratin", "Relaxer"]
+  },
+  {
+    label: "Facial / Beard Care",
+    values: ["Beard Trim", "Beard Shaping", "Hot Towel Shave"]
+  }
+];
+
 export default function BarberProfile() {
   const [barberData, setBarberData] = useState<ClipperProfile | null>(null);
-  const { clippers } = useClippd();
+  const { clippers, updateClipperProfile } = useClippd();
   const { user, logout } = useAuth();
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
+  const [isServicesModalVisible, setIsServicesModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showImageMenu, setShowImageMenu] = useState(false);
+  const [editData, setEditData] = useState({
+    profilePic: "",
+    firstName: "",
+    lastName: "",
+    bio: "",
+    city: "",
+    state: "",
+    images: [] as string[],
+  });
+  const [editServices, setEditServices] = useState<{
+    id?: number;
+    serviceName: string;
+    price: string;
+    durationMinutes?: number;
+  }[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [editingServiceIndex, setEditingServiceIndex] = useState<number | null>(null);
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [isBioFocused, setIsBioFocused] = useState(false);
+  const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
+  const [isLastNameFocused, setIsLastNameFocused] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [showPortfolioMenu, setShowPortfolioMenu] = useState<number | null>(null);
+  const [baseUrl, setBaseUrl] = useState<string>("");
 
   const handleLogout = async () => {
     await logout();
     router.replace("/login");
   };
 
+  // Initialize API URL
+  useEffect(() => {
+    const initializeUrl = async () => {
+      try {
+        const url = await getApiUrl();
+        setBaseUrl(url);
+      } catch (error) {
+        console.error("Failed to detect API URL:", error);
+      }
+    };
+    initializeUrl();
+  }, []);
+
   useEffect(() => {
     // If logged-in user is a Barber, find their profile in clippers array
     // Otherwise, use the first barber from the API data
     if (clippers && clippers.length > 0) {
       if (user && user.role === "Clipper") {
-        // Find barber with matching name
-        const userBarber = clippers.find(
-          (clipper) =>
-            clipper.name === `${user.firstName} ${user.lastName}` ||
-            clipper.name === user.firstName
-        );
+        // Find barber with matching user ID or name
+        let userBarber = clippers.find((clipper) => {
+          // Try to match by name (firstName + lastName)
+          const clipperFullName = clipper.name || "";
+          const userFullName = `${user.firstName} ${user.lastName}`;
+          return (
+            clipperFullName === userFullName ||
+            clipperFullName === user.firstName ||
+            clipperFullName.includes(user.firstName)
+          );
+        });
+
         if (userBarber) {
           setBarberData(userBarber);
+          const [city, state] = userBarber.location
+            ? userBarber.location.split(", ")
+            : ["", ""];
+          setEditData({
+            profilePic: userBarber.profilePic || "",
+            firstName: user.firstName || "",
+            lastName: user.lastName || "",
+            bio: userBarber.bio || "",
+            city: city || "",
+            state: state || "",
+            images: [],
+          });
           console.log("Logged-in barber data loaded:", userBarber);
           console.log("Barber services:", userBarber.services);
         } else {
-          // Fallback to first barber if not found
+          // If no match found, show first barber
+          console.log("Barber not found in clippers array. User:", user);
+          console.log("Clippers available:", clippers);
           setBarberData(clippers[0]);
+          const [city, state] = clippers[0].location
+            ? clippers[0].location.split(", ")
+            : ["", ""];
+          setEditData({
+            profilePic: clippers[0].profilePic || "",
+            firstName: clippers[0].name?.split(" ")[0] || "",
+            lastName: clippers[0].name?.split(" ").slice(1).join(" ") || "",
+            bio: clippers[0].bio || "",
+            city: city || "",
+            state: state || "",
+            images: [],
+          });
         }
       } else {
         // For regular clients, show first barber
         setBarberData(clippers[0]);
+        const [city, state] = clippers[0].location
+          ? clippers[0].location.split(", ")
+          : ["", ""];
+        setEditData({
+          profilePic: clippers[0].profilePic || "",
+          firstName: clippers[0].name?.split(" ")[0] || "",
+          lastName: clippers[0].name?.split(" ").slice(1).join(" ") || "",
+          bio: clippers[0].bio || "",
+          city: city || "",
+          state: state || "",
+          images: [],
+        });
         console.log("First barber data loaded:", clippers[0]);
         console.log("First barber services:", clippers[0]?.services);
       }
     }
   }, [clippers, user]);
+
+  const handleEditPress = () => {
+    // Initialize editData with current barberData values
+    if (barberData) {
+      const [firstName, lastName] = barberData.name.split(" ");
+      const [city, state] = barberData.location.split(", ");
+      
+      setEditData({
+        profilePic: barberData.profilePic || "",
+        firstName: firstName || "",
+        lastName: lastName || "",
+        bio: barberData.bio || "",
+        city: city || "",
+        state: state || "",
+        images: barberData.images || [],
+      });
+    }
+    setIsEditModalVisible(true);
+  };
+
+  const handlePortfolioEditPress = () => {
+    // Initialize editData with current barberData values
+    if (barberData) {
+      const [firstName, lastName] = barberData.name.split(" ");
+      const [city, state] = barberData.location.split(", ");
+      
+      setEditData({
+        profilePic: barberData.profilePic || "",
+        firstName: firstName || "",
+        lastName: lastName || "",
+        bio: barberData.bio || "",
+        city: city || "",
+        state: state || "",
+        images: barberData.images || [],
+      });
+    }
+    setIsPortfolioModalVisible(true);
+  };
+
+  const handleServicesEditPress = () => {
+    if (barberData && barberData.services) {
+      setEditServices(
+        barberData.services.map((service) => ({
+          id: service.id,
+          serviceName: service.serviceName,
+          price: service.price ? String(service.price) : "",
+          durationMinutes: service.durationMinutes ?? undefined,
+        }))
+      );
+    }
+    setSelectedCategory(null);
+    setEditingServiceIndex(null);
+    setIsServicesModalVisible(true);
+  };
+
+  const handleDeleteService = (index: number) => {
+    setEditServices(editServices.filter((_, i) => i !== index));
+  };
+
+  const handleServiceChange = (index: number, field: string, value: string) => {
+    const newServices = [...editServices];
+    newServices[index] = {
+      ...newServices[index],
+      [field]: value,
+    };
+    setEditServices(newServices);
+  };
+
+  // LOCAL TEST MODE: Set to true to only save images locally (won't persist after app restart)
+  const LOCAL_TEST_MODE = true;
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      try {
+        if (LOCAL_TEST_MODE) {
+          // In test mode, just store the URI directly (won't persist after restart)
+          setEditData({
+            ...editData,
+            profilePic: result.assets[0].uri,
+          });
+        } else {
+          // In production mode, convert image to base64 for persistence
+          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+            encoding: "base64",
+          });
+          const imageData = `data:image/jpeg;base64,${base64}`;
+          
+          setEditData({
+            ...editData,
+            profilePic: imageData,
+          });
+        }
+      } catch (error) {
+        console.error("Error converting image to base64:", error);
+        Alert.alert("Error", "Failed to process image");
+      }
+    }
+    setShowImageMenu(false);
+  };
+
+  const handleDeleteProfilePic = () => {
+    setEditData({
+      ...editData,
+      profilePic: "",
+    });
+    setShowImageMenu(false);
+  };
+
+  const pickPortfolioImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [4, 3],
+    });
+
+    if (!result.canceled && result.assets[0].uri) {
+      try {
+        if (LOCAL_TEST_MODE) {
+          // In test mode, just store the URI directly (won't persist after restart)
+          setEditData({
+            ...editData,
+            images: [result.assets[0].uri, ...(editData.images || [])],
+          });
+        } else {
+          // In production mode, convert image to base64 for persistence
+          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+            encoding: "base64",
+          });
+          const imageData = `data:image/jpeg;base64,${base64}`;
+          
+          setEditData({
+            ...editData,
+            images: [imageData, ...(editData.images || [])],
+          });
+        }
+        setShowPortfolioMenu(null);
+      } catch (error) {
+        console.error("Error processing image:", error);
+        Alert.alert("Error", "Failed to process image");
+      }
+    }
+  };
+
+  const handleDeletePortfolioImage = (index: number) => {
+    const newImages = editData.images?.filter((_, i) => i !== index) || [];
+    setEditData({
+      ...editData,
+      images: newImages,
+    });
+    setShowPortfolioMenu(null);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!user || user.role !== "Clipper") {
+      Alert.alert("Error", "Only clippers can edit their profile");
+      return;
+    }
+
+    if (!editData.firstName.trim() || !editData.bio.trim() || !editData.city || !editData.state) {
+      Alert.alert("Validation Error", "Please fill in all required fields");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Determine if image was explicitly deleted or changed
+      // If editData.profilePic is empty string, it means user deleted it
+      // If editData.profilePic is a URI, use the new image
+      // If editData.profilePic wasn't touched (same as barberData), don't update
+      let imageUrl = editData.profilePic;
+
+      const updatePayload = {
+        firstName: editData.firstName,
+        lastName: editData.lastName,
+        bio: editData.bio,
+        address: `${editData.city}, ${editData.state}`,
+        city: editData.city,
+        state: editData.state,
+        profileImage: imageUrl, // Send empty string if deleted, new URI if changed, or existing URL
+        images: editData.images, // Add portfolio images
+      };
+
+      console.log("Updating profile with:", updatePayload);
+      console.log("API URL:", `${baseUrl}/users/${user.id}`);
+
+      const response = await fetch(`${baseUrl}/users/${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatePayload),
+      });
+
+      const responseText = await response.text();
+      console.log("API Response Status:", response.status);
+      console.log("API Response:", responseText);
+
+      if (!response.ok) {
+        throw new Error(`API Error ${response.status}: ${responseText}`);
+      }
+
+      // Update local state with the new image URL
+      if (barberData) {
+        const updatedData = {
+          ...barberData,
+          profilePic: imageUrl, // Use the new image URL (local or URL)
+          name: `${editData.firstName} ${editData.lastName}`,
+          bio: editData.bio,
+          location: `${editData.city}, ${editData.state}`,
+          images: editData.images, // Update portfolio images
+        };
+        setBarberData(updatedData);
+        
+        // Update global context so changes reflect across the app
+        updateClipperProfile(barberData.id, updatedData);
+      }
+
+      Alert.alert("Success", "Profile updated successfully");
+      setIsEditModalVisible(false);
+      setIsPortfolioModalVisible(false);
+      // Reset editData
+      setEditData({
+        profilePic: "",
+        firstName: "",
+        lastName: "",
+        bio: "",
+        city: "",
+        state: "",
+        images: [],
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      Alert.alert("Error", `Failed to update profile: ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!barberData) {
     return null;
@@ -95,17 +523,25 @@ export default function BarberProfile() {
         {/* Profile Card */}
         <View style={styles.profileCard}>
           {/* Edit Button */}
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity style={styles.editButton} onPress={handleEditPress}>
             <Ionicons name="pencil" size={20} color="#333" />
           </TouchableOpacity>
 
           {/* Profile Image */}
-          <Image
-            source={{
-              uri: barberData.profilePic,
-            }}
-            style={styles.profileImage}
-          />
+          {barberData.profilePic ? (
+            <View style={styles.profileImageContainer}>
+              <Image
+                source={{
+                  uri: barberData.profilePic,
+                }}
+                style={styles.profileImage}
+              />
+            </View>
+          ) : (
+            <View style={styles.defaultProfileIcon}>
+              <Ionicons name="person" size={50} color="#999" />
+            </View>
+          )}
 
           {/* Name & Title */}
           <Text style={styles.name}>{barberData.name}</Text>
@@ -136,7 +572,7 @@ export default function BarberProfile() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Services</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleServicesEditPress}>
               <Ionicons name="pencil" size={20} color="#000000ff" />
             </TouchableOpacity>
           </View>
@@ -195,7 +631,7 @@ export default function BarberProfile() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Portfolio</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handlePortfolioEditPress}>
               <Ionicons name="pencil" size={20} color="#333" />
             </TouchableOpacity>
           </View>
@@ -211,9 +647,12 @@ export default function BarberProfile() {
                 />
               ))
             ) : (
-              <Text>No images available</Text>
+              <View style={styles.noPortfolioContainer}>
+                <Ionicons name="image-outline" size={60} color="#ccc" />
+                <Text style={styles.noPortfolioText}>No images yet</Text>
+              </View>
             )}
-            {barberData.images && barberData.images.length < 6 && (
+            {barberData.images && barberData.images.length < 9 && (
               <View style={styles.portfolioImagePlaceholder}>
                 <Ionicons name="image-outline" size={40} color="#ccc" />
               </View>
@@ -224,6 +663,484 @@ export default function BarberProfile() {
         {/* Bottom Spacing for Tab Bar */}
         <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={isEditModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsEditModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setIsEditModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={styles.modalBody}
+              keyboardShouldPersistTaps="handled"
+              contentInsetAdjustmentBehavior="automatic"
+              contentContainerStyle={
+                isBioFocused || isFirstNameFocused || isLastNameFocused 
+                  ? { paddingBottom: 300 } 
+                  : { paddingBottom: 20 }
+              }
+            >
+                {/* Profile Picture */}
+                <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Profile Picture</Text>
+                <TouchableOpacity
+                  style={styles.imagePickerButton}
+                  onPress={() => setShowImageMenu(true)}
+                  disabled={isLoading}
+                >
+                  {editData.profilePic ? (
+                    <View style={styles.previewImageWrapper}>
+                      <Image
+                        source={{ uri: editData.profilePic }}
+                        style={styles.previewImage}
+                      />
+                    </View>
+                  ) : (
+                    <View style={styles.imagePickerPlaceholder}>
+                      <Ionicons name="person" size={40} color="#999" />
+                      <Text style={styles.imagePickerText}>Tap to select image</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+                
+                {/* Image Action Menu */}
+                <Modal
+                  transparent={true}
+                  animationType="slide"
+                  visible={showImageMenu}
+                  onRequestClose={() => setShowImageMenu(false)}
+                >
+                  <TouchableOpacity
+                    style={styles.menuBackdrop}
+                    activeOpacity={1}
+                    onPress={() => setShowImageMenu(false)}
+                  >
+                    <View style={styles.imageMenuContainer}>
+                      <TouchableOpacity
+                        style={styles.menuButton}
+                        onPress={pickImage}
+                      >
+                        <Ionicons name="image-outline" size={24} color="#000000" />
+                        <Text style={styles.menuButtonText}>Change</Text>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity
+                        style={[styles.menuButton, styles.deleteMenuButton]}
+                        onPress={handleDeleteProfilePic}
+                      >
+                        <Ionicons name="trash-outline" size={24} color="#ff1a47" />
+                        <Text style={styles.menuButtonText}>Delete</Text>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity
+                        style={styles.menuCancelButton}
+                        onPress={() => setShowImageMenu(false)}
+                      >
+                        <Text style={styles.menuCancelButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                </Modal>
+              </View>
+
+              {/* First Name */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>First Name</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter first name"
+                  value={editData.firstName}
+                  onChangeText={(text) =>
+                    setEditData({ ...editData, firstName: text })
+                  }
+                  onFocus={() => setIsFirstNameFocused(true)}
+                  onBlur={() => setIsFirstNameFocused(false)}
+                  editable={!isLoading}
+                />
+              </View>
+
+              {/* Last Name */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Last Name</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter last name"
+                  value={editData.lastName}
+                  onChangeText={(text) =>
+                    setEditData({ ...editData, lastName: text })
+                  }
+                  onFocus={() => setIsLastNameFocused(true)}
+                  onBlur={() => setIsLastNameFocused(false)}
+                  editable={!isLoading}
+                />
+              </View>
+
+              {/* Bio */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Bio</Text>
+                <TextInput
+                  style={[styles.textInput, { minHeight: 100 }]}
+                  placeholder="Enter your bio"
+                  value={editData.bio}
+                  onChangeText={(text) =>
+                    setEditData({ ...editData, bio: text })
+                  }
+                  onFocus={() => setIsBioFocused(true)}
+                  onBlur={() => setIsBioFocused(false)}
+                  multiline
+                  editable={!isLoading}
+                />
+              </View>
+
+              {/* State and City */}
+              <View style={styles.inputGroup}>
+                <View style={styles.locationHeaderRow}>
+                  <Text style={styles.inputLabel}>Location</Text>
+                  <TouchableOpacity
+                    style={styles.editLocationButton}
+                    onPress={() => setIsEditingLocation(!isEditingLocation)}
+                  >
+                    <Text style={styles.editLocationButtonText}>
+                      {isEditingLocation ? "Done" : "Change"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {!isEditingLocation ? (
+                  <View style={styles.currentLocationDisplay}>
+                    <Text style={styles.currentLocationText}>
+                      {editData.city && editData.state
+                        ? `${editData.city}, ${editData.state}`
+                        : "No location set"}
+                    </Text>
+                  </View>
+                ) : (
+                  <>
+                    {/* State Picker */}
+                    <Text style={styles.subLabel}>State</Text>
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={editData.state}
+                        onValueChange={(value) =>
+                          setEditData({ ...editData, state: value, city: "" })
+                        }
+                        enabled={!isLoading}
+                      >
+                        <Picker.Item label="Select a state" value="" />
+                        {US_STATES.map((state) => (
+                          <Picker.Item key={state} label={state} value={state} />
+                        ))}
+                      </Picker>
+                    </View>
+
+                    {/* City Picker */}
+                    <Text style={styles.subLabel}>City</Text>
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={editData.city}
+                        onValueChange={(value) =>
+                          setEditData({ ...editData, city: value })
+                        }
+                        enabled={!isLoading && !!editData.state}
+                      >
+                        <Picker.Item label="Select a city" value="" />
+                        {editData.state &&
+                          CITIES_BY_STATE[editData.state]?.map((city) => (
+                            <Picker.Item key={city} label={city} value={city} />
+                          ))}
+                      </Picker>
+                    </View>
+                  </>
+                )}
+              </View>
+
+              {/* Buttons */}
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.button, styles.cancelButton]}
+                  onPress={() => setIsEditModalVisible(false)}
+                  disabled={isLoading}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, styles.saveButton]}
+                  onPress={handleSaveChanges}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text style={styles.saveButtonText}>Save Changes</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Portfolio Modal */}
+      <Modal
+        visible={isPortfolioModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsPortfolioModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Portfolio</Text>
+              <TouchableOpacity onPress={() => setIsPortfolioModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={styles.modalBody}
+              keyboardShouldPersistTaps="handled"
+              contentInsetAdjustmentBehavior="automatic"
+              contentContainerStyle={{ paddingBottom: 100 }}
+            >
+              {/* Portfolio Images */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Portfolio Images</Text>
+                <View style={styles.portfolioGrid}>
+                  {editData.images && editData.images.length < 9 && (
+                    <TouchableOpacity
+                      style={styles.portfolioAddButton}
+                      onPress={pickPortfolioImage}
+                    >
+                      <Ionicons name="add" size={40} color="#999" />
+                      <Text style={styles.portfolioAddText}>Add Image</Text>
+                    </TouchableOpacity>
+                  )}
+                  {editData.images && editData.images.map((img, index) => (
+                    <View key={index} style={styles.portfolioImageWrapper}>
+                      <Image
+                        source={{ uri: img }}
+                        style={styles.portfolioEditImage}
+                      />
+                      <TouchableOpacity
+                        style={styles.portfolioDeleteButton}
+                        onPress={() => handleDeletePortfolioImage(index)}
+                      >
+                        <Ionicons name="close" size={20} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => setIsPortfolioModalVisible(false)}
+                disabled={isLoading}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={handleSaveChanges}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Services Modal */}
+      <Modal
+        visible={isServicesModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {
+          setIsServicesModalVisible(false);
+          setSelectedCategory(null);
+          setEditingServiceIndex(null);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Services</Text>
+              <TouchableOpacity onPress={() => {
+                setIsServicesModalVisible(false);
+                setSelectedCategory(null);
+                setEditingServiceIndex(null);
+              }}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={styles.modalBody}
+              keyboardShouldPersistTaps="handled"
+              contentInsetAdjustmentBehavior="automatic"
+              contentContainerStyle={{ paddingBottom: 100 }}
+            >
+              {/* Current Services List */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Current Services</Text>
+                
+                {editServices.length === 0 ? (
+                  <Text style={styles.emptyText}>No services added yet</Text>
+                ) : (
+                  editServices.map((service, index) => (
+                    <View key={index} style={styles.serviceEntry}>
+                      <View style={styles.serviceMainRow}>
+                        <View style={styles.serviceInfoContainer}>
+                          <Text style={styles.serviceNameText}>{service.serviceName}</Text>
+                          <Text style={styles.servicePriceText}>${service.price}</Text>
+                        </View>
+                        <View style={styles.serviceActionButtons}>
+                          <TouchableOpacity
+                            style={styles.editServiceButton}
+                            onPress={() => setEditingServiceIndex(index)}
+                          >
+                            <Ionicons name="pencil" size={18} color="#00A8E8" />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.deleteServiceButton}
+                            onPress={() => handleDeleteService(index)}
+                          >
+                            <Ionicons name="trash" size={18} color="#ff1a47" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  ))
+                )}
+              </View>
+
+              {/* Category Selection Section */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Add or Edit Service</Text>
+                
+                {editingServiceIndex === null ? (
+                  <Text style={styles.helperText}>Select a service to add or tap a service above to edit</Text>
+                ) : (
+                  <Text style={styles.editingLabel}>Editing: {editServices[editingServiceIndex]?.serviceName}</Text>
+                )}
+
+                {/* Category Buttons */}
+                <View style={styles.categoryButtonsContainer}>
+                  {SERVICE_CATEGORIES.map((category) => (
+                    <TouchableOpacity
+                      key={category.label}
+                      style={[
+                        styles.categoryButton,
+                        selectedCategory === category.label && styles.categoryButtonActive
+                      ]}
+                      onPress={() => setSelectedCategory(selectedCategory === category.label ? null : category.label)}
+                    >
+                      <Text style={[
+                        styles.categoryButtonText,
+                        selectedCategory === category.label && styles.categoryButtonTextActive
+                      ]}>
+                        {category.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Service Items from Selected Category */}
+                {selectedCategory && (
+                  <View style={styles.serviceItemsContainer}>
+                    {SERVICE_CATEGORIES.find(c => c.label === selectedCategory)?.values.map((serviceName) => (
+                      <TouchableOpacity
+                        key={serviceName}
+                        style={styles.serviceSelectItem}
+                        onPress={() => {
+                          if (editingServiceIndex !== null) {
+                            handleServiceChange(editingServiceIndex, 'serviceName', serviceName);
+                          } else {
+                            setEditServices([
+                              ...editServices,
+                              { serviceName, price: "", id: undefined }
+                            ]);
+                            setEditingServiceIndex(editServices.length);
+                          }
+                        }}
+                      >
+                        <Ionicons name="add-circle-outline" size={20} color="#00A8E8" />
+                        <Text style={styles.serviceSelectText}>{serviceName}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+
+                {/* Price Input for Editing */}
+                {editingServiceIndex !== null && (
+                  <View style={styles.priceEditContainer}>
+                    <Text style={styles.priceEditLabel}>Price ($)</Text>
+                    <View style={styles.priceInputRow}>
+                      <TextInput
+                        style={styles.priceEditInput}
+                        placeholder="0.00"
+                        placeholderTextColor="#999"
+                        keyboardType="decimal-pad"
+                        returnKeyType="done"
+                        value={editServices[editingServiceIndex]?.price || ""}
+                        onChangeText={(value) => handleServiceChange(editingServiceIndex, 'price', value)}
+                      />
+                      <TouchableOpacity
+                        style={styles.priceConfirmButton}
+                        onPress={() => setEditingServiceIndex(null)}
+                      >
+                        <Ionicons name="checkmark-circle" size={28} color="#00A8E8" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => {
+                  setIsServicesModalVisible(false);
+                  setSelectedCategory(null);
+                  setEditingServiceIndex(null);
+                }}
+                disabled={isLoading}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={handleSaveChanges}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -272,7 +1189,22 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+  },
+  profileImageContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     marginBottom: 16,
+    overflow: "hidden",
+  },
+  defaultProfileIcon: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
   },
   name: {
     fontSize: 24,
@@ -388,6 +1320,28 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 12,
   },
+  portfolioImageWrapper: {
+    width: "30%",
+    aspectRatio: 1,
+    position: "relative",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  portfolioEditImage: {
+    width: "100%",
+    height: "100%",
+  },
+  portfolioDeleteButton: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   portfolioImagePlaceholder: {
     width: "31%",
     height: 120,
@@ -398,6 +1352,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#e0e0e0",
     borderStyle: "dashed",
+  },
+  noPortfolioContainer: {
+    width: "100%",
+    height: 200,
+    borderRadius: 12,
+    backgroundColor: "#f9f9f9",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#e8e8e8",
+    borderStyle: "dashed",
+  },
+  noPortfolioText: {
+    fontSize: 14,
+    color: "#bbb",
+    marginTop: 12,
   },
   statItem: {
     flex: 1,
@@ -422,5 +1392,419 @@ const styles = StyleSheet.create({
     color: "#999",
     textAlign: "center",
     padding: 20,
+  },
+
+  /* Modal Styles */
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingTop: 16,
+    maxHeight: "95%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#222",
+  },
+  modalBody: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 8,
+  },
+  subLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#555",
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    backgroundColor: "#fafafa",
+  },
+  previewImageWrapper: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    overflow: "hidden",
+    marginTop: 8,
+  },
+  previewImage: {
+    width: 100,
+    height: 100,
+  },
+  locationHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  editLocationButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "#ff1a47",
+    borderRadius: 6,
+  },
+  editLocationButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  currentLocationDisplay: {
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: "#fafafa",
+  },
+  currentLocationText: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+    marginBottom: 24,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#f0f0f0",
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  saveButton: {
+    backgroundColor: "#ff1a47",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
+    overflow: "hidden",
+    backgroundColor: "#fafafa",
+  },
+  imagePickerButton: {
+    borderWidth: 2,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
+    borderStyle: "dashed",
+    overflow: "hidden",
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fafafa",
+  },
+  imagePickerPlaceholder: {
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+  },
+  imagePickerText: {
+    fontSize: 14,
+    color: "#999",
+  },
+  menuBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  imageMenuContainer: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: 32,
+  },
+  menuButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "#f5f5f5",
+    marginBottom: 10,
+    gap: 12,
+  },
+  deleteMenuButton: {
+    marginBottom: 20,
+  },
+  menuButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000000",
+  },
+  menuCancelButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
+    alignItems: "center",
+  },
+  menuCancelButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  portfolioAddButton: {
+    width: "30%",
+    aspectRatio: 1,
+    borderWidth: 2,
+    borderColor: "#ddd",
+    borderStyle: "dashed",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f9f9f9",
+  },
+  portfolioAddText: {
+    fontSize: 12,
+    color: "#999",
+    marginTop: 4,
+  },
+
+  /* Services Styles */
+  serviceEntry: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#00A8E8",
+  },
+  serviceMainRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  serviceInfoContainer: {
+    flex: 1,
+  },
+  serviceNameText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  servicePriceText: {
+    fontSize: 14,
+    color: "#00A8E8",
+    fontWeight: "500",
+  },
+  serviceActionButtons: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  editServiceButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: "#e3f2fd",
+  },
+  deleteServiceButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: "#fee",
+  },
+  categoryButtonsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginVertical: 12,
+  },
+  categoryButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#f9f9f9",
+  },
+  categoryButtonActive: {
+    backgroundColor: "#00A8E8",
+    borderColor: "#00A8E8",
+  },
+  categoryButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#333",
+  },
+  categoryButtonTextActive: {
+    color: "#fff",
+  },
+  serviceItemsContainer: {
+    backgroundColor: "#fafafa",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+  },
+  serviceSelectItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    backgroundColor: "#fff",
+    marginBottom: 8,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  serviceSelectText: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+  },
+  priceEditContainer: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+  },
+  priceEditLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 8,
+  },
+  priceInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  priceEditInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    backgroundColor: "#fff",
+  },
+  priceConfirmButton: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  serviceInputGroup: {
+    flex: 1,
+  },
+  serviceLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 6,
+  },
+  helperText: {
+    fontSize: 13,
+    color: "#999",
+    fontStyle: "italic",
+    marginBottom: 12,
+  },
+  editingLabel: {
+    fontSize: 13,
+    color: "#00A8E8",
+    fontWeight: "500",
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#e3f2fd",
+    borderRadius: 6,
+  },
+  picker: {
+    height: 40,
+    backgroundColor: "#fff",
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  priceInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 14,
+    backgroundColor: "#fff",
+    height: 40,
+  },
+  addServiceButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#00A8E8",
+    borderRadius: 8,
+    marginTop: 8,
+    gap: 8,
+  },
+  addServiceText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#00A8E8",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    paddingVertical: 20,
   },
 });
