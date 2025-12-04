@@ -20,6 +20,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system/legacy";
 import { getApiUrl } from "@/utils/networkConfig";
 
 // US States and Major Cities
@@ -113,6 +114,7 @@ export default function BarberProfile() {
   const { clippers, updateClipperProfile } = useClippd();
   const { user, logout } = useAuth();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showImageMenu, setShowImageMenu] = useState(false);
   const [editData, setEditData] = useState({
@@ -122,11 +124,13 @@ export default function BarberProfile() {
     bio: "",
     city: "",
     state: "",
+    images: [] as string[],
   });
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isBioFocused, setIsBioFocused] = useState(false);
   const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
   const [isLastNameFocused, setIsLastNameFocused] = useState(false);
+  const [showPortfolioMenu, setShowPortfolioMenu] = useState<number | null>(null);
   const [baseUrl, setBaseUrl] = useState<string>("");
 
   const handleLogout = async () => {
@@ -229,10 +233,33 @@ export default function BarberProfile() {
         bio: barberData.bio || "",
         city: city || "",
         state: state || "",
+        images: barberData.images || [],
       });
     }
     setIsEditModalVisible(true);
   };
+
+  const handlePortfolioEditPress = () => {
+    // Initialize editData with current barberData values
+    if (barberData) {
+      const [firstName, lastName] = barberData.name.split(" ");
+      const [city, state] = barberData.location.split(", ");
+      
+      setEditData({
+        profilePic: barberData.profilePic || "",
+        firstName: firstName || "",
+        lastName: lastName || "",
+        bio: barberData.bio || "",
+        city: city || "",
+        state: state || "",
+        images: barberData.images || [],
+      });
+    }
+    setIsPortfolioModalVisible(true);
+  };
+
+  // LOCAL TEST MODE: Set to true to only save images locally (won't persist after app restart)
+  const LOCAL_TEST_MODE = true;
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -243,10 +270,29 @@ export default function BarberProfile() {
     });
 
     if (!result.canceled && result.assets[0]) {
-      setEditData({
-        ...editData,
-        profilePic: result.assets[0].uri,
-      });
+      try {
+        if (LOCAL_TEST_MODE) {
+          // In test mode, just store the URI directly (won't persist after restart)
+          setEditData({
+            ...editData,
+            profilePic: result.assets[0].uri,
+          });
+        } else {
+          // In production mode, convert image to base64 for persistence
+          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+            encoding: "base64",
+          });
+          const imageData = `data:image/jpeg;base64,${base64}`;
+          
+          setEditData({
+            ...editData,
+            profilePic: imageData,
+          });
+        }
+      } catch (error) {
+        console.error("Error converting image to base64:", error);
+        Alert.alert("Error", "Failed to process image");
+      }
     }
     setShowImageMenu(false);
   };
@@ -257,6 +303,50 @@ export default function BarberProfile() {
       profilePic: "",
     });
     setShowImageMenu(false);
+  };
+
+  const pickPortfolioImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [4, 3],
+    });
+
+    if (!result.canceled && result.assets[0].uri) {
+      try {
+        if (LOCAL_TEST_MODE) {
+          // In test mode, just store the URI directly (won't persist after restart)
+          setEditData({
+            ...editData,
+            images: [result.assets[0].uri, ...(editData.images || [])],
+          });
+        } else {
+          // In production mode, convert image to base64 for persistence
+          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+            encoding: "base64",
+          });
+          const imageData = `data:image/jpeg;base64,${base64}`;
+          
+          setEditData({
+            ...editData,
+            images: [imageData, ...(editData.images || [])],
+          });
+        }
+        setShowPortfolioMenu(null);
+      } catch (error) {
+        console.error("Error processing image:", error);
+        Alert.alert("Error", "Failed to process image");
+      }
+    }
+  };
+
+  const handleDeletePortfolioImage = (index: number) => {
+    const newImages = editData.images?.filter((_, i) => i !== index) || [];
+    setEditData({
+      ...editData,
+      images: newImages,
+    });
+    setShowPortfolioMenu(null);
   };
 
   const handleSaveChanges = async () => {
@@ -286,6 +376,7 @@ export default function BarberProfile() {
         city: editData.city,
         state: editData.state,
         profileImage: imageUrl, // Send empty string if deleted, new URI if changed, or existing URL
+        images: editData.images, // Add portfolio images
       };
 
       console.log("Updating profile with:", updatePayload);
@@ -315,6 +406,7 @@ export default function BarberProfile() {
           name: `${editData.firstName} ${editData.lastName}`,
           bio: editData.bio,
           location: `${editData.city}, ${editData.state}`,
+          images: editData.images, // Update portfolio images
         };
         setBarberData(updatedData);
         
@@ -324,6 +416,17 @@ export default function BarberProfile() {
 
       Alert.alert("Success", "Profile updated successfully");
       setIsEditModalVisible(false);
+      setIsPortfolioModalVisible(false);
+      // Reset editData
+      setEditData({
+        profilePic: "",
+        firstName: "",
+        lastName: "",
+        bio: "",
+        city: "",
+        state: "",
+        images: [],
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -464,7 +567,7 @@ export default function BarberProfile() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Portfolio</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handlePortfolioEditPress}>
               <Ionicons name="pencil" size={20} color="#333" />
             </TouchableOpacity>
           </View>
@@ -482,7 +585,7 @@ export default function BarberProfile() {
             ) : (
               <Text>No images available</Text>
             )}
-            {barberData.images && barberData.images.length < 6 && (
+            {barberData.images && barberData.images.length < 9 && (
               <View style={styles.portfolioImagePlaceholder}>
                 <Ionicons name="image-outline" size={40} color="#ccc" />
               </View>
@@ -719,6 +822,83 @@ export default function BarberProfile() {
           </View>
         </View>
       </Modal>
+
+      {/* Edit Portfolio Modal */}
+      <Modal
+        visible={isPortfolioModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsPortfolioModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Portfolio</Text>
+              <TouchableOpacity onPress={() => setIsPortfolioModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={styles.modalBody}
+              keyboardShouldPersistTaps="handled"
+              contentInsetAdjustmentBehavior="automatic"
+              contentContainerStyle={{ paddingBottom: 100 }}
+            >
+              {/* Portfolio Images */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Portfolio Images</Text>
+                <View style={styles.portfolioGrid}>
+                  {editData.images && editData.images.length < 9 && (
+                    <TouchableOpacity
+                      style={styles.portfolioAddButton}
+                      onPress={pickPortfolioImage}
+                    >
+                      <Ionicons name="add" size={40} color="#999" />
+                      <Text style={styles.portfolioAddText}>Add Image</Text>
+                    </TouchableOpacity>
+                  )}
+                  {editData.images && editData.images.map((img, index) => (
+                    <View key={index} style={styles.portfolioImageWrapper}>
+                      <Image
+                        source={{ uri: img }}
+                        style={styles.portfolioEditImage}
+                      />
+                      <TouchableOpacity
+                        style={styles.portfolioDeleteButton}
+                        onPress={() => handleDeletePortfolioImage(index)}
+                      >
+                        <Ionicons name="close" size={20} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => setIsPortfolioModalVisible(false)}
+                disabled={isLoading}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={handleSaveChanges}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -945,7 +1125,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingTop: 16,
-    maxHeight: "90%",
+    maxHeight: "95%",
   },
   modalHeader: {
     flexDirection: "row",
@@ -1030,6 +1210,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     fontWeight: "500",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: 24,
   },
   modalButtons: {
     flexDirection: "row",
@@ -1129,5 +1316,49 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
+  },
+  portfolioGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 8,
+  },
+  portfolioImageWrapper: {
+    width: "30%",
+    aspectRatio: 1,
+    position: "relative",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  portfolioEditImage: {
+    width: "100%",
+    height: "100%",
+  },
+  portfolioDeleteButton: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  portfolioAddButton: {
+    width: "30%",
+    aspectRatio: 1,
+    borderWidth: 2,
+    borderColor: "#ddd",
+    borderStyle: "dashed",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f9f9f9",
+  },
+  portfolioAddText: {
+    fontSize: 12,
+    color: "#999",
+    marginTop: 4,
   },
 });
