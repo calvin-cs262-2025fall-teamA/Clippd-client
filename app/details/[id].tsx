@@ -21,7 +21,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { itemType } from "../../type/clippdTypes";
+import { ClipperP, ClipperProfile, ClipperProfilerofile } from "../../type/clippdTypes";
 import { useState, useEffect, useCallback } from "react";
 
 /**
@@ -72,7 +72,9 @@ export default function DetailsPage() {
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
 
   // Find clipper from API data
-  const clippr: itemType | undefined = clippers.find((item) => item.id === id);
+  const clippr: ClipperProfile | undefined = clippers.find(
+    (item) => item.id === id
+  );
 
   // Load reviews from database
   const loadReviews = useCallback(async () => {
@@ -401,7 +403,7 @@ export default function DetailsPage() {
               onPress={() => setShowReviewInput(!showReviewInput)}
               style={styles.editButton}
             >
-              <Ionicons name="pencil" size={20} color="#333" />
+              <Ionicons name="pencil" size={22} color="#000000ff" />
             </TouchableOpacity>
           </View>
 
