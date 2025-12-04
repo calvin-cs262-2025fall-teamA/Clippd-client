@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider"; // ✅ from your original
+import Slider from "@react-native-community/slider";
 import Constants from "expo-constants";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
@@ -10,12 +10,39 @@ import MapView, { Circle } from "react-native-maps";
 const { width } = Dimensions.get("window");
 
 export default function MapScreen() {
-  const [region, setRegion] = useState(null);     // current “you” location = map center
+  const [region, setRegion] = useState(null);
   const [radiusMiles, setRadiusMiles] = useState(10);
   const mapRef = useRef(null);
+  const searchRef = useRef(null);
 
   const apiKey = Constants.expoConfig!.extra!.googleMapsApiKey;
 
+  const milesToMeters = (miles: number) => miles * 1609.34;
+
+  // 🔥 Convert radius → zoom level (bigger multiplier = more zoom-out)
+  const computeZoomDelta = (miles: number) => {
+    const km = miles * 1.609344;
+    const deg = km / 111;
+    return deg * 3; // zoom out enough to fit entire circle
+  };
+
+  // 🔥 Auto-zoom when radius changes
+  useEffect(() => {
+    if (!region) return;
+
+    const delta = computeZoomDelta(radiusMiles);
+
+    const updated = {
+      ...region,
+      latitudeDelta: delta,
+      longitudeDelta: delta,
+    };
+
+    setRegion(updated);
+    mapRef.current?.animateToRegion(updated, 450);
+  }, [radiusMiles]);
+
+  // 🔥 Get user GPS location
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -32,22 +59,29 @@ export default function MapScreen() {
         longitudeDelta: 0.04,
       };
 
-      setLocation(current.coords);
       setRegion(userRegion);
     })();
   }, []);
 
-  const milesToMeters = (miles: number) => miles * 1609.34;
-
   return (
     <View style={styles.container}>
-      {/* Search bar */}
+
+      {/* 🔎 Search Bar */}
       <View style={styles.searchContainer}>
         <GooglePlacesAutocomplete
+          ref={searchRef}
           placeholder="Search address"
           fetchDetails={true}
+          listViewDisplayed={false}
+          GooglePlacesDetailsQuery={{
+            fields: "geometry",   // 🔥 REQUIRED or details.geometry will be null
+          }}
+          onFail={() => {}}
+          onNotFound={() => {}}
           onPress={(data, details) => {
-            const { lat, lng } = details!.geometry.location;
+            if (!details?.geometry?.location) return;
+
+            const { lat, lng } = details.geometry.location;
 
             const newRegion = {
               latitude: lat,
@@ -58,6 +92,11 @@ export default function MapScreen() {
 
             setRegion(newRegion);
             mapRef.current?.animateToRegion(newRegion, 1000);
+
+            // 🔥 HIDE DROPDOWN COMPLETELY
+            searchRef.current?.clear();
+            searchRef.current?.setAddressText("");
+            searchRef.current?.blur();
           }}
           query={{
             key: apiKey,
@@ -70,7 +109,7 @@ export default function MapScreen() {
         />
       </View>
 
-      {/* Map + draggable “you” behavior */}
+      {/* 🗺 Map + Circle + Center Pin */}
       {region && (
         <>
           <MapView
@@ -79,11 +118,7 @@ export default function MapScreen() {
             initialRegion={region}
             showsUserLocation={true}
             showsMyLocationButton={true}
-            onRegionChangeComplete={(reg) => {
-              // 🔥 This is the key: when user drags the map,
-              // update our “you” location to be the map center.
-              setRegion(reg);
-            }}
+            onRegionChangeComplete={(reg) => setRegion(reg)}
           >
             <Circle
               center={region}
@@ -93,14 +128,14 @@ export default function MapScreen() {
             />
           </MapView>
 
-          {/* Hinge-style center pin (no fake assets, just Ionicon) */}
+          {/* 📍 Center Pin */}
           <View pointerEvents="none" style={styles.centerPinContainer}>
             <Ionicons name="location-sharp" size={32} color="#FF1744" />
           </View>
         </>
       )}
 
-      {/* Radius slider */}
+      {/* 🎚 Radius Slider */}
       <View style={styles.sliderContainer}>
         <Text style={styles.radiusLabel}>{radiusMiles} miles</Text>
 
@@ -116,6 +151,7 @@ export default function MapScreen() {
           thumbTintColor="#FF1744"
         />
       </View>
+
     </View>
   );
 }
@@ -137,6 +173,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 50,
   },
+
   input: {
     height: 50,
     fontSize: 16,
@@ -155,17 +192,18 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
+
   slider: {
     width: "100%",
     height: 40,
   },
+
   radiusLabel: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 5,
   },
 
-  // Center pin overlay (Hinge-style)
   centerPinContainer: {
     position: "absolute",
     top: "50%",
