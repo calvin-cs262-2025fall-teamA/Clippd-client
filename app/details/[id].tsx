@@ -21,7 +21,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ClipperP, ClipperProfile, ClipperProfilerofile } from "../../type/clippdTypes";
+import { ClipperProfile } from "../../type/clippdTypes";
 
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place

@@ -1,4 +1,4 @@
-import { itemType } from "@/type/clippdTypes";
+import { ClipperProfile } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
@@ -32,7 +32,7 @@ export default function SmallCard({
   location,
   rating,
   profilePic,
-}: itemType) {
+}: ClipperProfile) {
   const router = useRouter();
 
   const handlePress = () => {

@@ -1,4 +1,4 @@
-import { itemType } from "@/type/clippdTypes";
+import { ClipperProfile } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -42,7 +42,7 @@ export default function Card({
   images,
   rating,
   profilePic,
-}: itemType) {
+}: ClipperProfile) {
   const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
 
@@ -71,7 +71,7 @@ export default function Card({
               }}
               scrollEventThrottle={16}
             >
-              {images.map((img, index) => (
+              {images.map((img: string, index: number) => (
                 <Image
                   key={index}
                   source={{ uri: img }}
@@ -81,7 +81,7 @@ export default function Card({
             </ScrollView>
 
             <View style={styles.paginationContainer}>
-              {images.map((_, index) => (
+              {images.map((_: string, index: number) => (
                 <View key={index} style={styles.pagingDotWrapper}>
                   <Text
                     style={

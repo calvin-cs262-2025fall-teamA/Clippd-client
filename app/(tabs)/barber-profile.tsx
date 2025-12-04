@@ -440,7 +440,6 @@ export default function BarberProfile() {
         city: editData.city,
         state: editData.state,
         profileImage: imageUrl, // Send empty string if deleted, new URI if changed, or existing URL
-        images: editData.images, // Add portfolio images
       };
 
       console.log("Updating profile with:", updatePayload);
