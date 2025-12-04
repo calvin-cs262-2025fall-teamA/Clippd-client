@@ -1,6 +1,6 @@
 import { useClippd } from "@/contexts/ClippdContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { ClipperProfile } from "@/type/clippdTypes";
+import { ClipperProfile, Service } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -201,6 +201,7 @@ export default function BarberProfile() {
         });
 
         if (userBarber) {
+          // Load services for this barber
           setBarberData(userBarber);
           const [city, state] = userBarber.location
             ? userBarber.location.split(", ")
@@ -253,6 +254,7 @@ export default function BarberProfile() {
         console.log("First barber services:", clippers[0]?.services);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clippers, user]);
 
   const handleEditPress = () => {
@@ -499,8 +501,113 @@ export default function BarberProfile() {
     }
   };
 
+  const handleSaveServices = async () => {
+    if (!user || user.role !== "Clipper" || !barberData) {
+      Alert.alert("Error", "Only clippers can edit their services");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      console.log("Updating services for clipper:", barberData.id);
+      console.log("New services:", editServices);
+
+      // First, delete all existing services for this clipper
+      if (barberData.services && barberData.services.length > 0) {
+        for (const service of barberData.services) {
+          if (service.id) {
+            const deleteResponse = await fetch(`${baseUrl}/services/${service.id}`, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+
+            if (!deleteResponse.ok) {
+              console.error(`Failed to delete service ${service.id}`);
+            }
+          }
+        }
+      }
+
+      // Then, add all new services
+      for (const service of editServices) {
+        const addResponse = await fetch(`${baseUrl}/clippers/${barberData.id}/services`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            serviceName: service.serviceName,
+            price: parseFloat(service.price),
+            durationMinutes: service.durationMinutes || 0,
+          }),
+        });
+
+        if (!addResponse.ok) {
+          const errorText = await addResponse.text();
+          throw new Error(`Failed to add service: ${errorText}`);
+        }
+      }
+
+      // Fetch the updated clipper data from server to get latest services
+      const clipperResponse = await fetch(`${baseUrl}/clippers/${barberData.id}`);
+      if (clipperResponse.ok) {
+        
+        // Fetch services for this clipper
+        let services: Service[] = [];
+        try {
+          const servicesResponse = await fetch(
+            `${baseUrl}/clippers/${barberData.id}/services`
+          );
+          if (servicesResponse.ok) {
+            const rawServices = await servicesResponse.json();
+            services = rawServices
+              .filter((s: any) => s.serviceName || s.servicename) // Filter out invalid services
+              .map((s: any) => ({
+                id: s.id,
+                clipperID: s.clipperID || s.clipperid,
+                serviceName: s.serviceName || s.servicename || "",
+                price: s.price || 0,
+                durationMinutes: s.durationMinutes || s.durationminutes || 0,
+              }));
+            console.log("Fetched and normalized services:", services);
+          }
+        } catch (err) {
+          console.error("Failed to fetch services:", err);
+        }
+
+        // Update local state with fetched data
+        const updatedData = {
+          ...barberData,
+          services: services,
+        };
+        setBarberData(updatedData);
+        updateClipperProfile(barberData.id, updatedData);
+      }
+
+      Alert.alert("Success", "Services updated successfully");
+      setIsServicesModalVisible(false);
+      setEditServices([]);
+      setSelectedCategory(null);
+      setEditingServiceIndex(null);
+    } catch (error) {
+      console.error("Error updating services:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      Alert.alert("Error", `Failed to update services: ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!barberData) {
-    return null;
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={{ marginTop: 10, fontSize: 14, color: '#666' }}>Loading barber profile...</Text>
+      </View>
+    );
   }
 
   const totalReviews = barberData.reviews?.length || 0;
@@ -576,7 +683,7 @@ export default function BarberProfile() {
             </TouchableOpacity>
           </View>
 
-          {barberData.services && barberData.services.length > 0 ? (
+          {barberData.services && Array.isArray(barberData.services) && barberData.services.length > 0 ? (
             <ScrollView
               style={styles.servicesScrollContainer}
               contentContainerStyle={styles.servicesContentContainer}
@@ -586,40 +693,57 @@ export default function BarberProfile() {
               showsVerticalScrollIndicator={true}
               persistentScrollbar={true}
             >
-              {barberData.services.map((service) => (
-                <View key={service.id} style={styles.serviceCard}>
-                  <Text style={styles.serviceName}>
-                    {service.serviceName || "Service"}
-                  </Text>
-                  <View style={styles.serviceDetails}>
-                    {service.durationMinutes && (
-                      <View style={styles.serviceDetailItem}>
-                        <Ionicons name="time-outline" size={16} color="#666" />
-                        <Text style={styles.serviceDetailText}>
-                          {service.durationMinutes < 60
-                            ? `${service.durationMinutes}m`
-                            : `${Math.floor(service.durationMinutes / 60)}h${
-                                service.durationMinutes % 60 > 0
-                                  ? ` ${service.durationMinutes % 60}m`
-                                  : ""
+              <View>
+                {barberData.services
+                  .filter((service) => {
+                    // Only show services with valid serviceName
+                    return service && service.serviceName && String(service.serviceName).trim().length > 0;
+                  })
+                  .map((service) => {
+                    // Ensure all required fields exist and are valid
+                    const validService = {
+                      ...service,
+                      serviceName: String(service.serviceName || "").trim() || "Service",
+                      price: service.price !== undefined && service.price !== null ? service.price : 0,
+                      durationMinutes: service.durationMinutes || 0
+                    };
+                    return (
+                    <View key={service.id || Math.random()} style={styles.serviceCard}>
+                      <Text style={styles.serviceName}>
+                        {validService.serviceName}
+                      </Text>
+                      <View style={styles.serviceDetails}>
+                        {validService.durationMinutes > 0 && (
+                          <View style={styles.serviceDetailItem}>
+                            <Ionicons name="time-outline" size={16} color="#666" />
+                            <Text style={styles.serviceDetailText}>
+                              {validService.durationMinutes < 60
+                                ? `${validService.durationMinutes}m`
+                                : `${Math.floor(validService.durationMinutes / 60)}h${
+                                    validService.durationMinutes % 60 > 0
+                                      ? ` ${validService.durationMinutes % 60}m`
+                                      : ""
+                                  }`}
+                            </Text>
+                          </View>
+                        )}
+                        {validService.price > 0 && (
+                          <View style={styles.serviceDetailItem}>
+                            <Ionicons name="cash-outline" size={16} color="#666" />
+                            <Text style={styles.serviceDetailText}>
+                              {`$${
+                                typeof validService.price === "number"
+                                  ? validService.price.toFixed(2)
+                                  : parseFloat(String(validService.price)).toFixed(2)
                               }`}
-                        </Text>
+                            </Text>
+                          </View>
+                        )}
                       </View>
-                    )}
-                    {service.price !== undefined && service.price !== null && (
-                      <View style={styles.serviceDetailItem}>
-                        <Ionicons name="cash-outline" size={16} color="#666" />
-                        <Text style={styles.serviceDetailText}>
-                          $
-                          {typeof service.price === "number"
-                            ? service.price.toFixed(2)
-                            : parseFloat(String(service.price)).toFixed(2)}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              ))}
+                    </View>
+                    );
+                  })}
+              </View>
             </ScrollView>
           ) : (
             <Text style={styles.noDataText}>No services available</Text>
@@ -1003,30 +1127,37 @@ export default function BarberProfile() {
                 {editServices.length === 0 ? (
                   <Text style={styles.emptyText}>No services added yet</Text>
                 ) : (
-                  editServices.map((service, index) => (
-                    <View key={index} style={styles.serviceEntry}>
-                      <View style={styles.serviceMainRow}>
-                        <View style={styles.serviceInfoContainer}>
-                          <Text style={styles.serviceNameText}>{service.serviceName}</Text>
-                          <Text style={styles.servicePriceText}>${service.price}</Text>
-                        </View>
-                        <View style={styles.serviceActionButtons}>
-                          <TouchableOpacity
-                            style={styles.editServiceButton}
-                            onPress={() => setEditingServiceIndex(index)}
-                          >
-                            <Ionicons name="pencil" size={18} color="#00A8E8" />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.deleteServiceButton}
-                            onPress={() => handleDeleteService(index)}
-                          >
-                            <Ionicons name="trash" size={18} color="#ff1a47" />
-                          </TouchableOpacity>
+                  <View>
+                    {editServices.map((service, index) => {
+                      // Safely handle service data  
+                      const safeServiceName = String(service?.serviceName || "").trim() || "Unnamed Service";
+                      const safePrice = String(service?.price || "0.00").trim() || "0.00";
+                      return (
+                      <View key={index} style={styles.serviceEntry}>
+                        <View style={styles.serviceMainRow}>
+                          <View style={styles.serviceInfoContainer}>
+                            <Text style={styles.serviceNameText}>{safeServiceName}</Text>
+                            <Text style={styles.servicePriceText}>{`$${safePrice}`}</Text>
+                          </View>
+                          <View style={styles.serviceActionButtons}>
+                            <TouchableOpacity
+                              style={styles.editServiceButton}
+                              onPress={() => setEditingServiceIndex(index)}
+                            >
+                              <Ionicons name="pencil" size={18} color="#00A8E8" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.deleteServiceButton}
+                              onPress={() => handleDeleteService(index)}
+                            >
+                              <Ionicons name="trash" size={18} color="#ff1a47" />
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  ))
+                      );
+                    })}
+                  </View>
                 )}
               </View>
 
@@ -1037,7 +1168,7 @@ export default function BarberProfile() {
                 {editingServiceIndex === null ? (
                   <Text style={styles.helperText}>Select a service to add or tap a service above to edit</Text>
                 ) : (
-                  <Text style={styles.editingLabel}>Editing: {editServices[editingServiceIndex]?.serviceName}</Text>
+                  <Text style={styles.editingLabel}>Editing: {String(editServices[editingServiceIndex]?.serviceName || "").trim() || "Service"}</Text>
                 )}
 
                 {/* Category Buttons */}
@@ -1127,7 +1258,7 @@ export default function BarberProfile() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
-                onPress={handleSaveChanges}
+                onPress={handleSaveServices}
                 disabled={isLoading}
               >
                 {isLoading ? (
