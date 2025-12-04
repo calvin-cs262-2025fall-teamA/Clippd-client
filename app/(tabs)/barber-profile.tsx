@@ -15,8 +15,6 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
@@ -109,12 +107,37 @@ function formatRating(rating: number | string | undefined): string {
   return rounded.toFixed(1);
 }
 
+// Service Categories Data
+const SERVICE_CATEGORIES = [
+  {
+    label: "Haircuts",
+    values: ["Fade", "Taper", "Scissor Cut", "Layer cut", "Bob/Long Bob", "Buzz Cut", "Trim & Shape up"]
+  },
+  {
+    label: "Styling",
+    values: ["Blowout", "Curling/Waves", "Straightening", "Special Event Hairstyle"]
+  },
+  {
+    label: "Coloring",
+    values: ["Full Color", "Highlights", "Balayage", "Root Touch-up", "Bleach + Tone"]
+  },
+  {
+    label: "Treatments",
+    values: ["Perm", "Keratin", "Relaxer"]
+  },
+  {
+    label: "Facial / Beard Care",
+    values: ["Beard Trim", "Beard Shaping", "Hot Towel Shave"]
+  }
+];
+
 export default function BarberProfile() {
   const [barberData, setBarberData] = useState<ClipperProfile | null>(null);
   const { clippers, updateClipperProfile } = useClippd();
   const { user, logout } = useAuth();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
+  const [isServicesModalVisible, setIsServicesModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showImageMenu, setShowImageMenu] = useState(false);
   const [editData, setEditData] = useState({
@@ -126,10 +149,19 @@ export default function BarberProfile() {
     state: "",
     images: [] as string[],
   });
+  const [editServices, setEditServices] = useState<{
+    id?: number;
+    serviceName: string;
+    price: string;
+    durationMinutes?: number;
+  }[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [editingServiceIndex, setEditingServiceIndex] = useState<number | null>(null);
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isBioFocused, setIsBioFocused] = useState(false);
   const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
   const [isLastNameFocused, setIsLastNameFocused] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showPortfolioMenu, setShowPortfolioMenu] = useState<number | null>(null);
   const [baseUrl, setBaseUrl] = useState<string>("");
 
@@ -180,6 +212,7 @@ export default function BarberProfile() {
             bio: userBarber.bio || "",
             city: city || "",
             state: state || "",
+            images: [],
           });
           console.log("Logged-in barber data loaded:", userBarber);
           console.log("Barber services:", userBarber.services);
@@ -198,6 +231,7 @@ export default function BarberProfile() {
             bio: clippers[0].bio || "",
             city: city || "",
             state: state || "",
+            images: [],
           });
         }
       } else {
@@ -213,6 +247,7 @@ export default function BarberProfile() {
           bio: clippers[0].bio || "",
           city: city || "",
           state: state || "",
+          images: [],
         });
         console.log("First barber data loaded:", clippers[0]);
         console.log("First barber services:", clippers[0]?.services);
@@ -256,6 +291,35 @@ export default function BarberProfile() {
       });
     }
     setIsPortfolioModalVisible(true);
+  };
+
+  const handleServicesEditPress = () => {
+    if (barberData && barberData.services) {
+      setEditServices(
+        barberData.services.map((service) => ({
+          id: service.id,
+          serviceName: service.serviceName,
+          price: service.price ? String(service.price) : "",
+          durationMinutes: service.durationMinutes ?? undefined,
+        }))
+      );
+    }
+    setSelectedCategory(null);
+    setEditingServiceIndex(null);
+    setIsServicesModalVisible(true);
+  };
+
+  const handleDeleteService = (index: number) => {
+    setEditServices(editServices.filter((_, i) => i !== index));
+  };
+
+  const handleServiceChange = (index: number, field: string, value: string) => {
+    const newServices = [...editServices];
+    newServices[index] = {
+      ...newServices[index],
+      [field]: value,
+    };
+    setEditServices(newServices);
   };
 
   // LOCAL TEST MODE: Set to true to only save images locally (won't persist after app restart)
@@ -508,7 +572,7 @@ export default function BarberProfile() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Services</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleServicesEditPress}>
               <Ionicons name="pencil" size={20} color="#000000ff" />
             </TouchableOpacity>
           </View>
@@ -902,6 +966,181 @@ export default function BarberProfile() {
           </View>
         </View>
       </Modal>
+
+      {/* Edit Services Modal */}
+      <Modal
+        visible={isServicesModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {
+          setIsServicesModalVisible(false);
+          setSelectedCategory(null);
+          setEditingServiceIndex(null);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Services</Text>
+              <TouchableOpacity onPress={() => {
+                setIsServicesModalVisible(false);
+                setSelectedCategory(null);
+                setEditingServiceIndex(null);
+              }}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={styles.modalBody}
+              keyboardShouldPersistTaps="handled"
+              contentInsetAdjustmentBehavior="automatic"
+              contentContainerStyle={{ paddingBottom: 100 }}
+            >
+              {/* Current Services List */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Current Services</Text>
+                
+                {editServices.length === 0 ? (
+                  <Text style={styles.emptyText}>No services added yet</Text>
+                ) : (
+                  editServices.map((service, index) => (
+                    <View key={index} style={styles.serviceEntry}>
+                      <View style={styles.serviceMainRow}>
+                        <View style={styles.serviceInfoContainer}>
+                          <Text style={styles.serviceNameText}>{service.serviceName}</Text>
+                          <Text style={styles.servicePriceText}>${service.price}</Text>
+                        </View>
+                        <View style={styles.serviceActionButtons}>
+                          <TouchableOpacity
+                            style={styles.editServiceButton}
+                            onPress={() => setEditingServiceIndex(index)}
+                          >
+                            <Ionicons name="pencil" size={18} color="#00A8E8" />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.deleteServiceButton}
+                            onPress={() => handleDeleteService(index)}
+                          >
+                            <Ionicons name="trash" size={18} color="#ff1a47" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  ))
+                )}
+              </View>
+
+              {/* Category Selection Section */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Add or Edit Service</Text>
+                
+                {editingServiceIndex === null ? (
+                  <Text style={styles.helperText}>Select a service to add or tap a service above to edit</Text>
+                ) : (
+                  <Text style={styles.editingLabel}>Editing: {editServices[editingServiceIndex]?.serviceName}</Text>
+                )}
+
+                {/* Category Buttons */}
+                <View style={styles.categoryButtonsContainer}>
+                  {SERVICE_CATEGORIES.map((category) => (
+                    <TouchableOpacity
+                      key={category.label}
+                      style={[
+                        styles.categoryButton,
+                        selectedCategory === category.label && styles.categoryButtonActive
+                      ]}
+                      onPress={() => setSelectedCategory(selectedCategory === category.label ? null : category.label)}
+                    >
+                      <Text style={[
+                        styles.categoryButtonText,
+                        selectedCategory === category.label && styles.categoryButtonTextActive
+                      ]}>
+                        {category.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Service Items from Selected Category */}
+                {selectedCategory && (
+                  <View style={styles.serviceItemsContainer}>
+                    {SERVICE_CATEGORIES.find(c => c.label === selectedCategory)?.values.map((serviceName) => (
+                      <TouchableOpacity
+                        key={serviceName}
+                        style={styles.serviceSelectItem}
+                        onPress={() => {
+                          if (editingServiceIndex !== null) {
+                            handleServiceChange(editingServiceIndex, 'serviceName', serviceName);
+                          } else {
+                            setEditServices([
+                              ...editServices,
+                              { serviceName, price: "", id: undefined }
+                            ]);
+                            setEditingServiceIndex(editServices.length);
+                          }
+                        }}
+                      >
+                        <Ionicons name="add-circle-outline" size={20} color="#00A8E8" />
+                        <Text style={styles.serviceSelectText}>{serviceName}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+
+                {/* Price Input for Editing */}
+                {editingServiceIndex !== null && (
+                  <View style={styles.priceEditContainer}>
+                    <Text style={styles.priceEditLabel}>Price ($)</Text>
+                    <View style={styles.priceInputRow}>
+                      <TextInput
+                        style={styles.priceEditInput}
+                        placeholder="0.00"
+                        placeholderTextColor="#999"
+                        keyboardType="decimal-pad"
+                        returnKeyType="done"
+                        value={editServices[editingServiceIndex]?.price || ""}
+                        onChangeText={(value) => handleServiceChange(editingServiceIndex, 'price', value)}
+                      />
+                      <TouchableOpacity
+                        style={styles.priceConfirmButton}
+                        onPress={() => setEditingServiceIndex(null)}
+                      >
+                        <Ionicons name="checkmark-circle" size={28} color="#00A8E8" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => {
+                  setIsServicesModalVisible(false);
+                  setSelectedCategory(null);
+                  setEditingServiceIndex(null);
+                }}
+                disabled={isLoading}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={handleSaveChanges}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -1080,6 +1319,28 @@ const styles = StyleSheet.create({
     width: "31%",
     height: 120,
     borderRadius: 12,
+  },
+  portfolioImageWrapper: {
+    width: "30%",
+    aspectRatio: 1,
+    position: "relative",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  portfolioEditImage: {
+    width: "100%",
+    height: "100%",
+  },
+  portfolioDeleteButton: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
   },
   portfolioImagePlaceholder: {
     width: "31%",
@@ -1336,34 +1597,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
   },
-  portfolioGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginTop: 8,
-  },
-  portfolioImageWrapper: {
-    width: "30%",
-    aspectRatio: 1,
-    position: "relative",
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  portfolioEditImage: {
-    width: "100%",
-    height: "100%",
-  },
-  portfolioDeleteButton: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   portfolioAddButton: {
     width: "30%",
     aspectRatio: 1,
@@ -1379,5 +1612,199 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#999",
     marginTop: 4,
+  },
+
+  /* Services Styles */
+  serviceEntry: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#00A8E8",
+  },
+  serviceMainRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  serviceInfoContainer: {
+    flex: 1,
+  },
+  serviceNameText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  servicePriceText: {
+    fontSize: 14,
+    color: "#00A8E8",
+    fontWeight: "500",
+  },
+  serviceActionButtons: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  editServiceButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: "#e3f2fd",
+  },
+  deleteServiceButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: "#fee",
+  },
+  categoryButtonsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginVertical: 12,
+  },
+  categoryButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#f9f9f9",
+  },
+  categoryButtonActive: {
+    backgroundColor: "#00A8E8",
+    borderColor: "#00A8E8",
+  },
+  categoryButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#333",
+  },
+  categoryButtonTextActive: {
+    color: "#fff",
+  },
+  serviceItemsContainer: {
+    backgroundColor: "#fafafa",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+  },
+  serviceSelectItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    backgroundColor: "#fff",
+    marginBottom: 8,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  serviceSelectText: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+  },
+  priceEditContainer: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: "#e8e8e8",
+  },
+  priceEditLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 8,
+  },
+  priceInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  priceEditInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    backgroundColor: "#fff",
+  },
+  priceConfirmButton: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  serviceInputGroup: {
+    flex: 1,
+  },
+  serviceLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 6,
+  },
+  helperText: {
+    fontSize: 13,
+    color: "#999",
+    fontStyle: "italic",
+    marginBottom: 12,
+  },
+  editingLabel: {
+    fontSize: 13,
+    color: "#00A8E8",
+    fontWeight: "500",
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#e3f2fd",
+    borderRadius: 6,
+  },
+  picker: {
+    height: 40,
+    backgroundColor: "#fff",
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  priceInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 14,
+    backgroundColor: "#fff",
+    height: 40,
+  },
+  addServiceButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#00A8E8",
+    borderRadius: 8,
+    marginTop: 8,
+    gap: 8,
+  },
+  addServiceText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#00A8E8",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    paddingVertical: 20,
   },
 });
