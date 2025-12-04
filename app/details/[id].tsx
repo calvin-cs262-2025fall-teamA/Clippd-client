@@ -20,7 +20,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { itemType } from "../../type/clippdTypes";
+import { ClipperP, ClipperProfile, ClipperProfilerofile } from "../../type/clippdTypes";
+import { useState, useEffect, useCallback } from "react";
 
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
@@ -70,7 +71,9 @@ export default function DetailsPage() {
   const [, setIsLoadingReviews] = useState(false);
 
   // Find clipper from API data
-  const clippr: itemType | undefined = clippers.find((item) => item.id === id);
+  const clippr: ClipperProfile | undefined = clippers.find(
+    (item) => item.id === id
+  );
 
   // Load reviews from database
   const loadReviews = useCallback(async () => {
@@ -399,7 +402,7 @@ export default function DetailsPage() {
               onPress={() => setShowReviewInput(!showReviewInput)}
               style={styles.editButton}
             >
-              <Ionicons name="pencil" size={20} color="#333" />
+              <Ionicons name="pencil" size={22} color="#000000ff" />
             </TouchableOpacity>
           </View>
 

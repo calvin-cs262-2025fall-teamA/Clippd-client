@@ -1,6 +1,6 @@
 import { useClippd } from "@/contexts/ClippdContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { itemType } from "@/type/clippdTypes";
+import { ClipperProfile } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -35,7 +35,7 @@ function formatRating(rating: number | string | undefined): string {
 }
 
 export default function BarberProfile() {
-  const [barberData, setBarberData] = useState<itemType | null>(null);
+  const [barberData, setBarberData] = useState<ClipperProfile | null>(null);
   const { clippers } = useClippd();
   const { user, logout } = useAuth();
 
@@ -58,6 +58,7 @@ export default function BarberProfile() {
         if (userBarber) {
           setBarberData(userBarber);
           console.log("Logged-in barber data loaded:", userBarber);
+          console.log("Barber services:", userBarber.services);
         } else {
           // Fallback to first barber if not found
           setBarberData(clippers[0]);
@@ -66,8 +67,8 @@ export default function BarberProfile() {
         // For regular clients, show first barber
         setBarberData(clippers[0]);
         console.log("First barber data loaded:", clippers[0]);
+        console.log("First barber services:", clippers[0]?.services);
       }
-      console.log("Images:", clippers[0]?.images);
     }
   }, [clippers, user]);
 
@@ -126,9 +127,8 @@ export default function BarberProfile() {
 
           {/* Bio */}
           <Text style={styles.bio}>
-            Specializing in modern cuts and color techniques with 8+ years of
-            experience. Passionate about helping clients look and feel their
-            best.
+            {barberData.bio ||
+              "Specializing in modern cuts and color techniques with 8+ years of experience. Passionate about helping clients look and feel their best."}
           </Text>
         </View>
 
@@ -137,65 +137,58 @@ export default function BarberProfile() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Services</Text>
             <TouchableOpacity>
-              <Ionicons name="pencil" size={20} color="#333" />
+              <Ionicons name="pencil" size={20} color="#000000ff" />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.serviceCard}>
-            <Text style={styles.serviceName}>Haircut & Style</Text>
-            <View style={styles.serviceDetails}>
-              <View style={styles.serviceDetailItem}>
-                <Ionicons name="time-outline" size={16} color="#666" />
-                <Text style={styles.serviceDetailText}>1h</Text>
-              </View>
-              <View style={styles.serviceDetailItem}>
-                <Ionicons name="cash-outline" size={16} color="#666" />
-                <Text style={styles.serviceDetailText}>$45</Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.serviceCard}>
-            <Text style={styles.serviceName}>Beard Trim</Text>
-            <View style={styles.serviceDetails}>
-              <View style={styles.serviceDetailItem}>
-                <Ionicons name="time-outline" size={16} color="#666" />
-                <Text style={styles.serviceDetailText}>30m</Text>
-              </View>
-              <View style={styles.serviceDetailItem}>
-                <Ionicons name="cash-outline" size={16} color="#666" />
-                <Text style={styles.serviceDetailText}>$25</Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.serviceCard}>
-            <Text style={styles.serviceName}>Color Treatment</Text>
-            <View style={styles.serviceDetails}>
-              <View style={styles.serviceDetailItem}>
-                <Ionicons name="time-outline" size={16} color="#666" />
-                <Text style={styles.serviceDetailText}>2h</Text>
-              </View>
-              <View style={styles.serviceDetailItem}>
-                <Ionicons name="cash-outline" size={16} color="#666" />
-                <Text style={styles.serviceDetailText}>$120</Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.serviceCard}>
-            <Text style={styles.serviceName}>Blowout</Text>
-            <View style={styles.serviceDetails}>
-              <View style={styles.serviceDetailItem}>
-                <Ionicons name="time-outline" size={16} color="#666" />
-                <Text style={styles.serviceDetailText}>45m</Text>
-              </View>
-              <View style={styles.serviceDetailItem}>
-                <Ionicons name="cash-outline" size={16} color="#666" />
-                <Text style={styles.serviceDetailText}>$35</Text>
-              </View>
-            </View>
-          </View>
+          {barberData.services && barberData.services.length > 0 ? (
+            <ScrollView
+              style={styles.servicesScrollContainer}
+              contentContainerStyle={styles.servicesContentContainer}
+              scrollEnabled={true}
+              nestedScrollEnabled={true}
+              scrollEventThrottle={16}
+              showsVerticalScrollIndicator={true}
+              persistentScrollbar={true}
+            >
+              {barberData.services.map((service) => (
+                <View key={service.id} style={styles.serviceCard}>
+                  <Text style={styles.serviceName}>
+                    {service.serviceName || "Service"}
+                  </Text>
+                  <View style={styles.serviceDetails}>
+                    {service.durationMinutes && (
+                      <View style={styles.serviceDetailItem}>
+                        <Ionicons name="time-outline" size={16} color="#666" />
+                        <Text style={styles.serviceDetailText}>
+                          {service.durationMinutes < 60
+                            ? `${service.durationMinutes}m`
+                            : `${Math.floor(service.durationMinutes / 60)}h${
+                                service.durationMinutes % 60 > 0
+                                  ? ` ${service.durationMinutes % 60}m`
+                                  : ""
+                              }`}
+                        </Text>
+                      </View>
+                    )}
+                    {service.price !== undefined && service.price !== null && (
+                      <View style={styles.serviceDetailItem}>
+                        <Ionicons name="cash-outline" size={16} color="#666" />
+                        <Text style={styles.serviceDetailText}>
+                          $
+                          {typeof service.price === "number"
+                            ? service.price.toFixed(2)
+                            : parseFloat(String(service.price)).toFixed(2)}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          ) : (
+            <Text style={styles.noDataText}>No services available</Text>
+          )}
         </View>
 
         {/* Portfolio Section */}
@@ -225,36 +218,6 @@ export default function BarberProfile() {
                 <Ionicons name="image-outline" size={40} color="#ccc" />
               </View>
             )}
-          </View>
-        </View>
-
-        {/* Statistics Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Statistics</Text>
-
-          <View style={styles.statsCard}>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Total Appointments</Text>
-                <Text style={styles.statValue}>1,248</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Repeat Clients</Text>
-                <Text style={styles.statValue}>78%</Text>
-              </View>
-            </View>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Avg Rating</Text>
-                <Text style={styles.statValue}>
-                  {formatRating(barberData.rating)}
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Response Time</Text>
-                <Text style={styles.statValue}>{"< 1h"}</Text>
-              </View>
-            </View>
           </View>
         </View>
 
@@ -370,17 +333,29 @@ const styles = StyleSheet.create({
     color: "#222",
   },
 
+  /* Services Scroll Container */
+  servicesScrollContainer: {
+    maxHeight: 280,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 12,
+    backgroundColor: "#fafafa",
+  },
+  servicesContentContainer: {
+    paddingTop: 8,
+    paddingHorizontal: 0,
+  },
+
   /* Service Cards */
   serviceCard: {
     backgroundColor: "#ffffff",
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    marginBottom: 10,
+    marginHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
   },
   serviceName: {
     fontSize: 16,
@@ -424,23 +399,6 @@ const styles = StyleSheet.create({
     borderColor: "#e0e0e0",
     borderStyle: "dashed",
   },
-
-  /* Statistics Card */
-  statsCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
   statItem: {
     flex: 1,
   },
@@ -458,5 +416,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 14,
     fontWeight: "600",
+  },
+  noDataText: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    padding: 20,
   },
 });
