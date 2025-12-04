@@ -32,7 +32,6 @@ export default function MapScreen() {
         longitudeDelta: 0.04,
       };
 
-      setLocation(current.coords);
       setRegion(userRegion);
     })();
   }, []);

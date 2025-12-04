@@ -102,8 +102,12 @@ export default function Card({
       {/* ✅ Only wrap the info section with TouchableOpacity */}
       <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
         <View style={styles.infoRow}>
-          {profilePic && (
+          {profilePic ? (
             <Image source={{ uri: profilePic }} style={styles.profileImg} />
+          ) : (
+            <View style={styles.defaultProfileIcon}>
+              <Ionicons name="person" size={30} color="#999" />
+            </View>
           )}
 
           <View style={styles.textContainer}>
@@ -223,8 +227,17 @@ const styles = StyleSheet.create({
   profileImg: {
     width: 60,
     height: 60,
-    borderRadius: 5,
+    borderRadius: 30,
     marginBottom: 10,
+  },
+  defaultProfileIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginBottom: 10,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   photoFrame: {

@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -21,7 +22,6 @@ import {
   View,
 } from "react-native";
 import { ClipperP, ClipperProfile, ClipperProfilerofile } from "../../type/clippdTypes";
-import { useState, useEffect, useCallback } from "react";
 
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
@@ -69,6 +69,7 @@ export default function DetailsPage() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [, setIsLoadingReviews] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Find clipper from API data
   const clippr: ClipperProfile | undefined = clippers.find(
@@ -366,14 +367,22 @@ export default function DetailsPage() {
 
         <View style={styles.details}>
           <View style={styles.headerRow}>
-            <Image
-              source={{
-                uri:
-                  clippr.profilePic ||
-                  "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-              }}
-              style={styles.profileImage}
-            />
+            {clippr.profilePic ? (
+              <TouchableOpacity onPress={() => setShowProfileModal(true)}>
+                <View style={styles.profileImageContainer}>
+                  <Image
+                    source={{
+                      uri: clippr.profilePic,
+                    }}
+                    style={styles.profileImage}
+                  />
+                </View>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.defaultProfileIcon}>
+                <Ionicons name="person" size={50} color="#999" />
+              </View>
+            )}
 
             <View style={{ flex: 1 }}>
               <Text style={styles.name}>{clippr.name}</Text>
@@ -513,6 +522,36 @@ export default function DetailsPage() {
           )}
         </View>
       </ScrollView>
+
+      {/* Profile Image Modal */}
+      <Modal
+        visible={showProfileModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowProfileModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPress={() => setShowProfileModal(false)}
+        >
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowProfileModal(false)}
+            >
+              <Ionicons name="close" size={32} color="#fff" />
+            </TouchableOpacity>
+            {clippr.profilePic && (
+              <Image
+                source={{ uri: clippr.profilePic }}
+                style={styles.fullProfileImage}
+                resizeMode="contain"
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </>
   );
 }
@@ -745,7 +784,47 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 90,
     height: 90,
-    borderRadius: 8,
+    borderRadius: 45,
+  },
+  profileImageContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     marginRight: 10,
+    overflow: "hidden",
+  },
+  defaultProfileIcon: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    marginRight: 10,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "90%",
+    height: "80%",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  fullProfileImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+  },
+  closeButton: {
+    position: "absolute",
+    top: -50,
+    right: 0,
+    zIndex: 100,
+    padding: 10,
   },
 });

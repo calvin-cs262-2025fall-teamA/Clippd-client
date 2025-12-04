@@ -53,8 +53,12 @@ export default function SmallCard({
     <TouchableOpacity onPress={handlePress()} activeOpacity={0.9}>
       <View style={styles.card}>
         {/* Left: Profile Picture */}
-        {profilePic && (
+        {profilePic ? (
           <Image source={{ uri: profilePic }} style={styles.profileImg} />
+        ) : (
+          <View style={styles.defaultProfileIcon}>
+            <Ionicons name="person" size={40} color="#999" />
+          </View>
         )}
 
         {/* Middle: Name and Location */}
@@ -101,8 +105,17 @@ const styles = StyleSheet.create({
   profileImg: {
     width: 80,
     height: 80,
-    borderRadius: 8,
+    borderRadius: 40,
     marginRight: 12,
+  },
+  defaultProfileIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 12,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
   },
   textContainer: {
     flex: 1,
