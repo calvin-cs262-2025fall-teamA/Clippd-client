@@ -6,7 +6,7 @@ import React, {
   useState,
   useContext,
 } from "react";
-import { Users, itemType } from "../type/clippdTypes";
+import { Users, ClipperProfile, Service } from "../type/clippdTypes";
 import { getApiUrl } from "../utils/networkConfig";
 
 interface ClippdContextType {
@@ -15,13 +15,15 @@ interface ClippdContextType {
   setUsers: React.Dispatch<React.SetStateAction<Users[] | null>>;
   refreshUsers: () => Promise<void>;
   fetchUserById: (id: number) => Promise<Users | null>;
-  // Clippers (mapped to itemType for UI components like Card)
-  clippers: itemType[];
+  // Clippers (mapped to ClipperProfile for UI components like Card)
+  clippers: ClipperProfile[];
   isClippersLoading: boolean;
   clippersError: string | null;
   fetchClippers: () => Promise<void>;
   // Update clipper rating
   updateClipperRating: (clipperId: string, newRating: number) => void;
+  // Update clipper profile
+  updateClipperProfile: (clipperId: string, updatedData: Partial<ClipperProfile>) => void;
 }
 
 export const ClippdContext = createContext<ClippdContextType | undefined>(
@@ -34,7 +36,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
   // Users state
   const [users, setUsers] = useState<Users[] | null>(null);
   // Clippers (for cards)
-  const [clippers, setClippers] = useState<itemType[]>([]);
+  const [clippers, setClippers] = useState<ClipperProfile[]>([]);
   const [isClippersLoading, setIsClippersLoading] = useState(false);
   const [clippersError, setClippersError] = useState<string | null>(null);
   const [baseUrl, setBaseUrl] = useState<string>("");
@@ -96,17 +98,50 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
       if (!response.ok)
         throw new Error(`Failed to fetch clippers (${response.status})`);
       const raw = await response.json();
-      // Map API response to itemType expected by Card
-      const mapped: itemType[] = (raw || []).map((c: any) => ({
-        id: String(c.id),
-        name: [c.firstname, c.lastname].filter(Boolean).join(" "),
-        location: [c.city, c.state].filter(Boolean).join(", "),
-        images: c.images || [], // Use images from database
-        rating:
-          typeof c.rating === "string" ? c.rating : String(c.rating ?? "0"),
-        profilePic: c.profileimage || "",
-        reviews: c.reviews || [], // Use reviews from database
-      }));
+      // Map API response to ClipperProfile expected by Card
+      const mapped: ClipperProfile[] = await Promise.all(
+        (raw || []).map(async (c: any) => {
+          // Fetch services for this clipper
+          let services: Service[] = [];
+          try {
+            const servicesResponse = await fetch(
+              `${baseUrl}/clippers/${c.id}/services`
+            );
+            if (servicesResponse.ok) {
+              const rawServices = await servicesResponse.json();
+              // Normalize services to handle case sensitivity from PostgreSQL
+              services = rawServices.map((s: any) => ({
+                id: s.id,
+                clipperID: s.clipperid || s.clipperID,
+                serviceName: s.servicename || s.serviceName,
+                price: s.price,
+                durationMinutes: s.durationminutes || s.durationMinutes,
+              }));
+              console.log(
+                `[ClippdContext] Fetched ${services.length} services for clipper ${c.id}:`,
+                services
+              );
+            }
+          } catch (err) {
+            console.warn(`Failed to fetch services for clipper ${c.id}:`, err);
+          }
+
+          return {
+            id: String(c.id),
+            name: [c.firstName || c.firstname, c.lastName || c.lastname]
+              .filter(Boolean)
+              .join(" "),
+            location: [c.city, c.state].filter(Boolean).join(", "),
+            images: c.images || [], // Use images from database
+            rating:
+              typeof c.rating === "string" ? c.rating : String(c.rating ?? "0"),
+            profilePic: c.profileimage || c.profileImage || "",
+            bio: c.bio || "", // Use bio from database
+            reviews: c.reviews || [], // Use reviews from database
+            services: services, // Use services from database
+          };
+        })
+      );
       setClippers(mapped);
     } catch (error: any) {
       console.error("[ClippdContext] fetchClippers error:", error.message);
@@ -117,15 +152,31 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
   }, [baseUrl]);
 
   // Update a specific clipper's rating
-  const updateClipperRating = useCallback((clipperId: string, newRating: number) => {
-    setClippers((prevClippers) =>
-      prevClippers.map((clipper) =>
-        clipper.id === clipperId
-          ? { ...clipper, rating: String(newRating) }
-          : clipper
-      )
-    );
-  }, []);
+  const updateClipperRating = useCallback(
+    (clipperId: string, newRating: number) => {
+      setClippers((prevClippers) =>
+        prevClippers.map((clipper) =>
+          clipper.id === clipperId
+            ? { ...clipper, rating: String(newRating) }
+            : clipper
+        )
+      );
+    },
+    []
+  );
+
+  const updateClipperProfile = useCallback(
+    (clipperId: string, updatedData: Partial<ClipperProfile>) => {
+      setClippers((prevClippers) =>
+        prevClippers.map((clipper) =>
+          clipper.id === clipperId
+            ? { ...clipper, ...updatedData }
+            : clipper
+        )
+      );
+    },
+    []
+  );
 
   // Auto-fetch data when baseUrl is ready
   useEffect(() => {
@@ -162,6 +213,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
         clippersError,
         fetchClippers,
         updateClipperRating,
+        updateClipperProfile,
       },
     },
     children

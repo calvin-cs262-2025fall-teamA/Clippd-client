@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -20,7 +21,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { itemType } from "../../type/clippdTypes";
+import { ClipperProfile } from "../../type/clippdTypes";
 
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
@@ -68,9 +69,12 @@ export default function DetailsPage() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [, setIsLoadingReviews] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Find clipper from API data
-  const clippr: itemType | undefined = clippers.find((item) => item.id === id);
+  const clippr: ClipperProfile | undefined = clippers.find(
+    (item) => item.id === id
+  );
 
   // Load reviews from database
   const loadReviews = useCallback(async () => {
@@ -337,40 +341,55 @@ export default function DetailsPage() {
 
       <ScrollView style={styles.container}>
         {/* ---- Image Grid Section ---- */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.imageScroll}
-        >
-          {imageGroups.map((group, groupIndex) => (
-            <View key={groupIndex} style={styles.imageGroup}>
-              {/* Large image on left */}
-              <Image source={{ uri: group[0] }} style={styles.largeImage} />
+        {imageGroups.length > 0 ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.imageScroll}
+          >
+            {imageGroups.map((group, groupIndex) => (
+              <View key={groupIndex} style={styles.imageGroup}>
+                {/* Large image on left */}
+                <Image source={{ uri: group[0] }} style={styles.largeImage} />
 
-              {/* Two stacked images on right */}
-              <View style={styles.sideImageGrid}>
-                {group.slice(1, 3).map((img, index) => (
-                  <Image
-                    key={index}
-                    source={{ uri: img }}
-                    style={styles.sideImage}
-                  />
-                ))}
+                {/* Two stacked images on right */}
+                <View style={styles.sideImageGrid}>
+                  {group.slice(1, 3).map((img, index) => (
+                    <Image
+                      key={index}
+                      source={{ uri: img }}
+                      style={styles.sideImage}
+                    />
+                  ))}
+                </View>
               </View>
-            </View>
-          ))}
-        </ScrollView>
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={styles.noImagesPlaceholder}>
+            <Ionicons name="image-outline" size={60} color="#ccc" />
+            <Text style={styles.noImagesText}>No images</Text>
+          </View>
+        )}
 
         <View style={styles.details}>
           <View style={styles.headerRow}>
-            <Image
-              source={{
-                uri:
-                  clippr.profilePic ||
-                  "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-              }}
-              style={styles.profileImage}
-            />
+            {clippr.profilePic ? (
+              <TouchableOpacity onPress={() => setShowProfileModal(true)}>
+                <View style={styles.profileImageContainer}>
+                  <Image
+                    source={{
+                      uri: clippr.profilePic,
+                    }}
+                    style={styles.profileImage}
+                  />
+                </View>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.defaultProfileIcon}>
+                <Ionicons name="person" size={50} color="#999" />
+              </View>
+            )}
 
             <View style={{ flex: 1 }}>
               <Text style={styles.name}>{clippr.name}</Text>
@@ -399,7 +418,7 @@ export default function DetailsPage() {
               onPress={() => setShowReviewInput(!showReviewInput)}
               style={styles.editButton}
             >
-              <Ionicons name="pencil" size={20} color="#333" />
+              <Ionicons name="pencil" size={22} color="#000000ff" />
             </TouchableOpacity>
           </View>
 
@@ -510,6 +529,36 @@ export default function DetailsPage() {
           )}
         </View>
       </ScrollView>
+
+      {/* Profile Image Modal */}
+      <Modal
+        visible={showProfileModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowProfileModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPress={() => setShowProfileModal(false)}
+        >
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowProfileModal(false)}
+            >
+              <Ionicons name="close" size={32} color="#fff" />
+            </TouchableOpacity>
+            {clippr.profilePic && (
+              <Image
+                source={{ uri: clippr.profilePic }}
+                style={styles.fullProfileImage}
+                resizeMode="contain"
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </>
   );
 }
@@ -742,7 +791,58 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 90,
     height: 90,
-    borderRadius: 8,
+    borderRadius: 45,
+  },
+  profileImageContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     marginRight: 10,
+    overflow: "hidden",
+  },
+  defaultProfileIcon: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    marginRight: 10,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "90%",
+    height: "80%",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  fullProfileImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+  },
+  closeButton: {
+    position: "absolute",
+    top: -50,
+    right: 0,
+    zIndex: 100,
+    padding: 10,
+  },
+  noImagesPlaceholder: {
+    height: 300,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f9f9f9",
+  },
+  noImagesText: {
+    fontSize: 14,
+    color: "#bbb",
+    marginTop: 12,
   },
 });

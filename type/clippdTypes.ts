@@ -1,11 +1,21 @@
-export interface itemType {
+export interface Service {
+  id: number;
+  clipperID: number;
+  serviceName: string;
+  price?: number;
+  durationMinutes?: number | null;
+}
+
+export interface ClipperProfile {
   id: string;
   name: string;
   location: string;
   images: string[];
-  rating: number;
+  rating: string;
   profilePic: string;
+  bio?: string;
   reviews?: Review[];
+  services?: Service[];
 }
 
 export interface Review {
