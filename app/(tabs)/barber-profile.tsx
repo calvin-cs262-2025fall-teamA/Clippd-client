@@ -959,7 +959,6 @@ export default function BarberProfile() {
                         }
                         enabled={!isLoading}
                       >
-                        <Picker.Item label="Select a state" value="" />
                         {US_STATES.map((state) => (
                           <Picker.Item key={state} label={state} value={state} />
                         ))}
@@ -976,7 +975,6 @@ export default function BarberProfile() {
                         }
                         enabled={!isLoading && !!editData.state}
                       >
-                        <Picker.Item label="Select a city" value="" />
                         {editData.state &&
                           CITIES_BY_STATE[editData.state]?.map((city) => (
                             <Picker.Item key={city} label={city} value={city} />
