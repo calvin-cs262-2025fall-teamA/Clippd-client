@@ -108,10 +108,31 @@ const extractPhoneNumber = (value: string): string => {
   return value.replace(/\D/g, "");
 };
 
+// Preference Categories
+const PREFERENCE_CATEGORIES = [
+  {
+    label: "Haircut Styles",
+    values: ["Fade", "Taper", "Scissor Cut", "Layer cut", "Buzz Cut", "Trim & Shape up"]
+  },
+  {
+    label: "Beard Care",
+    values: ["Beard Trim", "Beard Shaping", "Hot Towel Shave"]
+  },
+  {
+    label: "Hair Care",
+    values: ["Hair Treatment", "Scalp Care", "Conditioning"]
+  },
+  {
+    label: "Styling",
+    values: ["Blowout", "Curling/Waves", "Straightening"]
+  }
+];
+
 export default function Profile() {
   const { user, isLoading, logout } = useAuth();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isEditContactModalVisible, setIsEditContactModalVisible] = useState(false);
+  const [isEditPreferencesModalVisible, setIsEditPreferencesModalVisible] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
   const [showImageMenu, setShowImageMenu] = useState(false);
   const [baseUrl, setBaseUrl] = useState<string>("");
@@ -122,6 +143,7 @@ export default function Profile() {
   const [state, setState] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
+  const [preferences, setPreferences] = useState<string[]>([]);
   const [editData, setEditData] = useState({
     profilePic: "",
     firstName: "",
@@ -133,11 +155,14 @@ export default function Profile() {
     phoneNumber: "",
     email: "",
   });
+  const [editPreferencesData, setEditPreferencesData] = useState<string[]>([]);
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
   const [isLastNameFocused, setIsLastNameFocused] = useState(false);
   const [isPhoneNumberFocused, setIsPhoneNumberFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [newPreference, setNewPreference] = useState("");
+  const [selectedPreferenceCategory, setSelectedPreferenceCategory] = useState<string | null>(null);
 
   // LOCAL TEST MODE: Set to true to only save images locally (won't persist after app restart)
   const LOCAL_TEST_MODE = true;
@@ -168,6 +193,7 @@ export default function Profile() {
       setState(user.state || "");
       setPhoneNumber(user.phoneNumber || "");
       setEmail(user.email || "");
+      setPreferences(user.preferences || ["Fade Cuts", "Beard Trim"]);
       console.log("[Profile] Loaded user profile:", {
         firstName: user.firstName,
         lastName: user.lastName,
@@ -176,6 +202,7 @@ export default function Profile() {
         state: user.state,
         phoneNumber: user.phoneNumber,
         email: user.email,
+        preferences: user.preferences,
       });
     }
   }, [user, isLoading]);
@@ -302,6 +329,44 @@ export default function Profile() {
     } finally {
       setIsLoading2(false);
     }
+  };
+
+  const handleEditPreferencesPress = () => {
+    setEditPreferencesData([...preferences]);
+    setNewPreference("");
+    setIsEditPreferencesModalVisible(true);
+  };
+
+  const handleAddPreference = (preferenceName: string) => {
+    if (editPreferencesData.includes(preferenceName)) {
+      Alert.alert("Error", "This preference already exists");
+      return;
+    }
+
+    setEditPreferencesData([...editPreferencesData, preferenceName]);
+  };
+
+  const handleDeletePreference = (index: number) => {
+    setEditPreferencesData(editPreferencesData.filter((_, i) => i !== index));
+  };
+
+  const handleSavePreferencesChanges = () => {
+    if (editPreferencesData.length === 0) {
+      Alert.alert("Error", "Please add at least one preference");
+      return;
+    }
+
+    console.log("[handleSavePreferencesChanges] Saving preferences:", editPreferencesData);
+    
+    // Update local state
+    setPreferences([...editPreferencesData]);
+
+    // In a real app, you would save this to the server and SecureStore
+    // For now, we're just updating local state
+    Alert.alert("Success", "Preferences updated successfully");
+    setIsEditPreferencesModalVisible(false);
+    setEditPreferencesData([]);
+    setSelectedPreferenceCategory(null);
   };
 
   const pickImage = async () => {
@@ -516,17 +581,20 @@ export default function Profile() {
           <View style={styles.preferencesCard}>
             <View style={styles.cardHeader}>
               <Text style={styles.fieldHeader}>Preferences</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handleEditPreferencesPress}>
                 <Ionicons name="pencil" size={18} color="#666" />
               </TouchableOpacity>
             </View>
             <View style={styles.chipContainer}>
-              <View style={styles.chip}>
-                <Text style={styles.chipText}>Fade Cuts</Text>
-              </View>
-              <View style={styles.chip}>
-                <Text style={styles.chipText}>Beard Trim</Text>
-              </View>
+              {preferences.length > 0 ? (
+                preferences.map((pref, index) => (
+                  <View key={index} style={styles.chip}>
+                    <Text style={styles.chipText}>{pref}</Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.noPreferencesText}>No preferences set</Text>
+              )}
             </View>
           </View>
         </View>
@@ -824,6 +892,131 @@ export default function Profile() {
                 </TouchableOpacity>
               </View>
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Preferences Modal */}
+      <Modal
+        visible={isEditPreferencesModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {
+          setIsEditPreferencesModalVisible(false);
+          setSelectedPreferenceCategory(null);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Preferences</Text>
+              <TouchableOpacity onPress={() => {
+                setIsEditPreferencesModalVisible(false);
+                setSelectedPreferenceCategory(null);
+              }}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={styles.modalBody}
+              keyboardShouldPersistTaps="handled"
+              contentInsetAdjustmentBehavior="automatic"
+              contentContainerStyle={{ paddingBottom: 100 }}
+            >
+              {/* Current Preferences List */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Your Preferences</Text>
+                
+                {editPreferencesData.length === 0 ? (
+                  <Text style={styles.emptyText}>No preferences added yet</Text>
+                ) : (
+                  <View>
+                    {editPreferencesData.map((pref, index) => (
+                      <View key={index} style={styles.preferenceEntry}>
+                        <View style={styles.preferenceMainRow}>
+                          <View style={styles.preferenceInfoContainer}>
+                            <Text style={styles.preferenceNameText}>{pref}</Text>
+                          </View>
+                          <TouchableOpacity
+                            style={styles.deletePreferenceButton}
+                            onPress={() => handleDeletePreference(index)}
+                          >
+                            <Ionicons name="trash" size={18} color="#ff1a47" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              {/* Category Selection Section */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Add Preferences</Text>
+                
+                {/* Category Buttons */}
+                <View style={styles.categoryButtonsContainer}>
+                  {PREFERENCE_CATEGORIES.map((category) => (
+                    <TouchableOpacity
+                      key={category.label}
+                      style={[
+                        styles.categoryButton,
+                        selectedPreferenceCategory === category.label && styles.categoryButtonActive
+                      ]}
+                      onPress={() => setSelectedPreferenceCategory(selectedPreferenceCategory === category.label ? null : category.label)}
+                    >
+                      <Text style={[
+                        styles.categoryButtonText,
+                        selectedPreferenceCategory === category.label && styles.categoryButtonTextActive
+                      ]}>
+                        {category.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Preference Items from Selected Category */}
+                {selectedPreferenceCategory && (
+                  <View style={styles.preferenceItemsContainer}>
+                    {PREFERENCE_CATEGORIES.find(c => c.label === selectedPreferenceCategory)?.values.map((preferenceName) => (
+                      <TouchableOpacity
+                        key={preferenceName}
+                        style={styles.preferenceSelectItem}
+                        onPress={() => handleAddPreference(preferenceName)}
+                      >
+                        <Ionicons name="add-circle-outline" size={20} color="#ff1a47" />
+                        <Text style={styles.preferenceSelectText}>{preferenceName}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => {
+                  setIsEditPreferencesModalVisible(false);
+                  setSelectedPreferenceCategory(null);
+                }}
+                disabled={isLoading2}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={handleSavePreferencesChanges}
+                disabled={isLoading2}
+              >
+                {isLoading2 ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -1167,4 +1360,109 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#fafafa",
   },
+  noPreferencesText: {
+    fontSize: 14,
+    color: "#999",
+  },
+  preferenceEntry: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#ff1a47",
+  },
+  preferenceMainRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  preferenceInfoContainer: {
+    flex: 1,
+  },
+  preferenceNameText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  deletePreferenceButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: "#fee",
+  },
+  addPreferenceContainer: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+  },
+  addPreferenceButtonIcon: {
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ff1a47",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
+    marginBottom: 12,
+  },
+  categoryButtonsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 16,
+  },
+  categoryButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#f0f0f0",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  categoryButtonActive: {
+    backgroundColor: "#ff1a47",
+    borderColor: "#ff1a47",
+  },
+  categoryButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  categoryButtonTextActive: {
+    color: "#fff",
+  },
+  preferenceItemsContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+  },
+  preferenceSelectItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: "#fafafa",
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 12,
+  },
+  preferenceSelectText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "500",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
 });
+
