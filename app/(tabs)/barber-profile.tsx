@@ -233,7 +233,7 @@ export default function BarberProfile() {
         console.log("Barber services:", selectedBarber.services);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [clippers, user]);
 
   const handleEditPress = () => {
