@@ -187,9 +187,11 @@ export default function BarberProfile() {
     // If logged-in user is a Barber, find their profile in clippers array
     // Otherwise, use the first barber from the API data
     if (clippers && clippers.length > 0) {
+      let selectedBarber: ClipperProfile | null = null;
+
       if (user && user.role === "Clipper") {
         // Find barber with matching user ID or name
-        let userBarber = clippers.find((clipper) => {
+        selectedBarber = clippers.find((clipper) => {
           // Try to match by name (firstName + lastName)
           const clipperFullName = clipper.name || "";
           const userFullName = `${user.firstName} ${user.lastName}`;
@@ -198,60 +200,37 @@ export default function BarberProfile() {
             clipperFullName === user.firstName ||
             clipperFullName.includes(user.firstName)
           );
-        });
+        }) || null;
 
-        if (userBarber) {
-          // Load services for this barber
-          setBarberData(userBarber);
-          const [city, state] = userBarber.location
-            ? userBarber.location.split(", ")
-            : ["", ""];
-          setEditData({
-            profilePic: userBarber.profilePic || "",
-            firstName: user.firstName || "",
-            lastName: user.lastName || "",
-            bio: userBarber.bio || "",
-            city: city || "",
-            state: state || "",
-            images: [],
-          });
-          console.log("Logged-in barber data loaded:", userBarber);
-          console.log("Barber services:", userBarber.services);
-        } else {
+        if (!selectedBarber) {
           // If no match found, show first barber
           console.log("Barber not found in clippers array. User:", user);
           console.log("Clippers available:", clippers);
-          setBarberData(clippers[0]);
-          const [city, state] = clippers[0].location
-            ? clippers[0].location.split(", ")
-            : ["", ""];
-          setEditData({
-            profilePic: clippers[0].profilePic || "",
-            firstName: clippers[0].name?.split(" ")[0] || "",
-            lastName: clippers[0].name?.split(" ").slice(1).join(" ") || "",
-            bio: clippers[0].bio || "",
-            city: city || "",
-            state: state || "",
-            images: [],
-          });
+          selectedBarber = clippers[0];
         }
       } else {
         // For regular clients, show first barber
-        setBarberData(clippers[0]);
-        const [city, state] = clippers[0].location
-          ? clippers[0].location.split(", ")
+        selectedBarber = clippers[0];
+      }
+
+      if (selectedBarber) {
+        // Set barber data (services are already loaded from ClippdContext)
+        setBarberData(selectedBarber);
+        const [city, state] = selectedBarber.location
+          ? selectedBarber.location.split(", ")
           : ["", ""];
+        const nameParts = selectedBarber.name?.split(" ") || [];
         setEditData({
-          profilePic: clippers[0].profilePic || "",
-          firstName: clippers[0].name?.split(" ")[0] || "",
-          lastName: clippers[0].name?.split(" ").slice(1).join(" ") || "",
-          bio: clippers[0].bio || "",
+          profilePic: selectedBarber.profilePic || "",
+          firstName: nameParts[0] || "",
+          lastName: nameParts.slice(1).join(" ") || "",
+          bio: selectedBarber.bio || "",
           city: city || "",
           state: state || "",
-          images: [],
+          images: selectedBarber.images || [],
         });
-        console.log("First barber data loaded:", clippers[0]);
-        console.log("First barber services:", clippers[0]?.services);
+        console.log("Barber data loaded:", selectedBarber);
+        console.log("Barber services:", selectedBarber.services);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -296,15 +275,20 @@ export default function BarberProfile() {
   };
 
   const handleServicesEditPress = () => {
-    if (barberData && barberData.services) {
-      setEditServices(
-        barberData.services.map((service) => ({
+    if (barberData && barberData.services && Array.isArray(barberData.services)) {
+      const validServices = barberData.services
+        .filter((service) => service && service.serviceName)
+        .map((service) => ({
           id: service.id,
-          serviceName: service.serviceName,
+          serviceName: String(service.serviceName || "").trim(),
           price: service.price ? String(service.price) : "",
           durationMinutes: service.durationMinutes ?? undefined,
-        }))
-      );
+        }));
+      setEditServices(validServices);
+      console.log("Loaded services for editing:", validServices);
+    } else {
+      setEditServices([]);
+      console.log("No services to load");
     }
     setSelectedCategory(null);
     setEditingServiceIndex(null);
@@ -507,83 +491,125 @@ export default function BarberProfile() {
       return;
     }
 
+    // Validate services before saving
+    const validServices = editServices.filter(service => {
+      if (!service.serviceName || !String(service.serviceName).trim()) {
+        console.warn("Skipping service without name");
+        return false;
+      }
+      if (!service.price || isNaN(parseFloat(String(service.price)))) {
+        console.warn("Skipping service without valid price");
+        return false;
+      }
+      return true;
+    });
+
+    if (validServices.length === 0) {
+      Alert.alert("Validation Error", "Please add at least one service with a name and price");
+      return;
+    }
+
     setIsLoading(true);
     try {
       console.log("Updating services for clipper:", barberData.id);
-      console.log("New services:", editServices);
+      console.log("Valid services to save:", validServices);
 
       // First, delete all existing services for this clipper
       if (barberData.services && barberData.services.length > 0) {
         for (const service of barberData.services) {
           if (service.id) {
-            const deleteResponse = await fetch(`${baseUrl}/services/${service.id}`, {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
+            try {
+              const deleteResponse = await fetch(`${baseUrl}/services/${service.id}`, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
 
-            if (!deleteResponse.ok) {
-              console.error(`Failed to delete service ${service.id}`);
+              if (!deleteResponse.ok) {
+                console.warn(`Failed to delete service ${service.id}`);
+              }
+            } catch (deleteErr) {
+              console.warn(`Error deleting service ${service.id}:`, deleteErr);
             }
           }
         }
       }
 
-      // Then, add all new services
-      for (const service of editServices) {
-        const addResponse = await fetch(`${baseUrl}/clippers/${barberData.id}/services`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            serviceName: service.serviceName,
-            price: parseFloat(service.price),
-            durationMinutes: service.durationMinutes || 0,
-          }),
-        });
+      // Then, add all new services with proper validation
+      const addedServices: Service[] = [];
+      for (const service of validServices) {
+        try {
+          const serviceName = String(service.serviceName || "").trim();
+          const price = parseFloat(String(service.price || "0"));
+          const durationMinutes = service.durationMinutes || 0;
 
-        if (!addResponse.ok) {
-          const errorText = await addResponse.text();
-          throw new Error(`Failed to add service: ${errorText}`);
+          if (!serviceName) {
+            console.warn("Skipping service with empty name");
+            continue;
+          }
+
+          if (isNaN(price) || price < 0) {
+            console.warn("Skipping service with invalid price:", price);
+            continue;
+          }
+
+          const addResponse = await fetch(`${baseUrl}/clippers/${barberData.id}/services`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              serviceName: serviceName,
+              price: price,
+              durationMinutes: durationMinutes,
+            }),
+          });
+
+          if (!addResponse.ok) {
+            const errorText = await addResponse.text();
+            console.error(`Failed to add service: ${errorText}`);
+            throw new Error(`Failed to add service: ${errorText}`);
+          }
+
+          const addedService = await addResponse.json();
+          console.log("Service added successfully:", addedService);
+          addedServices.push(addedService);
+        } catch (addErr) {
+          console.error("Error adding service:", addErr);
+          throw addErr;
         }
       }
 
       // Fetch the updated clipper data from server to get latest services
-      const clipperResponse = await fetch(`${baseUrl}/clippers/${barberData.id}`);
-      if (clipperResponse.ok) {
-        
-        // Fetch services for this clipper
-        let services: Service[] = [];
-        try {
-          const servicesResponse = await fetch(
-            `${baseUrl}/clippers/${barberData.id}/services`
-          );
-          if (servicesResponse.ok) {
-            const rawServices = await servicesResponse.json();
-            services = rawServices
-              .filter((s: any) => s.serviceName || s.servicename) // Filter out invalid services
-              .map((s: any) => ({
-                id: s.id,
-                clipperID: s.clipperID || s.clipperid,
-                serviceName: s.serviceName || s.servicename || "",
-                price: s.price || 0,
-                durationMinutes: s.durationMinutes || s.durationminutes || 0,
-              }));
-            console.log("Fetched and normalized services:", services);
-          }
-        } catch (err) {
-          console.error("Failed to fetch services:", err);
-        }
+      try {
+        const servicesResponse = await fetch(
+          `${baseUrl}/clippers/${barberData.id}/services`
+        );
+        if (servicesResponse.ok) {
+          const rawServices = await servicesResponse.json();
+          const services = (rawServices || [])
+            .filter((s: any) => s.serviceName || s.servicename) // Filter out invalid services
+            .map((s: any) => ({
+              id: s.id,
+              clipperID: s.clipperID || s.clipperid,
+              serviceName: s.serviceName || s.servicename || "",
+              price: s.price || 0,
+              durationMinutes: s.durationMinutes || s.durationminutes || 0,
+            }));
+          console.log("Fetched and normalized services:", services);
 
-        // Update local state with fetched data
-        const updatedData = {
-          ...barberData,
-          services: services,
-        };
-        setBarberData(updatedData);
-        updateClipperProfile(barberData.id, updatedData);
+          // Update local state with fetched data
+          const updatedData = {
+            ...barberData,
+            services: services,
+          };
+          setBarberData(updatedData);
+          updateClipperProfile(barberData.id, updatedData);
+        }
+      } catch (fetchErr) {
+        console.error("Failed to fetch updated services:", fetchErr);
+        // Don't throw here, services might be saved even if fetch fails
       }
 
       Alert.alert("Success", "Services updated successfully");
@@ -697,50 +723,73 @@ export default function BarberProfile() {
                 {barberData.services
                   .filter((service) => {
                     // Only show services with valid serviceName
-                    return service && service.serviceName && String(service.serviceName).trim().length > 0;
+                    return (
+                      service &&
+                      service.serviceName &&
+                      String(service.serviceName).trim().length > 0
+                    );
                   })
-                  .map((service) => {
+                  .map((service, idx) => {
                     // Ensure all required fields exist and are valid
                     const validService = {
                       ...service,
-                      serviceName: String(service.serviceName || "").trim() || "Service",
-                      price: service.price !== undefined && service.price !== null ? service.price : 0,
-                      durationMinutes: service.durationMinutes || 0
+                      serviceName:
+                        String(service.serviceName || "").trim() || "Service",
+                      price:
+                        service.price !== undefined && service.price !== null
+                          ? service.price
+                          : 0,
+                      durationMinutes: service.durationMinutes || 0,
                     };
                     return (
-                    <View key={service.id || Math.random()} style={styles.serviceCard}>
-                      <Text style={styles.serviceName}>
-                        {validService.serviceName}
-                      </Text>
-                      <View style={styles.serviceDetails}>
-                        {validService.durationMinutes > 0 && (
-                          <View style={styles.serviceDetailItem}>
-                            <Ionicons name="time-outline" size={16} color="#666" />
-                            <Text style={styles.serviceDetailText}>
-                              {validService.durationMinutes < 60
-                                ? `${validService.durationMinutes}m`
-                                : `${Math.floor(validService.durationMinutes / 60)}h${
-                                    validService.durationMinutes % 60 > 0
-                                      ? ` ${validService.durationMinutes % 60}m`
-                                      : ""
-                                  }`}
-                            </Text>
-                          </View>
-                        )}
-                        {validService.price > 0 && (
-                          <View style={styles.serviceDetailItem}>
-                            <Ionicons name="cash-outline" size={16} color="#666" />
-                            <Text style={styles.serviceDetailText}>
-                              {`$${
-                                typeof validService.price === "number"
-                                  ? validService.price.toFixed(2)
-                                  : parseFloat(String(validService.price)).toFixed(2)
-                              }`}
-                            </Text>
-                          </View>
-                        )}
+                      <View
+                        key={service.id || `service-${idx}`}
+                        style={styles.serviceCard}
+                      >
+                        <Text style={styles.serviceName}>
+                          {validService.serviceName}
+                        </Text>
+                        <View style={styles.serviceDetails}>
+                          {validService.durationMinutes > 0 && (
+                            <View style={styles.serviceDetailItem}>
+                              <Ionicons
+                                name="time-outline"
+                                size={16}
+                                color="#666"
+                              />
+                              <Text style={styles.serviceDetailText}>
+                                {validService.durationMinutes < 60
+                                  ? `${validService.durationMinutes}m`
+                                  : `${Math.floor(
+                                      validService.durationMinutes / 60
+                                    )}h${
+                                      validService.durationMinutes % 60 > 0
+                                        ? ` ${validService.durationMinutes % 60}m`
+                                        : ""
+                                    }`}
+                              </Text>
+                            </View>
+                          )}
+                          {validService.price > 0 && (
+                            <View style={styles.serviceDetailItem}>
+                              <Ionicons
+                                name="cash-outline"
+                                size={16}
+                                color="#666"
+                              />
+                              <Text style={styles.serviceDetailText}>
+                                {`$${
+                                  typeof validService.price === "number"
+                                    ? validService.price.toFixed(2)
+                                    : parseFloat(
+                                        String(validService.price)
+                                      ).toFixed(2)
+                                }`}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
                       </View>
-                    </View>
                     );
                   })}
               </View>
