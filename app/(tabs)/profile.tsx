@@ -11,8 +11,6 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as SecureStore from "expo-secure-store";
@@ -87,15 +85,65 @@ const CITIES_BY_STATE: { [key: string]: string[] } = {
   "Wyoming": ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs"],
 };
 
+// Format phone number to (XXX) XXX-XXXX format
+const formatPhoneNumber = (value: string): string => {
+  // Remove all non-digit characters
+  const digits = value.replace(/\D/g, "");
+  
+  // If no digits, return empty string
+  if (digits.length === 0) return "";
+  
+  // Format: (XXX) XXX-XXXX
+  if (digits.length <= 3) {
+    return `(${digits}`;
+  } else if (digits.length <= 6) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  } else {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+  }
+};
+
+// Extract only digits from phone number
+const extractPhoneNumber = (value: string): string => {
+  return value.replace(/\D/g, "");
+};
+
+// Preference Categories
+const PREFERENCE_CATEGORIES = [
+  {
+    label: "Haircut Styles",
+    values: ["Fade", "Taper", "Scissor Cut", "Layer cut", "Buzz Cut", "Trim & Shape up"]
+  },
+  {
+    label: "Beard Care",
+    values: ["Beard Trim", "Beard Shaping", "Hot Towel Shave"]
+  },
+  {
+    label: "Hair Care",
+    values: ["Hair Treatment", "Scalp Care", "Conditioning"]
+  },
+  {
+    label: "Styling",
+    values: ["Blowout", "Curling/Waves", "Straightening"]
+  }
+];
+
 export default function Profile() {
   const { user, isLoading, logout } = useAuth();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isEditContactModalVisible, setIsEditContactModalVisible] = useState(false);
+  const [isEditPreferencesModalVisible, setIsEditPreferencesModalVisible] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
   const [showImageMenu, setShowImageMenu] = useState(false);
   const [baseUrl, setBaseUrl] = useState<string>("");
   const [profilePic, setProfilePic] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [preferences, setPreferences] = useState<string[]>([]);
   const [editData, setEditData] = useState({
     profilePic: "",
     firstName: "",
@@ -103,7 +151,18 @@ export default function Profile() {
     city: "",
     state: "",
   });
+  const [editContactData, setEditContactData] = useState({
+    phoneNumber: "",
+    email: "",
+  });
+  const [editPreferencesData, setEditPreferencesData] = useState<string[]>([]);
   const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
+  const [isLastNameFocused, setIsLastNameFocused] = useState(false);
+  const [isPhoneNumberFocused, setIsPhoneNumberFocused] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [newPreference, setNewPreference] = useState("");
+  const [selectedPreferenceCategory, setSelectedPreferenceCategory] = useState<string | null>(null);
 
   // LOCAL TEST MODE: Set to true to only save images locally (won't persist after app restart)
   const LOCAL_TEST_MODE = true;
@@ -128,12 +187,22 @@ export default function Profile() {
     // Load user's profile data from DB when user data is available
     if (user && !isLoading) {
       setProfilePic(user.profileImage || "");
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
       setCity(user.city || "");
       setState(user.state || "");
+      setPhoneNumber(user.phoneNumber || "");
+      setEmail(user.email || "");
+      setPreferences(user.preferences || ["Fade Cuts", "Beard Trim"]);
       console.log("[Profile] Loaded user profile:", {
+        firstName: user.firstName,
+        lastName: user.lastName,
         profileImage: user.profileImage,
         city: user.city,
         state: user.state,
+        phoneNumber: user.phoneNumber,
+        email: user.email,
+        preferences: user.preferences,
       });
     }
   }, [user, isLoading]);
@@ -141,15 +210,15 @@ export default function Profile() {
   const handleEditPress = () => {
     if (user) {
       // Set default values: first state if state is empty, first city if city is empty
-      const defaultState = !user.state || user.state.trim() === "" ? US_STATES[0] : user.state;
-      const defaultCity = !user.city || user.city.trim() === "" 
+      const defaultState = !state || state.trim() === "" ? US_STATES[0] : state;
+      const defaultCity = !city || city.trim() === "" 
         ? (CITIES_BY_STATE[defaultState] ? CITIES_BY_STATE[defaultState][0] : "")
-        : user.city;
+        : city;
 
       setEditData({
         profilePic: profilePic,
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
+        firstName: firstName || "",
+        lastName: lastName || "",
         city: defaultCity,
         state: defaultState,
       });
@@ -162,9 +231,146 @@ export default function Profile() {
     router.replace("/login");
   };
 
+  const handleEditContactPress = () => {
+    setEditContactData({
+      phoneNumber: formatPhoneNumber(phoneNumber || ""),
+      email: email || "",
+    });
+    setIsEditContactModalVisible(true);
+  };
+
+  const handleSaveContactChanges = async () => {
+    if (!editContactData.phoneNumber.trim()) {
+      Alert.alert("Error", "Please enter a phone number");
+      return;
+    }
+
+    if (!editContactData.email.trim()) {
+      Alert.alert("Error", "Please enter an email address");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(editContactData.email)) {
+      Alert.alert("Error", "Please enter a valid email address");
+      return;
+    }
+
+    // Validate phone number (should have at least 10 digits)
+    const phoneDigits = extractPhoneNumber(editContactData.phoneNumber);
+    if (phoneDigits.length < 10) {
+      Alert.alert("Error", "Please enter a valid 10-digit phone number");
+      return;
+    }
+
+    if (!user?.id) {
+      Alert.alert("Error", "User ID not found");
+      return;
+    }
+
+    setIsLoading2(true);
+    try {
+      const updatePayload = {
+        userId: user.id,
+        phoneNumber: phoneDigits,
+        email: editContactData.email,
+      };
+
+      console.log("[handleSaveContactChanges] Updating contact info with:", updatePayload);
+      console.log("[handleSaveContactChanges] API URL:", `${baseUrl}/auth/user/profile`);
+
+      const response = await fetch(`${baseUrl}/auth/user/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(updatePayload),
+      });
+
+      const responseText = await response.text();
+      console.log("[handleSaveContactChanges] API Response Status:", response.status);
+      console.log("[handleSaveContactChanges] API Response:", responseText);
+
+      if (!response.ok) {
+        throw new Error(`API Error ${response.status}: ${responseText}`);
+      }
+
+      // Update local state immediately with the new data (store only digits)
+      console.log("[handleSaveContactChanges] Updating local state");
+      setPhoneNumber(phoneDigits);
+      setEmail(editContactData.email);
+
+      // Update SecureStore with new contact data
+      if (user) {
+        const updatedUser = {
+          ...user,
+          phoneNumber: phoneDigits,
+          email: editContactData.email,
+        };
+        
+        await SecureStore.setItemAsync("userData", JSON.stringify(updatedUser));
+        console.log("[handleSaveContactChanges] Updated user data in SecureStore:", updatedUser);
+      }
+
+      Alert.alert("Success", "Contact information updated successfully");
+      setIsEditContactModalVisible(false);
+      
+      // Reset editContactData
+      setEditContactData({
+        phoneNumber: "",
+        email: "",
+      });
+    } catch (error) {
+      console.error("[handleSaveContactChanges] Error updating contact info:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      Alert.alert("Error", `Failed to update contact info: ${errorMessage}`);
+    } finally {
+      setIsLoading2(false);
+    }
+  };
+
+  const handleEditPreferencesPress = () => {
+    setEditPreferencesData([...preferences]);
+    setNewPreference("");
+    setIsEditPreferencesModalVisible(true);
+  };
+
+  const handleAddPreference = (preferenceName: string) => {
+    if (editPreferencesData.includes(preferenceName)) {
+      Alert.alert("Error", "This preference already exists");
+      return;
+    }
+
+    setEditPreferencesData([...editPreferencesData, preferenceName]);
+  };
+
+  const handleDeletePreference = (index: number) => {
+    setEditPreferencesData(editPreferencesData.filter((_, i) => i !== index));
+  };
+
+  const handleSavePreferencesChanges = () => {
+    if (editPreferencesData.length === 0) {
+      Alert.alert("Error", "Please add at least one preference");
+      return;
+    }
+
+    console.log("[handleSavePreferencesChanges] Saving preferences:", editPreferencesData);
+    
+    // Update local state
+    setPreferences([...editPreferencesData]);
+
+    // In a real app, you would save this to the server and SecureStore
+    // For now, we're just updating local state
+    Alert.alert("Success", "Preferences updated successfully");
+    setIsEditPreferencesModalVisible(false);
+    setEditPreferencesData([]);
+    setSelectedPreferenceCategory(null);
+  };
+
   const pickImage = async () => {
     console.log("[pickImage] Starting image picker...");
-    console.log("[pickImage] Current editData:", editData);
     
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -181,11 +387,11 @@ export default function Profile() {
         
         if (LOCAL_TEST_MODE) {
           // In test mode, just store the URI directly (won't persist after restart)
-          console.log("[pickImage] Using local test mode - storing URI directly");
-          setEditData((prevData) => ({
-            ...prevData,
+          setEditData({
+            ...editData,
             profilePic: result.assets[0].uri,
-          }));
+          });
+          console.log("[pickImage] Using local test mode - URI stored");
         } else {
           // In production mode, convert image to base64 for persistence
           try {
@@ -193,20 +399,21 @@ export default function Profile() {
               encoding: "base64",
             });
             const imageData = `data:image/jpeg;base64,${base64}`;
-            setEditData((prevData) => ({
-              ...prevData,
+            setEditData({
+              ...editData,
               profilePic: imageData,
-            }));
+            });
+            console.log("[pickImage] Production mode - base64 encoded and stored");
           } catch (error) {
-            console.error("[pickImage] Error processing image:", error);
+            console.error("[pickImage] Error converting to base64:", error);
             Alert.alert("Error", "Failed to process image");
           }
         }
       } else {
-        console.log("[pickImage] Image selection canceled or no assets");
+        console.log("[pickImage] Image selection canceled");
       }
     } catch (error) {
-      console.error("[pickImage] Error:", error);
+      console.error("[pickImage] Error opening image picker:", error);
       Alert.alert("Error", "Failed to open image picker");
     }
     
@@ -215,6 +422,7 @@ export default function Profile() {
   };
 
   const handleDeleteProfilePic = () => {
+    console.log("[handleDeleteProfilePic] Deleting profile picture");
     setEditData({
       ...editData,
       profilePic: "",
@@ -240,17 +448,20 @@ export default function Profile() {
 
     setIsLoading2(true);
     try {
+      let imageUrl = editData.profilePic;
+
       const updatePayload = {
         userId: user.id,
         firstName: editData.firstName,
         lastName: editData.lastName,
         city: editData.city,
         state: editData.state,
-        profileImage: editData.profilePic,
+        address: `${editData.city}, ${editData.state}`,
+        profileImage: imageUrl, // Send the new or existing image
       };
 
-      console.log("Updating customer profile with:", updatePayload);
-      console.log("API URL:", `${baseUrl}/auth/user/profile`);
+      console.log("[handleSaveChanges] Updating customer profile with:", updatePayload);
+      console.log("[handleSaveChanges] API URL:", `${baseUrl}/auth/user/profile`);
 
       const response = await fetch(`${baseUrl}/auth/user/profile`, {
         method: "PUT",
@@ -262,23 +473,22 @@ export default function Profile() {
       });
 
       const responseText = await response.text();
-      console.log("API Response Status:", response.status);
-      console.log("API Response:", responseText);
+      console.log("[handleSaveChanges] API Response Status:", response.status);
+      console.log("[handleSaveChanges] API Response:", responseText);
 
       if (!response.ok) {
         throw new Error(`API Error ${response.status}: ${responseText}`);
       }
 
-      // Parse response
-      const responseData = JSON.parse(responseText);
-      console.log("Parsed response data:", responseData);
-
-      // Update local state with response data
-      setProfilePic(editData.profilePic);
+      // Update local state immediately with the new data
+      console.log("[handleSaveChanges] Updating local state");
+      setProfilePic(imageUrl);
+      setFirstName(editData.firstName);
+      setLastName(editData.lastName);
       setCity(editData.city);
       setState(editData.state);
 
-      // Update AuthContext user and SecureStore
+      // Update SecureStore with new profile data
       if (user) {
         const updatedUser = {
           ...user,
@@ -286,20 +496,27 @@ export default function Profile() {
           lastName: editData.lastName,
           city: editData.city,
           state: editData.state,
-          profileImage: editData.profilePic,
+          profileImage: imageUrl,
         };
         
-        // Save updated user to SecureStore so it persists
         await SecureStore.setItemAsync("userData", JSON.stringify(updatedUser));
-        
-        console.log("Updated user data in SecureStore:", updatedUser);
+        console.log("[handleSaveChanges] Updated user data in SecureStore:", updatedUser);
       }
 
       Alert.alert("Success", "Profile updated successfully");
       setIsEditModalVisible(false);
       setIsEditingLocation(false);
+      
+      // Reset editData
+      setEditData({
+        profilePic: "",
+        firstName: "",
+        lastName: "",
+        city: "",
+        state: "",
+      });
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("[handleSaveChanges] Error updating profile:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       Alert.alert("Error", `Failed to update profile: ${errorMessage}`);
     } finally {
@@ -339,7 +556,7 @@ export default function Profile() {
           )}
 
           <Text style={styles.name}>
-            {user ? `${user.firstName} ${user.lastName}` : "Guest User"}
+            {firstName && lastName ? `${firstName} ${lastName}` : "Guest User"}
           </Text>
           <Text style={styles.location}>{city || "City"}, {state || "State"}</Text>
         </View>
@@ -350,13 +567,13 @@ export default function Profile() {
           <View style={styles.contactCard}>
             <View style={styles.cardHeader}>
               <Text style={styles.fieldHeader}>Contact</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handleEditContactPress}>
                 <Ionicons name="pencil" size={18} color="#666" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.field}>Phone: (555) 123-4567</Text>
+            <Text style={styles.field}>Phone: {phoneNumber ? formatPhoneNumber(phoneNumber) : "(555) 123-4567"}</Text>
             <Text style={styles.field}>
-              Email: {user ? user.email : "customer@email.com"}
+              Email: {email || (user ? user.email : "customer@email.com")}
             </Text>
           </View>
 
@@ -364,17 +581,20 @@ export default function Profile() {
           <View style={styles.preferencesCard}>
             <View style={styles.cardHeader}>
               <Text style={styles.fieldHeader}>Preferences</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handleEditPreferencesPress}>
                 <Ionicons name="pencil" size={18} color="#666" />
               </TouchableOpacity>
             </View>
             <View style={styles.chipContainer}>
-              <View style={styles.chip}>
-                <Text style={styles.chipText}>Fade Cuts</Text>
-              </View>
-              <View style={styles.chip}>
-                <Text style={styles.chipText}>Beard Trim</Text>
-              </View>
+              {preferences.length > 0 ? (
+                preferences.map((pref, index) => (
+                  <View key={index} style={styles.chip}>
+                    <Text style={styles.chipText}>{pref}</Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.noPreferencesText}>No preferences set</Text>
+              )}
             </View>
           </View>
         </View>
@@ -387,10 +607,7 @@ export default function Profile() {
         transparent={true}
         onRequestClose={() => setIsEditModalVisible(false)}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.modalContainer}
-        >
+        <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Profile</Text>
@@ -399,70 +616,112 @@ export default function Profile() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView
+            <ScrollView 
               style={styles.modalBody}
               keyboardShouldPersistTaps="handled"
               contentInsetAdjustmentBehavior="automatic"
-              contentContainerStyle={{ paddingBottom: 100 }}
+              contentContainerStyle={
+                isFirstNameFocused || isLastNameFocused 
+                  ? { paddingBottom: 300 } 
+                  : { paddingBottom: 20 }
+              }
             >
               {/* Profile Picture */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Profile Picture</Text>
-                {editData.profilePic ? (
-                  <View style={styles.imagePreviewContainer}>
-                    <Image
-                      source={{ uri: editData.profilePic }}
-                      style={styles.imagePreview}
-                    />
-                    <TouchableOpacity
-                      style={styles.imageChangeButton}
-                      onPress={() => setShowImageMenu(true)}
-                    >
-                      <Ionicons name="pencil" size={16} color="#fff" />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    style={styles.imagePickerButton}
-                    onPress={() => setShowImageMenu(true)}
-                  >
+                <TouchableOpacity
+                  style={styles.imagePickerButton}
+                  onPress={() => setShowImageMenu(true)}
+                  disabled={isLoading2}
+                >
+                  {editData.profilePic ? (
+                    <View style={styles.previewImageWrapper}>
+                      <Image
+                        source={{ uri: editData.profilePic }}
+                        style={styles.previewImage}
+                      />
+                    </View>
+                  ) : (
                     <View style={styles.imagePickerPlaceholder}>
-                      <Ionicons name="image-outline" size={48} color="#999" />
-                      <Text style={styles.imagePickerText}>Add Photo</Text>
+                      <Ionicons name="person" size={40} color="#999" />
+                      <Text style={styles.imagePickerText}>Tap to select image</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+                
+                {/* Image Action Menu */}
+                <Modal
+                  transparent={true}
+                  animationType="slide"
+                  visible={showImageMenu}
+                  onRequestClose={() => setShowImageMenu(false)}
+                >
+                  <TouchableOpacity
+                    style={styles.menuBackdrop}
+                    activeOpacity={1}
+                    onPress={() => setShowImageMenu(false)}
+                  >
+                    <View style={styles.imageMenuContainer}>
+                      <TouchableOpacity
+                        style={styles.menuButton}
+                        onPress={pickImage}
+                      >
+                        <Ionicons name="image-outline" size={24} color="#000000" />
+                        <Text style={styles.menuButtonText}>Change</Text>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity
+                        style={[styles.menuButton, styles.deleteMenuButton]}
+                        onPress={handleDeleteProfilePic}
+                      >
+                        <Ionicons name="trash-outline" size={24} color="#ff1a47" />
+                        <Text style={styles.menuButtonText}>Delete</Text>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity
+                        style={styles.menuCancelButton}
+                        onPress={() => setShowImageMenu(false)}
+                      >
+                        <Text style={styles.menuCancelButtonText}>Cancel</Text>
+                      </TouchableOpacity>
                     </View>
                   </TouchableOpacity>
-                )}
+                </Modal>
               </View>
 
               {/* First Name */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>First Name *</Text>
+                <Text style={styles.inputLabel}>First Name</Text>
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter first name"
-                  placeholderTextColor="#999"
                   value={editData.firstName}
-                  onChangeText={(value) =>
-                    setEditData({ ...editData, firstName: value })
+                  onChangeText={(text) =>
+                    setEditData({ ...editData, firstName: text })
                   }
+                  onFocus={() => setIsFirstNameFocused(true)}
+                  onBlur={() => setIsFirstNameFocused(false)}
+                  editable={!isLoading2}
                 />
               </View>
 
               {/* Last Name */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Last Name *</Text>
+                <Text style={styles.inputLabel}>Last Name</Text>
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter last name"
-                  placeholderTextColor="#999"
                   value={editData.lastName}
-                  onChangeText={(value) =>
-                    setEditData({ ...editData, lastName: value })
+                  onChangeText={(text) =>
+                    setEditData({ ...editData, lastName: text })
                   }
+                  onFocus={() => setIsLastNameFocused(true)}
+                  onBlur={() => setIsLastNameFocused(false)}
+                  editable={!isLoading2}
                 />
               </View>
 
-              {/* Location - State and City */}
+              {/* State and City */}
               <View style={styles.inputGroup}>
                 <View style={styles.locationHeaderRow}>
                   <Text style={styles.inputLabel}>Location</Text>
@@ -484,7 +743,7 @@ export default function Profile() {
                         : "No location set"}
                     </Text>
                   </View>
-                ) : isEditModalVisible ? (
+                ) : (
                   <>
                     {/* State Picker */}
                     <Text style={styles.subLabel}>State</Text>
@@ -496,7 +755,6 @@ export default function Profile() {
                         }
                         enabled={!isLoading2}
                       >
-                        <Picker.Item label="Select a state" value="" />
                         {US_STATES.map((state) => (
                           <Picker.Item key={state} label={state} value={state} />
                         ))}
@@ -513,7 +771,6 @@ export default function Profile() {
                         }
                         enabled={!isLoading2 && !!editData.state}
                       >
-                        <Picker.Item label="Select a city" value="" />
                         {editData.state &&
                           CITIES_BY_STATE[editData.state]?.map((city) => (
                             <Picker.Item key={city} label={city} value={city} />
@@ -521,21 +778,236 @@ export default function Profile() {
                       </Picker>
                     </View>
                   </>
-                ) : null}
+                )}
+              </View>
+
+              {/* Buttons */}
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.button, styles.cancelButton]}
+                  onPress={() => setIsEditModalVisible(false)}
+                  disabled={isLoading2}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, styles.saveButton]}
+                  onPress={handleSaveChanges}
+                  disabled={isLoading2}
+                >
+                  {isLoading2 ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text style={styles.saveButtonText}>Save Changes</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Contact Modal */}
+      <Modal
+        visible={isEditContactModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsEditContactModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Contact</Text>
+              <TouchableOpacity onPress={() => setIsEditContactModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={styles.modalBody}
+              keyboardShouldPersistTaps="handled"
+              contentInsetAdjustmentBehavior="automatic"
+              contentContainerStyle={
+                isPhoneNumberFocused || isEmailFocused 
+                  ? { paddingBottom: 300 } 
+                  : { paddingBottom: 20 }
+              }
+            >
+              {/* Phone Number */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Phone Number</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter phone number"
+                  value={editContactData.phoneNumber}
+                  onChangeText={(text) => {
+                    const formatted = formatPhoneNumber(text);
+                    setEditContactData({ ...editContactData, phoneNumber: formatted });
+                  }}
+                  onFocus={() => setIsPhoneNumberFocused(true)}
+                  onBlur={() => setIsPhoneNumberFocused(false)}
+                  editable={!isLoading2}
+                  keyboardType="phone-pad"
+                  maxLength={14}
+                />
+              </View>
+
+              {/* Email Address */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Email Address</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter email address"
+                  value={editContactData.email}
+                  onChangeText={(text) =>
+                    setEditContactData({ ...editContactData, email: text })
+                  }
+                  onFocus={() => setIsEmailFocused(true)}
+                  onBlur={() => setIsEmailFocused(false)}
+                  editable={!isLoading2}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              {/* Buttons */}
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.button, styles.cancelButton]}
+                  onPress={() => setIsEditContactModalVisible(false)}
+                  disabled={isLoading2}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, styles.saveButton]}
+                  onPress={handleSaveContactChanges}
+                  disabled={isLoading2}
+                >
+                  {isLoading2 ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text style={styles.saveButtonText}>Save Changes</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Preferences Modal */}
+      <Modal
+        visible={isEditPreferencesModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {
+          setIsEditPreferencesModalVisible(false);
+          setSelectedPreferenceCategory(null);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Preferences</Text>
+              <TouchableOpacity onPress={() => {
+                setIsEditPreferencesModalVisible(false);
+                setSelectedPreferenceCategory(null);
+              }}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={styles.modalBody}
+              keyboardShouldPersistTaps="handled"
+              contentInsetAdjustmentBehavior="automatic"
+              contentContainerStyle={{ paddingBottom: 100 }}
+            >
+              {/* Current Preferences List */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Your Preferences</Text>
+                
+                {editPreferencesData.length === 0 ? (
+                  <Text style={styles.emptyText}>No preferences added yet</Text>
+                ) : (
+                  <View>
+                    {editPreferencesData.map((pref, index) => (
+                      <View key={index} style={styles.preferenceEntry}>
+                        <View style={styles.preferenceMainRow}>
+                          <View style={styles.preferenceInfoContainer}>
+                            <Text style={styles.preferenceNameText}>{pref}</Text>
+                          </View>
+                          <TouchableOpacity
+                            style={styles.deletePreferenceButton}
+                            onPress={() => handleDeletePreference(index)}
+                          >
+                            <Ionicons name="trash" size={18} color="#ff1a47" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              {/* Category Selection Section */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Add Preferences</Text>
+                
+                {/* Category Buttons */}
+                <View style={styles.categoryButtonsContainer}>
+                  {PREFERENCE_CATEGORIES.map((category) => (
+                    <TouchableOpacity
+                      key={category.label}
+                      style={[
+                        styles.categoryButton,
+                        selectedPreferenceCategory === category.label && styles.categoryButtonActive
+                      ]}
+                      onPress={() => setSelectedPreferenceCategory(selectedPreferenceCategory === category.label ? null : category.label)}
+                    >
+                      <Text style={[
+                        styles.categoryButtonText,
+                        selectedPreferenceCategory === category.label && styles.categoryButtonTextActive
+                      ]}>
+                        {category.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Preference Items from Selected Category */}
+                {selectedPreferenceCategory && (
+                  <View style={styles.preferenceItemsContainer}>
+                    {PREFERENCE_CATEGORIES.find(c => c.label === selectedPreferenceCategory)?.values.map((preferenceName) => (
+                      <TouchableOpacity
+                        key={preferenceName}
+                        style={styles.preferenceSelectItem}
+                        onPress={() => handleAddPreference(preferenceName)}
+                      >
+                        <Ionicons name="add-circle-outline" size={20} color="#ff1a47" />
+                        <Text style={styles.preferenceSelectText}>{preferenceName}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
             </ScrollView>
 
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.button, styles.cancelButton]}
-                onPress={() => setIsEditModalVisible(false)}
+                onPress={() => {
+                  setIsEditPreferencesModalVisible(false);
+                  setSelectedPreferenceCategory(null);
+                }}
                 disabled={isLoading2}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
-                onPress={handleSaveChanges}
+                onPress={handleSavePreferencesChanges}
                 disabled={isLoading2}
               >
                 {isLoading2 ? (
@@ -546,47 +1018,9 @@ export default function Profile() {
               </TouchableOpacity>
             </View>
           </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* Image Menu Modal */}
-      <Modal
-        visible={showImageMenu}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setShowImageMenu(false)}
-      >
-        <View style={styles.menuBackdrop}>
-          <View style={styles.imageMenuContainer}>
-            <TouchableOpacity
-              style={styles.menuButton}
-              onPress={pickImage}
-            >
-              <Ionicons name="image-outline" size={24} color="#000" />
-              <Text style={styles.menuButtonText}>Choose Photo</Text>
-            </TouchableOpacity>
-
-            {editData.profilePic && (
-              <TouchableOpacity
-                style={[styles.menuButton, styles.deleteMenuButton]}
-                onPress={handleDeleteProfilePic}
-              >
-                <Ionicons name="trash-outline" size={24} color="#ff1a47" />
-                <Text style={[styles.menuButtonText, { color: "#ff1a47" }]}>
-                  Delete Photo
-                </Text>
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity
-              style={styles.menuCancelButton}
-              onPress={() => setShowImageMenu(false)}
-            >
-              <Text style={styles.menuCancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </Modal>
+
     </>
   );
 }
@@ -779,35 +1213,23 @@ const styles = StyleSheet.create({
   },
   textInput: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#e0e0e0",
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 12,
+    paddingVertical: 10,
     fontSize: 14,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fafafa",
   },
-  imagePreviewContainer: {
-    position: "relative",
-    width: 120,
-    height: 120,
-    borderRadius: 12,
+  previewImageWrapper: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     overflow: "hidden",
+    marginTop: 8,
   },
-  imagePreview: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 12,
-  },
-  imageChangeButton: {
-    position: "absolute",
-    bottom: 4,
-    right: 4,
-    backgroundColor: "#00A8E8",
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
+  previewImage: {
+    width: 100,
+    height: 100,
   },
   imagePickerButton: {
     borderWidth: 2,
@@ -829,34 +1251,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#999",
   },
-  buttonRow: {
+  modalButtons: {
     flexDirection: "row",
     gap: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
+    marginTop: 24,
+    marginBottom: 24,
   },
   button: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
   },
   cancelButton: {
     backgroundColor: "#f0f0f0",
   },
   cancelButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
-    color: "#666",
+    color: "#333",
   },
   saveButton: {
-    backgroundColor: "#00A8E8",
+    backgroundColor: "#ff1a47",
   },
   saveButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
     color: "#fff",
   },
@@ -940,8 +1360,109 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#fafafa",
   },
-  picker: {
-    height: 40,
+  noPreferencesText: {
+    fontSize: 14,
+    color: "#999",
+  },
+  preferenceEntry: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#ff1a47",
+  },
+  preferenceMainRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  preferenceInfoContainer: {
+    flex: 1,
+  },
+  preferenceNameText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  deletePreferenceButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: "#fee",
+  },
+  addPreferenceContainer: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+  },
+  addPreferenceButtonIcon: {
+    padding: 10,
+    borderRadius: 8,
     backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ff1a47",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
+    marginBottom: 12,
+  },
+  categoryButtonsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 16,
+  },
+  categoryButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#f0f0f0",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  categoryButtonActive: {
+    backgroundColor: "#ff1a47",
+    borderColor: "#ff1a47",
+  },
+  categoryButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  categoryButtonTextActive: {
+    color: "#fff",
+  },
+  preferenceItemsContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+  },
+  preferenceSelectItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: "#fafafa",
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 12,
+  },
+  preferenceSelectText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "500",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
   },
 });
+
