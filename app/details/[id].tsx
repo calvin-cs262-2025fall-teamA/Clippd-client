@@ -24,6 +24,7 @@ import {
   FlatList,
   PanResponder,
   GestureResponderEvent,
+  Linking,
 } from "react-native";
 import { ClipperProfile } from "../../type/clippdTypes";
 
@@ -59,6 +60,24 @@ function formatDate(dateString: string | undefined): string {
   } catch {
     return "";
   }
+}
+
+/**
+ * Open Google Maps with address
+ */
+function openGoogleMaps(address: string, location: string): void {
+  if (!address || !address.trim()) {
+    Alert.alert("No address", "Address information is not available");
+    return;
+  }
+
+  const searchQuery = `${address}, ${location}`;
+  const encodedQuery = encodeURIComponent(searchQuery);
+  const googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}`;
+
+  Linking.openURL(googleMapsUrl).catch(() => {
+    Alert.alert("Error", "Could not open Google Maps");
+  });
 }
 
 export default function DetailsPage() {
@@ -444,10 +463,14 @@ export default function DetailsPage() {
 
             <View style={{ flex: 1 }}>
               <Text style={styles.name}>{clippr.name}</Text>
-              <Text style={styles.locationText}>
-                <Ionicons name="location-outline" size={20} color={"red"} />{" "}
-                {clippr.location}
-              </Text>
+              <TouchableOpacity
+                onPress={() => openGoogleMaps(clippr.address || "", clippr.location)}
+              >
+                <Text style={styles.locationText}>
+                  <Ionicons name="location-outline" size={20} color={"red"} />{" "}
+                  {clippr.location}
+                </Text>
+              </TouchableOpacity>
             </View>
             <Text style={styles.rating}>
               <Ionicons name="star" size={20} color="gold" />
