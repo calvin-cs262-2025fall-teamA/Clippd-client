@@ -145,6 +145,7 @@ export default function BarberProfile() {
     firstName: "",
     lastName: "",
     bio: "",
+    address: "",
     city: "",
     state: "",
     images: [] as string[],
@@ -161,6 +162,7 @@ export default function BarberProfile() {
   const [isBioFocused, setIsBioFocused] = useState(false);
   const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
   const [isLastNameFocused, setIsLastNameFocused] = useState(false);
+  const [isAddressFocused, setIsAddressFocused] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showPortfolioMenu, setShowPortfolioMenu] = useState<number | null>(null);
   const [baseUrl, setBaseUrl] = useState<string>("");
@@ -225,6 +227,7 @@ export default function BarberProfile() {
           firstName: nameParts[0] || "",
           lastName: nameParts.slice(1).join(" ") || "",
           bio: selectedBarber.bio || "",
+          address: selectedBarber.address || "",
           city: city || "",
           state: state || "",
           images: selectedBarber.images || [],
@@ -247,6 +250,7 @@ export default function BarberProfile() {
         firstName: firstName || "",
         lastName: lastName || "",
         bio: barberData.bio || "",
+        address: barberData.address || "",
         city: city || "",
         state: state || "",
         images: barberData.images || [],
@@ -266,6 +270,7 @@ export default function BarberProfile() {
         firstName: firstName || "",
         lastName: lastName || "",
         bio: barberData.bio || "",
+        address: barberData.address || "",
         city: city || "",
         state: state || "",
         images: barberData.images || [],
@@ -422,7 +427,7 @@ export default function BarberProfile() {
         firstName: editData.firstName,
         lastName: editData.lastName,
         bio: editData.bio,
-        address: `${editData.city}, ${editData.state}`,
+        address: editData.address,
         city: editData.city,
         state: editData.state,
         profileImage: imageUrl, // Send empty string if deleted, new URI if changed, or existing URL
@@ -447,14 +452,26 @@ export default function BarberProfile() {
         throw new Error(`API Error ${response.status}: ${responseText}`);
       }
 
-      // Update local state with the new image URL
+      // Parse response to get updated user data
+      let responseData: any = {};
+      try {
+        responseData = JSON.parse(responseText);
+        console.log("Parsed response data:", responseData);
+        console.log("Response data keys:", Object.keys(responseData));
+        console.log("Address from response:", responseData.address);
+      } catch (parseError) {
+        console.warn("Failed to parse response as JSON:", parseError);
+      }
+
+      // Update local state with the response data (which includes address from DB)
       if (barberData) {
         const updatedData = {
           ...barberData,
-          profilePic: imageUrl, // Use the new image URL (local or URL)
-          name: `${editData.firstName} ${editData.lastName}`,
-          bio: editData.bio,
-          location: `${editData.city}, ${editData.state}`,
+          profilePic: responseData.profileImage || imageUrl, // Use response value if available
+          name: `${responseData.firstName || editData.firstName} ${responseData.lastName || editData.lastName}`,
+          bio: responseData.bio || editData.bio,
+          address: responseData.address || editData.address, // Use response value if available
+          location: `${responseData.city || editData.city}, ${responseData.state || editData.state}`,
           images: editData.images, // Update portfolio images
         };
         setBarberData(updatedData);
@@ -472,6 +489,7 @@ export default function BarberProfile() {
         firstName: "",
         lastName: "",
         bio: "",
+        address: "",
         city: "",
         state: "",
         images: [],
@@ -679,7 +697,7 @@ export default function BarberProfile() {
           <Text style={styles.name}>{barberData.name}</Text>
           <Text style={styles.title}>Professional Hair Stylist</Text>
 
-          {/* Rating & Location */}
+          {/* Rating & Location Section */}
           <View style={styles.ratingLocationRow}>
             <View style={styles.ratingContainer}>
               <Ionicons name="star" size={18} color="#FFB800" />
@@ -687,9 +705,19 @@ export default function BarberProfile() {
                 {formatRating(barberData.rating)} ({totalReviews} reviews)
               </Text>
             </View>
-            <View style={styles.locationContainer}>
-              <Ionicons name="location" size={18} color="#666" />
-              <Text style={styles.locationText}>{barberData.location}</Text>
+            <View style={styles.locationAddressColumn}>
+              <View style={styles.locationContainer}>
+                <Ionicons name="location" size={18} color="#666" />
+                <Text style={styles.locationText}>{barberData.location}</Text>
+              </View>
+              
+              {/* Address - using same pattern as Bio */}
+              <View style={styles.addressContainerProfile}>
+                <Ionicons name="location-outline" size={18} color="#666" />
+                <Text style={styles.addressText}>
+                  {barberData.address || "No address provided"}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -857,7 +885,7 @@ export default function BarberProfile() {
               keyboardShouldPersistTaps="handled"
               contentInsetAdjustmentBehavior="automatic"
               contentContainerStyle={
-                isBioFocused || isFirstNameFocused || isLastNameFocused 
+                isBioFocused || isFirstNameFocused || isLastNameFocused || isAddressFocused
                   ? { paddingBottom: 300 } 
                   : { paddingBottom: 20 }
               }
@@ -974,7 +1002,7 @@ export default function BarberProfile() {
                 />
               </View>
 
-              {/* State and City */}
+              {/* Location and Address Section */}
               <View style={styles.inputGroup}>
                 <View style={styles.locationHeaderRow}>
                   <Text style={styles.inputLabel}>Location</Text>
@@ -1032,6 +1060,20 @@ export default function BarberProfile() {
                     </View>
                   </>
                 )}
+
+                {/* Address Input */}
+                <Text style={styles.subLabel}>Address</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter your address"
+                  value={editData.address}
+                  onChangeText={(text) =>
+                    setEditData({ ...editData, address: text })
+                  }
+                  onFocus={() => setIsAddressFocused(true)}
+                  onBlur={() => setIsAddressFocused(false)}
+                  editable={!isLoading}
+                />
               </View>
 
               {/* Buttons */}
@@ -1409,6 +1451,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
   },
+  locationAddressColumn: {
+    flex: 1,
+    gap: 6,
+  },
   locationContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -1417,6 +1463,22 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 14,
     color: "#666",
+  },
+  addressContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 20,
+  },
+  addressContainerProfile: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  addressText: {
+    fontSize: 14,
+    color: "#666",
+    flex: 1,
   },
   bio: {
     fontSize: 14,

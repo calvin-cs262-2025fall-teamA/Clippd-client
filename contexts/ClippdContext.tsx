@@ -137,6 +137,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
               typeof c.rating === "string" ? c.rating : String(c.rating ?? "0"),
             profilePic: c.profileimage || c.profileImage || "",
             bio: c.bio || "", // Use bio from database
+            address: c.address || "", // Use address from database (consistent with bio)
             reviews: c.reviews || [], // Use reviews from database
             services: services, // Use services from database
           };
