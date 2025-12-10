@@ -40,9 +40,9 @@ export default function FilterScreen() {
           values={["Thick", "Thin", "Frizzy", "Damaged"]}
         />
 
-        {/* Clippr Specialty (NESTED) */}
+        {/* Clipper Services (NESTED) */}
         <DropdownSection
-          label="Clippr Specialty"
+          label="Clipper Services"
           values={[
             {
               label: "Haircuts",

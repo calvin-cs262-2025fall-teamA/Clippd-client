@@ -8,7 +8,7 @@ import {
   useFocusEffect,
   useLocalSearchParams,
 } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +20,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Dimensions,
+  FlatList,
+  PanResponder,
+  GestureResponderEvent,
+  Linking,
 } from "react-native";
 import { ClipperProfile } from "../../type/clippdTypes";
 
@@ -57,6 +62,24 @@ function formatDate(dateString: string | undefined): string {
   }
 }
 
+/**
+ * Open Google Maps with address
+ */
+function openGoogleMaps(address: string, location: string): void {
+  if (!address || !address.trim()) {
+    Alert.alert("No address", "Address information is not available");
+    return;
+  }
+
+  const searchQuery = `${address}, ${location}`;
+  const encodedQuery = encodeURIComponent(searchQuery);
+  const googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}`;
+
+  Linking.openURL(googleMapsUrl).catch(() => {
+    Alert.alert("Error", "Could not open Google Maps");
+  });
+}
+
 export default function DetailsPage() {
   const { id } = useLocalSearchParams();
   const { isFavorited, addFavorite, removeFavorite } = useFavorites();
@@ -70,6 +93,10 @@ export default function DetailsPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [, setIsLoadingReviews] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showPortfolioModal, setShowPortfolioModal] = useState(false);
+  const [portfolioCurrentIndex, setPortfolioCurrentIndex] = useState(0);
+  const panResponderRef = useRef<PanResponder | null>(null);
+  const flatListRef = useRef<FlatList>(null);
 
   // Find clipper from API data
   const clippr: ClipperProfile | undefined = clippers.find(
@@ -141,6 +168,33 @@ export default function DetailsPage() {
       loadReviews();
     }, [loadReviews])
   );
+
+  // Setup pan responder for detecting downward swipe to close portfolio modal
+  useEffect(() => {
+    panResponderRef.current = PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: () => {},
+      onPanResponderRelease: (evt, gestureState) => {
+        // Detect downward swipe (dy > 100 means swiped down)
+        if (gestureState.dy > 100 && showPortfolioModal) {
+          setShowPortfolioModal(false);
+        }
+      },
+    });
+  }, [showPortfolioModal]);
+
+  // Scroll to correct image when portfolio modal opens
+  useEffect(() => {
+    if (showPortfolioModal && flatListRef.current) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({
+          index: portfolioCurrentIndex,
+          animated: false,
+        });
+      }, 0);
+    }
+  }, [showPortfolioModal, portfolioCurrentIndex]);
 
   const favorited = isFavorited(id as string);
 
@@ -350,16 +404,32 @@ export default function DetailsPage() {
             {imageGroups.map((group, groupIndex) => (
               <View key={groupIndex} style={styles.imageGroup}>
                 {/* Large image on left */}
-                <Image source={{ uri: group[0] }} style={styles.largeImage} />
+                <TouchableOpacity
+                  onPress={() => {
+                    const imageIndex = groupIndex * 3;
+                    setPortfolioCurrentIndex(imageIndex);
+                    setShowPortfolioModal(true);
+                  }}
+                >
+                  <Image source={{ uri: group[0] }} style={styles.largeImage} />
+                </TouchableOpacity>
 
                 {/* Two stacked images on right */}
                 <View style={styles.sideImageGrid}>
                   {group.slice(1, 3).map((img, index) => (
-                    <Image
+                    <TouchableOpacity
                       key={index}
-                      source={{ uri: img }}
-                      style={styles.sideImage}
-                    />
+                      onPress={() => {
+                        const imageIndex = groupIndex * 3 + index + 1;
+                        setPortfolioCurrentIndex(imageIndex);
+                        setShowPortfolioModal(true);
+                      }}
+                    >
+                      <Image
+                        source={{ uri: img }}
+                        style={styles.sideImage}
+                      />
+                    </TouchableOpacity>
                   ))}
                 </View>
               </View>
@@ -393,10 +463,14 @@ export default function DetailsPage() {
 
             <View style={{ flex: 1 }}>
               <Text style={styles.name}>{clippr.name}</Text>
-              <Text style={styles.locationText}>
-                <Ionicons name="location-outline" size={20} color={"red"} />{" "}
-                {clippr.location}
-              </Text>
+              <TouchableOpacity
+                onPress={() => openGoogleMaps(clippr.address || "", clippr.location)}
+              >
+                <Text style={styles.locationText}>
+                  <Ionicons name="location-outline" size={20} color={"red"} />{" "}
+                  {clippr.location}
+                </Text>
+              </TouchableOpacity>
             </View>
             <Text style={styles.rating}>
               <Ionicons name="star" size={20} color="gold" />
@@ -414,12 +488,14 @@ export default function DetailsPage() {
         <View style={styles.reviewContainer}>
           <View style={styles.reviewHeaderRow}>
             <Text style={styles.sectionTitle}>Reviews</Text>
-            <TouchableOpacity
-              onPress={() => setShowReviewInput(!showReviewInput)}
-              style={styles.editButton}
-            >
-              <Ionicons name="pencil" size={22} color="#000000ff" />
-            </TouchableOpacity>
+            {user?.role !== "Clipper" && (
+              <TouchableOpacity
+                onPress={() => setShowReviewInput(!showReviewInput)}
+                style={styles.editButton}
+              >
+                <Ionicons name="pencil" size={22} color="#000000ff" />
+              </TouchableOpacity>
+            )}
           </View>
 
           {showReviewInput && (
@@ -544,7 +620,7 @@ export default function DetailsPage() {
         >
           <View style={styles.modalContainer}>
             <TouchableOpacity
-              style={styles.closeButton}
+              style={styles.profileCloseButton}
               onPress={() => setShowProfileModal(false)}
             >
               <Ionicons name="close" size={32} color="#fff" />
@@ -558,6 +634,72 @@ export default function DetailsPage() {
             )}
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Portfolio Images Modal with Sliding */}
+      <Modal
+        visible={showPortfolioModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowPortfolioModal(false)}
+      >
+        <View
+          style={styles.modalBackdrop}
+          {...(panResponderRef.current ? panResponderRef.current.panHandlers : {})}
+        >
+          <View style={styles.portfolioModalContainer}>
+            <TouchableOpacity
+              style={styles.portfolioCloseButton}
+              onPress={() => setShowPortfolioModal(false)}
+            >
+              <Ionicons name="close" size={32} color="#fff" />
+            </TouchableOpacity>
+
+            {clippr.images && clippr.images.length > 0 && (
+              <>
+                <FlatList
+                  ref={flatListRef}
+                  data={clippr.images}
+                  renderItem={({ item }) => (
+                    <View style={styles.portfolioSlideContainer}>
+                      <Image
+                        source={{ uri: item }}
+                        style={styles.portfolioFullImage}
+                        resizeMode="contain"
+                      />
+                    </View>
+                  )}
+                  keyExtractor={(item, index) => index.toString()}
+                  horizontal
+                  pagingEnabled
+                  scrollEventThrottle={16}
+                  removeClippedSubviews={true}
+                  maxToRenderPerBatch={3}
+                  updateCellsBatchingPeriod={50}
+                  initialNumToRender={2}
+                  windowSize={3}
+                  onScrollToIndexFailed={() => {
+                    // Handle scroll to index failure gracefully
+                  }}
+                  onMomentumScrollEnd={(event) => {
+                    const contentOffsetX =
+                      event.nativeEvent.contentOffset.x;
+                    const screenWidth = Dimensions.get("window").width;
+                    const index = Math.round(contentOffsetX / screenWidth);
+                    setPortfolioCurrentIndex(index);
+                  }}
+                />
+
+                {/* Image Counter */}
+                <View style={styles.imageCounter}>
+                  <Text style={styles.imageCounterText}>
+                    {portfolioCurrentIndex + 1} / {clippr.images.length}
+                  </Text>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
       </Modal>
     </>
   );
@@ -829,8 +971,22 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
+    top: 20,
+    right: 20,
+    zIndex: 100,
+    padding: 10,
+  },
+  profileCloseButton: {
+    position: "absolute",
     top: -50,
     right: 0,
+    zIndex: 100,
+    padding: 10,
+  },
+  portfolioCloseButton: {
+    position: "absolute",
+    top: 20,
+    right: 20,
     zIndex: 100,
     padding: 10,
   },
@@ -844,5 +1000,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#bbb",
     marginTop: 12,
+  },
+  portfolioModalContainer: {
+    flex: 1,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  portfolioSlideContainer: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  portfolioFullImage: {
+    width: "100%",
+    height: "100%",
+  },
+  imageCounter: {
+    position: "absolute",
+    bottom: 30,
+    alignSelf: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  imageCounterText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
