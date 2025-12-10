@@ -32,6 +32,11 @@ export default function Signup() {
       return;
     }
 
+    if (role === "Select Role") {
+      Alert.alert("Error", "Please select a role");
+      return;
+    }
+
     if (password.length < 6) {
       Alert.alert("Error", "Password must be at least 6 characters");
       return;

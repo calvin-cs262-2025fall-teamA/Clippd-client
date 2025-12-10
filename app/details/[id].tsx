@@ -226,7 +226,7 @@ export default function DetailsPage() {
       const endpoint = `${apiUrl}/clippers/${id}/reviews`;
 
       const requestBody = {
-        clientID: parseInt(user.id),
+        userID: parseInt(user.id),
         clipperID: parseInt(id as string),
         rating: reviewRating,
         comment: reviewText,
@@ -425,10 +425,7 @@ export default function DetailsPage() {
                         setShowPortfolioModal(true);
                       }}
                     >
-                      <Image
-                        source={{ uri: img }}
-                        style={styles.sideImage}
-                      />
+                      <Image source={{ uri: img }} style={styles.sideImage} />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -464,7 +461,9 @@ export default function DetailsPage() {
             <View style={{ flex: 1 }}>
               <Text style={styles.name}>{clippr.name}</Text>
               <TouchableOpacity
-                onPress={() => openGoogleMaps(clippr.address || "", clippr.location)}
+                onPress={() =>
+                  openGoogleMaps(clippr.address || "", clippr.location)
+                }
               >
                 <Text style={styles.locationText}>
                   <Ionicons name="location-outline" size={20} color={"red"} />{" "}
@@ -645,7 +644,9 @@ export default function DetailsPage() {
       >
         <View
           style={styles.modalBackdrop}
-          {...(panResponderRef.current ? panResponderRef.current.panHandlers : {})}
+          {...(panResponderRef.current
+            ? panResponderRef.current.panHandlers
+            : {})}
         >
           <View style={styles.portfolioModalContainer}>
             <TouchableOpacity
@@ -682,8 +683,7 @@ export default function DetailsPage() {
                     // Handle scroll to index failure gracefully
                   }}
                   onMomentumScrollEnd={(event) => {
-                    const contentOffsetX =
-                      event.nativeEvent.contentOffset.x;
+                    const contentOffsetX = event.nativeEvent.contentOffset.x;
                     const screenWidth = Dimensions.get("window").width;
                     const index = Math.round(contentOffsetX / screenWidth);
                     setPortfolioCurrentIndex(index);

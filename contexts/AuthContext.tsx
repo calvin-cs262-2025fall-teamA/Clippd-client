@@ -8,8 +8,7 @@ type AuthContextType = {
     firstName: string,
     lastName: string,
     email: string,
-    password: string,
-    role?: string
+    password: string
   ) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -21,9 +20,6 @@ type User = {
   firstName: string;
   lastName: string;
   role?: string;
-  city?: string;
-  state?: string;
-  profileImage?: string;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -125,9 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         firstName: data.firstname || "",
         lastName: data.lastname || "",
         role: data.role || "Client",
-        city: data.city || "",
-        state: data.state || "",
-        profileImage: data.profileimage || "",
       };
 
       console.log("[AuthContext] Creating user object:", user);
@@ -193,9 +186,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         firstName: firstName,
         lastName: lastName,
         role: role,
-        city: data.city || "",
-        state: data.state || "",
-        profileImage: data.profileimage || "",
       };
 
       await SecureStore.setItemAsync("userToken", token);
