@@ -23,67 +23,199 @@ import { getApiUrl } from "@/utils/networkConfig";
 
 // US States and Major Cities
 const US_STATES = [
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
-  "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
-  "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
-  "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
-  "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
-  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
-  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia",
-  "Wisconsin", "Wyoming"
+  "Alabama",
+  "Alaska",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia",
+  "Hawaii",
+  "Idaho",
+  "Illinois",
+  "Indiana",
+  "Iowa",
+  "Kansas",
+  "Kentucky",
+  "Louisiana",
+  "Maine",
+  "Maryland",
+  "Massachusetts",
+  "Michigan",
+  "Minnesota",
+  "Mississippi",
+  "Missouri",
+  "Montana",
+  "Nebraska",
+  "Nevada",
+  "New Hampshire",
+  "New Jersey",
+  "New Mexico",
+  "New York",
+  "North Carolina",
+  "North Dakota",
+  "Ohio",
+  "Oklahoma",
+  "Oregon",
+  "Pennsylvania",
+  "Rhode Island",
+  "South Carolina",
+  "South Dakota",
+  "Tennessee",
+  "Texas",
+  "Utah",
+  "Vermont",
+  "Virginia",
+  "Washington",
+  "West Virginia",
+  "Wisconsin",
+  "Wyoming",
 ];
 
 const CITIES_BY_STATE: { [key: string]: string[] } = {
-  "Alabama": ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa"],
-  "Alaska": ["Anchorage", "Juneau", "Fairbanks", "Sitka", "Ketchikan"],
-  "Arizona": ["Phoenix", "Mesa", "Scottsdale", "Chandler", "Tempe"],
-  "Arkansas": ["Little Rock", "Fort Smith", "Fayetteville", "Springdale", "Jonesboro"],
-  "California": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "San Jose"],
-  "Colorado": ["Denver", "Colorado Springs", "Aurora", "Fort Collins", "Pueblo"],
-  "Connecticut": ["Bridgeport", "New Haven", "Hartford", "Stamford", "Waterbury"],
-  "Delaware": ["Wilmington", "Dover", "Newark", "Middletown", "Smyrna"],
-  "Florida": ["Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg"],
-  "Georgia": ["Atlanta", "Augusta", "Savannah", "Athens", "Macon"],
-  "Hawaii": ["Honolulu", "Hilo", "Kailua", "Kaneohe", "Waipahu"],
-  "Idaho": ["Boise", "Nampa", "Meridian", "Idaho Falls", "Pocatello"],
-  "Illinois": ["Chicago", "Aurora", "Rockford", "Joliet", "Naperville"],
-  "Indiana": ["Indianapolis", "Fort Wayne", "Evansville", "South Bend", "Bloomington"],
-  "Iowa": ["Des Moines", "Cedar Rapids", "Davenport", "Sioux City", "Iowa City"],
-  "Kansas": ["Kansas City", "Wichita", "Topeka", "Overland Park", "Lawrence"],
-  "Kentucky": ["Louisville", "Lexington", "Bowling Green", "Owensboro", "Covington"],
-  "Louisiana": ["New Orleans", "Baton Rouge", "Shreveport", "Lafayette", "Lake Charles"],
-  "Maine": ["Portland", "Lewiston", "Bangor", "Augusta", "Waterville"],
-  "Maryland": ["Baltimore", "Frederick", "Rockville", "Gaithersburg", "Bowie"],
-  "Massachusetts": ["Boston", "Worcester", "Springfield", "Lowell", "Cambridge"],
-  "Michigan": ["Detroit", "Grand Rapids", "Warren", "Sterling Heights", "Ann Arbor"],
-  "Minnesota": ["Minneapolis", "St. Paul", "Rochester", "Duluth", "Bloomington"],
-  "Mississippi": ["Jackson", "Gulfport", "Southhaven", "Hattiesburg", "Biloxi"],
-  "Missouri": ["Kansas City", "St. Louis", "Springfield", "Independence", "Columbia"],
-  "Montana": ["Billings", "Missoula", "Great Falls", "Bozeman", "Helena"],
-  "Nebraska": ["Omaha", "Lincoln", "Bellevue", "Grand Island", "Kearney"],
-  "Nevada": ["Las Vegas", "Henderson", "Reno", "North Las Vegas", "Sparks"],
+  Alabama: ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa"],
+  Alaska: ["Anchorage", "Juneau", "Fairbanks", "Sitka", "Ketchikan"],
+  Arizona: ["Phoenix", "Mesa", "Scottsdale", "Chandler", "Tempe"],
+  Arkansas: [
+    "Little Rock",
+    "Fort Smith",
+    "Fayetteville",
+    "Springdale",
+    "Jonesboro",
+  ],
+  California: [
+    "Los Angeles",
+    "San Francisco",
+    "San Diego",
+    "Sacramento",
+    "San Jose",
+  ],
+  Colorado: ["Denver", "Colorado Springs", "Aurora", "Fort Collins", "Pueblo"],
+  Connecticut: ["Bridgeport", "New Haven", "Hartford", "Stamford", "Waterbury"],
+  Delaware: ["Wilmington", "Dover", "Newark", "Middletown", "Smyrna"],
+  Florida: ["Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg"],
+  Georgia: ["Atlanta", "Augusta", "Savannah", "Athens", "Macon"],
+  Hawaii: ["Honolulu", "Hilo", "Kailua", "Kaneohe", "Waipahu"],
+  Idaho: ["Boise", "Nampa", "Meridian", "Idaho Falls", "Pocatello"],
+  Illinois: ["Chicago", "Aurora", "Rockford", "Joliet", "Naperville"],
+  Indiana: [
+    "Indianapolis",
+    "Fort Wayne",
+    "Evansville",
+    "South Bend",
+    "Bloomington",
+  ],
+  Iowa: ["Des Moines", "Cedar Rapids", "Davenport", "Sioux City", "Iowa City"],
+  Kansas: ["Kansas City", "Wichita", "Topeka", "Overland Park", "Lawrence"],
+  Kentucky: [
+    "Louisville",
+    "Lexington",
+    "Bowling Green",
+    "Owensboro",
+    "Covington",
+  ],
+  Louisiana: [
+    "New Orleans",
+    "Baton Rouge",
+    "Shreveport",
+    "Lafayette",
+    "Lake Charles",
+  ],
+  Maine: ["Portland", "Lewiston", "Bangor", "Augusta", "Waterville"],
+  Maryland: ["Baltimore", "Frederick", "Rockville", "Gaithersburg", "Bowie"],
+  Massachusetts: ["Boston", "Worcester", "Springfield", "Lowell", "Cambridge"],
+  Michigan: [
+    "Detroit",
+    "Grand Rapids",
+    "Warren",
+    "Sterling Heights",
+    "Ann Arbor",
+  ],
+  Minnesota: ["Minneapolis", "St. Paul", "Rochester", "Duluth", "Bloomington"],
+  Mississippi: ["Jackson", "Gulfport", "Southhaven", "Hattiesburg", "Biloxi"],
+  Missouri: [
+    "Kansas City",
+    "St. Louis",
+    "Springfield",
+    "Independence",
+    "Columbia",
+  ],
+  Montana: ["Billings", "Missoula", "Great Falls", "Bozeman", "Helena"],
+  Nebraska: ["Omaha", "Lincoln", "Bellevue", "Grand Island", "Kearney"],
+  Nevada: ["Las Vegas", "Henderson", "Reno", "North Las Vegas", "Sparks"],
   "New Hampshire": ["Manchester", "Nashua", "Concord", "Derry", "Rochester"],
   "New Jersey": ["Newark", "Jersey City", "Paterson", "Elizabeth", "Trenton"],
-  "New Mexico": ["Albuquerque", "Las Cruces", "Rio Rancho", "Santa Fe", "Roswell"],
+  "New Mexico": [
+    "Albuquerque",
+    "Las Cruces",
+    "Rio Rancho",
+    "Santa Fe",
+    "Roswell",
+  ],
   "New York": ["New York City", "Buffalo", "Rochester", "Yonkers", "Syracuse"],
-  "North Carolina": ["Charlotte", "Raleigh", "Greensboro", "Durham", "Winston-Salem"],
+  "North Carolina": [
+    "Charlotte",
+    "Raleigh",
+    "Greensboro",
+    "Durham",
+    "Winston-Salem",
+  ],
   "North Dakota": ["Bismarck", "Fargo", "Grand Forks", "Minot", "Williston"],
-  "Ohio": ["Columbus", "Cleveland", "Cincinnati", "Toledo", "Akron"],
-  "Oklahoma": ["Oklahoma City", "Tulsa", "Norman", "Broken Arrow", "Lawton"],
-  "Oregon": ["Portland", "Eugene", "Salem", "Gresham", "Hillsboro"],
-  "Pennsylvania": ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading"],
-  "Rhode Island": ["Providence", "Warwick", "Cranston", "Pawtucket", "Woonsocket"],
-  "South Carolina": ["Charleston", "Columbia", "Greenville", "Summerville", "Goose Creek"],
-  "South Dakota": ["Sioux Falls", "Rapid City", "Aberdeen", "Brookings", "Watertown"],
-  "Tennessee": ["Nashville", "Memphis", "Knoxville", "Chattanooga", "Clarksville"],
-  "Texas": ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth"],
-  "Utah": ["Salt Lake City", "Provo", "Ogden", "Sandy", "Orem"],
-  "Vermont": ["Burlington", "Rutland", "South Burlington", "Montpelier", "Barre"],
-  "Virginia": ["Virginia Beach", "Richmond", "Arlington", "Alexandria", "Roanoke"],
-  "Washington": ["Seattle", "Tacoma", "Vancouver", "Spokane", "Bellevue"],
-  "West Virginia": ["Charleston", "Huntington", "Parkersburg", "Wheeling", "Weirton"],
-  "Wisconsin": ["Milwaukee", "Madison", "Green Bay", "Kenosha", "Racine"],
-  "Wyoming": ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs"],
+  Ohio: ["Columbus", "Cleveland", "Cincinnati", "Toledo", "Akron"],
+  Oklahoma: ["Oklahoma City", "Tulsa", "Norman", "Broken Arrow", "Lawton"],
+  Oregon: ["Portland", "Eugene", "Salem", "Gresham", "Hillsboro"],
+  Pennsylvania: ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading"],
+  "Rhode Island": [
+    "Providence",
+    "Warwick",
+    "Cranston",
+    "Pawtucket",
+    "Woonsocket",
+  ],
+  "South Carolina": [
+    "Charleston",
+    "Columbia",
+    "Greenville",
+    "Summerville",
+    "Goose Creek",
+  ],
+  "South Dakota": [
+    "Sioux Falls",
+    "Rapid City",
+    "Aberdeen",
+    "Brookings",
+    "Watertown",
+  ],
+  Tennessee: [
+    "Nashville",
+    "Memphis",
+    "Knoxville",
+    "Chattanooga",
+    "Clarksville",
+  ],
+  Texas: ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth"],
+  Utah: ["Salt Lake City", "Provo", "Ogden", "Sandy", "Orem"],
+  Vermont: ["Burlington", "Rutland", "South Burlington", "Montpelier", "Barre"],
+  Virginia: [
+    "Virginia Beach",
+    "Richmond",
+    "Arlington",
+    "Alexandria",
+    "Roanoke",
+  ],
+  Washington: ["Seattle", "Tacoma", "Vancouver", "Spokane", "Bellevue"],
+  "West Virginia": [
+    "Charleston",
+    "Huntington",
+    "Parkersburg",
+    "Wheeling",
+    "Weirton",
+  ],
+  Wisconsin: ["Milwaukee", "Madison", "Green Bay", "Kenosha", "Racine"],
+  Wyoming: ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs"],
 };
 
 /**
@@ -107,28 +239,67 @@ function formatRating(rating: number | string | undefined): string {
   return rounded.toFixed(1);
 }
 
+const formatPhoneNumber = (value: string): string => {
+  // Remove all non-digit characters
+  const digits = value.replace(/\D/g, "");
+
+  // If no digits, return empty string
+  if (digits.length === 0) return "";
+
+  // Format: (XXX) XXX-XXXX
+  if (digits.length <= 3) {
+    return `(${digits}`;
+  } else if (digits.length <= 6) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  } else {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(
+      6,
+      10
+    )}`;
+  }
+};
+
 // Service Categories Data
 const SERVICE_CATEGORIES = [
   {
     label: "Haircuts",
-    values: ["Fade", "Taper", "Scissor Cut", "Layer cut", "Bob/Long Bob", "Buzz Cut", "Trim & Shape up"]
+    values: [
+      "Fade",
+      "Taper",
+      "Scissor Cut",
+      "Layer cut",
+      "Bob/Long Bob",
+      "Buzz Cut",
+      "Trim & Shape up",
+    ],
   },
   {
     label: "Styling",
-    values: ["Blowout", "Curling/Waves", "Straightening", "Special Event Hairstyle"]
+    values: [
+      "Blowout",
+      "Curling/Waves",
+      "Straightening",
+      "Special Event Hairstyle",
+    ],
   },
   {
     label: "Coloring",
-    values: ["Full Color", "Highlights", "Balayage", "Root Touch-up", "Bleach + Tone"]
+    values: [
+      "Full Color",
+      "Highlights",
+      "Balayage",
+      "Root Touch-up",
+      "Bleach + Tone",
+    ],
   },
   {
     label: "Treatments",
-    values: ["Perm", "Keratin", "Relaxer"]
+    values: ["Perm", "Keratin", "Relaxer"],
   },
   {
     label: "Facial / Beard Care",
-    values: ["Beard Trim", "Beard Shaping", "Hot Towel Shave"]
-  }
+    values: ["Beard Trim", "Beard Shaping", "Hot Towel Shave"],
+  },
 ];
 
 export default function BarberProfile() {
@@ -148,23 +319,35 @@ export default function BarberProfile() {
     address: "",
     city: "",
     state: "",
+    emailAddress: "",
+    phone: "",
     images: [] as string[],
   });
-  const [editServices, setEditServices] = useState<{
-    id?: number;
-    serviceName: string;
-    price: string;
-    durationMinutes?: number;
-  }[]>([]);
+  const [editServices, setEditServices] = useState<
+    {
+      id?: number;
+      serviceName: string;
+      price: string;
+      durationMinutes?: number;
+    }[]
+  >([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [editingServiceIndex, setEditingServiceIndex] = useState<number | null>(null);
+  const [editingServiceIndex, setEditingServiceIndex] = useState<number | null>(
+    null
+  );
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isBioFocused, setIsBioFocused] = useState(false);
   const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
   const [isLastNameFocused, setIsLastNameFocused] = useState(false);
   const [isAddressFocused, setIsAddressFocused] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [showPortfolioMenu, setShowPortfolioMenu] = useState<number | null>(null);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isPhoneFocused, setIsPhoneFocused] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [showPortfolioMenu, setShowPortfolioMenu] = useState<number | null>(
+    null
+  );
   const [baseUrl, setBaseUrl] = useState<string>("");
 
   const handleLogout = async () => {
@@ -193,16 +376,17 @@ export default function BarberProfile() {
 
       if (user && user.role === "Clipper") {
         // Find barber with matching user ID or name
-        selectedBarber = clippers.find((clipper) => {
-          // Try to match by name (firstName + lastName)
-          const clipperFullName = clipper.name || "";
-          const userFullName = `${user.firstName} ${user.lastName}`;
-          return (
-            clipperFullName === userFullName ||
-            clipperFullName === user.firstName ||
-            clipperFullName.includes(user.firstName)
-          );
-        }) || null;
+        selectedBarber =
+          clippers.find((clipper) => {
+            // Try to match by name (firstName + lastName)
+            const clipperFullName = clipper.name || "";
+            const userFullName = `${user.firstName} ${user.lastName}`;
+            return (
+              clipperFullName === userFullName ||
+              clipperFullName === user.firstName ||
+              clipperFullName.includes(user.firstName)
+            );
+          }) || null;
 
         if (!selectedBarber) {
           // If no match found, show first barber
@@ -230,13 +414,16 @@ export default function BarberProfile() {
           address: selectedBarber.address || "",
           city: city || "",
           state: state || "",
+          emailAddress: selectedBarber.emailAddress || "",
+          phone: selectedBarber.phone || "",
           images: selectedBarber.images || [],
         });
         console.log("Barber data loaded:", selectedBarber);
+        console.log("Barber email:", selectedBarber.emailAddress);
+        console.log("Barber phone:", selectedBarber.phone);
         console.log("Barber services:", selectedBarber.services);
       }
     }
-     
   }, [clippers, user]);
 
   const handleEditPress = () => {
@@ -244,7 +431,7 @@ export default function BarberProfile() {
     if (barberData) {
       const [firstName, lastName] = barberData.name.split(" ");
       const [city, state] = barberData.location.split(", ");
-      
+
       setEditData({
         profilePic: barberData.profilePic || "",
         firstName: firstName || "",
@@ -253,6 +440,8 @@ export default function BarberProfile() {
         address: barberData.address || "",
         city: city || "",
         state: state || "",
+        emailAddress: barberData.emailAddress || "",
+        phone: barberData.phone || "",
         images: barberData.images || [],
       });
     }
@@ -264,7 +453,7 @@ export default function BarberProfile() {
     if (barberData) {
       const [firstName, lastName] = barberData.name.split(" ");
       const [city, state] = barberData.location.split(", ");
-      
+
       setEditData({
         profilePic: barberData.profilePic || "",
         firstName: firstName || "",
@@ -273,6 +462,8 @@ export default function BarberProfile() {
         address: barberData.address || "",
         city: city || "",
         state: state || "",
+        emailAddress: barberData.emailAddress || "",
+        phone: barberData.phone || "",
         images: barberData.images || [],
       });
     }
@@ -280,7 +471,11 @@ export default function BarberProfile() {
   };
 
   const handleServicesEditPress = () => {
-    if (barberData && barberData.services && Array.isArray(barberData.services)) {
+    if (
+      barberData &&
+      barberData.services &&
+      Array.isArray(barberData.services)
+    ) {
       const validServices = barberData.services
         .filter((service) => service && service.serviceName)
         .map((service) => ({
@@ -334,11 +529,14 @@ export default function BarberProfile() {
           });
         } else {
           // In production mode, convert image to base64 for persistence
-          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
-            encoding: "base64",
-          });
+          const base64 = await FileSystem.readAsStringAsync(
+            result.assets[0].uri,
+            {
+              encoding: "base64",
+            }
+          );
           const imageData = `data:image/jpeg;base64,${base64}`;
-          
+
           setEditData({
             ...editData,
             profilePic: imageData,
@@ -377,11 +575,14 @@ export default function BarberProfile() {
           });
         } else {
           // In production mode, convert image to base64 for persistence
-          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
-            encoding: "base64",
-          });
+          const base64 = await FileSystem.readAsStringAsync(
+            result.assets[0].uri,
+            {
+              encoding: "base64",
+            }
+          );
           const imageData = `data:image/jpeg;base64,${base64}`;
-          
+
           setEditData({
             ...editData,
             images: [imageData, ...(editData.images || [])],
@@ -410,7 +611,12 @@ export default function BarberProfile() {
       return;
     }
 
-    if (!editData.firstName.trim() || !editData.bio.trim() || !editData.city || !editData.state) {
+    if (
+      !editData.firstName.trim() ||
+      !editData.bio.trim() ||
+      !editData.city ||
+      !editData.state
+    ) {
       Alert.alert("Validation Error", "Please fill in all required fields");
       return;
     }
@@ -430,6 +636,8 @@ export default function BarberProfile() {
         address: editData.address,
         city: editData.city,
         state: editData.state,
+        emailAddress: editData.emailAddress,
+        phone: editData.phone,
         profileImage: imageUrl, // Send empty string if deleted, new URI if changed, or existing URL
       };
 
@@ -468,14 +676,20 @@ export default function BarberProfile() {
         const updatedData = {
           ...barberData,
           profilePic: responseData.profileImage || imageUrl, // Use response value if available
-          name: `${responseData.firstName || editData.firstName} ${responseData.lastName || editData.lastName}`,
+          name: `${responseData.firstName || editData.firstName} ${
+            responseData.lastName || editData.lastName
+          }`,
           bio: responseData.bio || editData.bio,
           address: responseData.address || editData.address, // Use response value if available
-          location: `${responseData.city || editData.city}, ${responseData.state || editData.state}`,
+          location: `${responseData.city || editData.city}, ${
+            responseData.state || editData.state
+          }`,
+          emailAddress: responseData.emailAddress || editData.emailAddress,
+          phone: responseData.phone || editData.phone,
           images: editData.images, // Update portfolio images
         };
         setBarberData(updatedData);
-        
+
         // Update global context so changes reflect across the app
         updateClipperProfile(barberData.id, updatedData);
       }
@@ -492,11 +706,14 @@ export default function BarberProfile() {
         address: "",
         city: "",
         state: "",
+        emailAddress: "",
+        phone: "",
         images: [],
       });
     } catch (error) {
       console.error("Error updating profile:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       Alert.alert("Error", `Failed to update profile: ${errorMessage}`);
     } finally {
       setIsLoading(false);
@@ -510,7 +727,7 @@ export default function BarberProfile() {
     }
 
     // Validate services before saving
-    const validServices = editServices.filter(service => {
+    const validServices = editServices.filter((service) => {
       if (!service.serviceName || !String(service.serviceName).trim()) {
         console.warn("Skipping service without name");
         return false;
@@ -523,7 +740,10 @@ export default function BarberProfile() {
     });
 
     if (validServices.length === 0) {
-      Alert.alert("Validation Error", "Please add at least one service with a name and price");
+      Alert.alert(
+        "Validation Error",
+        "Please add at least one service with a name and price"
+      );
       return;
     }
 
@@ -537,12 +757,15 @@ export default function BarberProfile() {
         for (const service of barberData.services) {
           if (service.id) {
             try {
-              const deleteResponse = await fetch(`${baseUrl}/services/${service.id}`, {
-                method: "DELETE",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              });
+              const deleteResponse = await fetch(
+                `${baseUrl}/services/${service.id}`,
+                {
+                  method: "DELETE",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
 
               if (!deleteResponse.ok) {
                 console.warn(`Failed to delete service ${service.id}`);
@@ -572,17 +795,20 @@ export default function BarberProfile() {
             continue;
           }
 
-          const addResponse = await fetch(`${baseUrl}/clippers/${barberData.id}/services`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              serviceName: serviceName,
-              price: price,
-              durationMinutes: durationMinutes,
-            }),
-          });
+          const addResponse = await fetch(
+            `${baseUrl}/clippers/${barberData.id}/services`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                serviceName: serviceName,
+                price: price,
+                durationMinutes: durationMinutes,
+              }),
+            }
+          );
 
           if (!addResponse.ok) {
             const errorText = await addResponse.text();
@@ -637,7 +863,8 @@ export default function BarberProfile() {
       setEditingServiceIndex(null);
     } catch (error) {
       console.error("Error updating services:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       Alert.alert("Error", `Failed to update services: ${errorMessage}`);
     } finally {
       setIsLoading(false);
@@ -646,10 +873,17 @@ export default function BarberProfile() {
 
   if (!barberData) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <Stack.Screen options={{ headerShown: false }} />
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={{ marginTop: 10, fontSize: 14, color: '#666' }}>Loading barber profile...</Text>
+        <Text style={{ marginTop: 10, fontSize: 14, color: "#666" }}>
+          Loading barber profile...
+        </Text>
       </View>
     );
   }
@@ -705,27 +939,35 @@ export default function BarberProfile() {
                 {formatRating(barberData.rating)} ({totalReviews} reviews)
               </Text>
             </View>
-            <View style={styles.locationAddressColumn}>
-              <View style={styles.locationContainer}>
-                <Ionicons name="location" size={18} color="#666" />
-                <Text style={styles.locationText}>{barberData.location}</Text>
-              </View>
-              
-              {/* Address - using same pattern as Bio */}
-              <View style={styles.addressContainerProfile}>
-                <Ionicons name="location-outline" size={18} color="#666" />
-                <Text style={styles.addressText}>
-                  {barberData.address || "No address provided"}
-                </Text>
-              </View>
-            </View>
           </View>
 
           {/* Bio */}
-          <Text style={styles.bio}>
-            {barberData.bio ||
-              "Specializing in modern cuts and color techniques with 8+ years of experience. Passionate about helping clients look and feel their best."}
-          </Text>
+          <Text style={styles.bio}>{barberData.bio || "Please add a bio"}</Text>
+
+          {/* Contact Information */}
+          <View style={styles.contactSection}>
+            <View style={styles.contactItem}>
+              <Ionicons name="mail" size={18} color="#666" />
+              <Text style={styles.contactText} numberOfLines={1}>
+                {barberData.emailAddress || "No email"}
+              </Text>
+            </View>
+            <View style={styles.contactItem}>
+              <Ionicons name="call" size={16} color="#666" />
+              <Text style={styles.contactText} numberOfLines={1}>
+                {barberData.phone
+                  ? formatPhoneNumber(barberData.phone)
+                  : "Phone number not set"}
+              </Text>
+            </View>
+            <View style={styles.contactItem}>
+              <Ionicons name="location-outline" size={18} color="#666" />
+              <Text style={styles.contactText} numberOfLines={1}>
+                {barberData.address || "No address"},{" "}
+                {barberData.location || ""}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* Services Section */}
@@ -737,7 +979,9 @@ export default function BarberProfile() {
             </TouchableOpacity>
           </View>
 
-          {barberData.services && Array.isArray(barberData.services) && barberData.services.length > 0 ? (
+          {barberData.services &&
+          Array.isArray(barberData.services) &&
+          barberData.services.length > 0 ? (
             <ScrollView
               style={styles.servicesScrollContainer}
               contentContainerStyle={styles.servicesContentContainer}
@@ -792,7 +1036,9 @@ export default function BarberProfile() {
                                       validService.durationMinutes / 60
                                     )}h${
                                       validService.durationMinutes % 60 > 0
-                                        ? ` ${validService.durationMinutes % 60}m`
+                                        ? ` ${
+                                            validService.durationMinutes % 60
+                                          }m`
                                         : ""
                                     }`}
                               </Text>
@@ -860,6 +1106,55 @@ export default function BarberProfile() {
           </View>
         </View>
 
+        {/* Reviews Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Reviews</Text>
+          </View>
+
+          {barberData.reviews &&
+          Array.isArray(barberData.reviews) &&
+          barberData.reviews.length > 0 ? (
+            <View>
+              {barberData.reviews.map((review, index) => (
+                <View key={review.id || index} style={styles.reviewCard}>
+                  <View style={styles.reviewHeader}>
+                    <View style={styles.reviewerInfo}>
+                      <Text style={styles.reviewerName}>
+                        {review.reviewerName || "Anonymous"}
+                      </Text>
+                      <View style={styles.ratingStars}>
+                        {[...Array(5)].map((_, i) => (
+                          <Ionicons
+                            key={i}
+                            name={
+                              i < (review.rating || 0) ? "star" : "star-outline"
+                            }
+                            size={14}
+                            color={
+                              i < (review.rating || 0) ? "#FFD700" : "#ccc"
+                            }
+                          />
+                        ))}
+                      </View>
+                    </View>
+                    <Text style={styles.reviewDate}>
+                      {review.createdAt || ""}
+                    </Text>
+                  </View>
+                  <Text style={styles.reviewComment}>
+                    {review.comment ||
+                      review.reviewContent ||
+                      "No comment provided"}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.noDataText}>No reviews yet</Text>
+          )}
+        </View>
+
         {/* Bottom Spacing for Tab Bar */}
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -880,18 +1175,21 @@ export default function BarberProfile() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView 
+            <ScrollView
               style={styles.modalBody}
               keyboardShouldPersistTaps="handled"
               contentInsetAdjustmentBehavior="automatic"
               contentContainerStyle={
-                isBioFocused || isFirstNameFocused || isLastNameFocused || isAddressFocused
-                  ? { paddingBottom: 300 } 
+                isBioFocused ||
+                isFirstNameFocused ||
+                isLastNameFocused ||
+                isAddressFocused
+                  ? { paddingBottom: 300 }
                   : { paddingBottom: 20 }
               }
             >
-                {/* Profile Picture */}
-                <View style={styles.inputGroup}>
+              {/* Profile Picture */}
+              <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Profile Picture</Text>
                 <TouchableOpacity
                   style={styles.imagePickerButton}
@@ -908,11 +1206,13 @@ export default function BarberProfile() {
                   ) : (
                     <View style={styles.imagePickerPlaceholder}>
                       <Ionicons name="person" size={40} color="#999" />
-                      <Text style={styles.imagePickerText}>Tap to select image</Text>
+                      <Text style={styles.imagePickerText}>
+                        Tap to select image
+                      </Text>
                     </View>
                   )}
                 </TouchableOpacity>
-                
+
                 {/* Image Action Menu */}
                 <Modal
                   transparent={true}
@@ -930,18 +1230,26 @@ export default function BarberProfile() {
                         style={styles.menuButton}
                         onPress={pickImage}
                       >
-                        <Ionicons name="image-outline" size={24} color="#000000" />
+                        <Ionicons
+                          name="image-outline"
+                          size={24}
+                          color="#000000"
+                        />
                         <Text style={styles.menuButtonText}>Change</Text>
                       </TouchableOpacity>
-                      
+
                       <TouchableOpacity
                         style={[styles.menuButton, styles.deleteMenuButton]}
                         onPress={handleDeleteProfilePic}
                       >
-                        <Ionicons name="trash-outline" size={24} color="#ff1a47" />
+                        <Ionicons
+                          name="trash-outline"
+                          size={24}
+                          color="#ff1a47"
+                        />
                         <Text style={styles.menuButtonText}>Delete</Text>
                       </TouchableOpacity>
-                      
+
                       <TouchableOpacity
                         style={styles.menuCancelButton}
                         onPress={() => setShowImageMenu(false)}
@@ -1037,7 +1345,11 @@ export default function BarberProfile() {
                         enabled={!isLoading}
                       >
                         {US_STATES.map((state) => (
-                          <Picker.Item key={state} label={state} value={state} />
+                          <Picker.Item
+                            key={state}
+                            label={state}
+                            value={state}
+                          />
                         ))}
                       </Picker>
                     </View>
@@ -1074,6 +1386,41 @@ export default function BarberProfile() {
                   onBlur={() => setIsAddressFocused(false)}
                   editable={!isLoading}
                 />
+              </View>
+
+              {/* Contact Information Section */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Contact Information</Text>
+
+                {/* Email */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.subLabel}>Email</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Enter your email"
+                    value={editData.emailAddress}
+                    onChangeText={(text) =>
+                      setEditData({ ...editData, emailAddress: text })
+                    }
+                    keyboardType="email-address"
+                    editable={!isLoading}
+                  />
+                </View>
+
+                {/* Phone */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.subLabel}>Phone</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Enter your phone number"
+                    value={editData.phone}
+                    onChangeText={(text) =>
+                      setEditData({ ...editData, phone: text })
+                    }
+                    keyboardType="phone-pad"
+                    editable={!isLoading}
+                  />
+                </View>
               </View>
 
               {/* Buttons */}
@@ -1113,12 +1460,14 @@ export default function BarberProfile() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Portfolio</Text>
-              <TouchableOpacity onPress={() => setIsPortfolioModalVisible(false)}>
+              <TouchableOpacity
+                onPress={() => setIsPortfolioModalVisible(false)}
+              >
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView 
+            <ScrollView
               style={styles.modalBody}
               keyboardShouldPersistTaps="handled"
               contentInsetAdjustmentBehavior="automatic"
@@ -1137,20 +1486,21 @@ export default function BarberProfile() {
                       <Text style={styles.portfolioAddText}>Add Image</Text>
                     </TouchableOpacity>
                   )}
-                  {editData.images && editData.images.map((img, index) => (
-                    <View key={index} style={styles.portfolioImageWrapper}>
-                      <Image
-                        source={{ uri: img }}
-                        style={styles.portfolioEditImage}
-                      />
-                      <TouchableOpacity
-                        style={styles.portfolioDeleteButton}
-                        onPress={() => handleDeletePortfolioImage(index)}
-                      >
-                        <Ionicons name="close" size={20} color="#fff" />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
+                  {editData.images &&
+                    editData.images.map((img, index) => (
+                      <View key={index} style={styles.portfolioImageWrapper}>
+                        <Image
+                          source={{ uri: img }}
+                          style={styles.portfolioEditImage}
+                        />
+                        <TouchableOpacity
+                          style={styles.portfolioDeleteButton}
+                          onPress={() => handleDeletePortfolioImage(index)}
+                        >
+                          <Ionicons name="close" size={20} color="#fff" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
                 </View>
               </View>
             </ScrollView>
@@ -1194,16 +1544,18 @@ export default function BarberProfile() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Services</Text>
-              <TouchableOpacity onPress={() => {
-                setIsServicesModalVisible(false);
-                setSelectedCategory(null);
-                setEditingServiceIndex(null);
-              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsServicesModalVisible(false);
+                  setSelectedCategory(null);
+                  setEditingServiceIndex(null);
+                }}
+              >
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView 
+            <ScrollView
               style={styles.modalBody}
               keyboardShouldPersistTaps="handled"
               contentInsetAdjustmentBehavior="automatic"
@@ -1212,38 +1564,53 @@ export default function BarberProfile() {
               {/* Current Services List */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Current Services</Text>
-                
+
                 {editServices.length === 0 ? (
                   <Text style={styles.emptyText}>No services added yet</Text>
                 ) : (
                   <View>
                     {editServices.map((service, index) => {
-                      // Safely handle service data  
-                      const safeServiceName = String(service?.serviceName || "").trim() || "Unnamed Service";
-                      const safePrice = String(service?.price || "0.00").trim() || "0.00";
+                      // Safely handle service data
+                      const safeServiceName =
+                        String(service?.serviceName || "").trim() ||
+                        "Unnamed Service";
+                      const safePrice =
+                        String(service?.price || "0.00").trim() || "0.00";
                       return (
-                      <View key={index} style={styles.serviceEntry}>
-                        <View style={styles.serviceMainRow}>
-                          <View style={styles.serviceInfoContainer}>
-                            <Text style={styles.serviceNameText}>{safeServiceName}</Text>
-                            <Text style={styles.servicePriceText}>{`$${safePrice}`}</Text>
-                          </View>
-                          <View style={styles.serviceActionButtons}>
-                            <TouchableOpacity
-                              style={styles.editServiceButton}
-                              onPress={() => setEditingServiceIndex(index)}
-                            >
-                              <Ionicons name="pencil" size={18} color="#00A8E8" />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={styles.deleteServiceButton}
-                              onPress={() => handleDeleteService(index)}
-                            >
-                              <Ionicons name="trash" size={18} color="#ff1a47" />
-                            </TouchableOpacity>
+                        <View key={index} style={styles.serviceEntry}>
+                          <View style={styles.serviceMainRow}>
+                            <View style={styles.serviceInfoContainer}>
+                              <Text style={styles.serviceNameText}>
+                                {safeServiceName}
+                              </Text>
+                              <Text
+                                style={styles.servicePriceText}
+                              >{`$${safePrice}`}</Text>
+                            </View>
+                            <View style={styles.serviceActionButtons}>
+                              <TouchableOpacity
+                                style={styles.editServiceButton}
+                                onPress={() => setEditingServiceIndex(index)}
+                              >
+                                <Ionicons
+                                  name="pencil"
+                                  size={18}
+                                  color="#00A8E8"
+                                />
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.deleteServiceButton}
+                                onPress={() => handleDeleteService(index)}
+                              >
+                                <Ionicons
+                                  name="trash"
+                                  size={18}
+                                  color="#ff1a47"
+                                />
+                              </TouchableOpacity>
+                            </View>
                           </View>
                         </View>
-                      </View>
                       );
                     })}
                   </View>
@@ -1253,11 +1620,18 @@ export default function BarberProfile() {
               {/* Category Selection Section */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Add or Edit Service</Text>
-                
+
                 {editingServiceIndex === null ? (
-                  <Text style={styles.helperText}>Select a service to add or tap a service above to edit</Text>
+                  <Text style={styles.helperText}>
+                    Select a service to add or tap a service above to edit
+                  </Text>
                 ) : (
-                  <Text style={styles.editingLabel}>Editing: {String(editServices[editingServiceIndex]?.serviceName || "").trim() || "Service"}</Text>
+                  <Text style={styles.editingLabel}>
+                    Editing:{" "}
+                    {String(
+                      editServices[editingServiceIndex]?.serviceName || ""
+                    ).trim() || "Service"}
+                  </Text>
                 )}
 
                 {/* Category Buttons */}
@@ -1267,14 +1641,24 @@ export default function BarberProfile() {
                       key={category.label}
                       style={[
                         styles.categoryButton,
-                        selectedCategory === category.label && styles.categoryButtonActive
+                        selectedCategory === category.label &&
+                          styles.categoryButtonActive,
                       ]}
-                      onPress={() => setSelectedCategory(selectedCategory === category.label ? null : category.label)}
+                      onPress={() =>
+                        setSelectedCategory(
+                          selectedCategory === category.label
+                            ? null
+                            : category.label
+                        )
+                      }
                     >
-                      <Text style={[
-                        styles.categoryButtonText,
-                        selectedCategory === category.label && styles.categoryButtonTextActive
-                      ]}>
+                      <Text
+                        style={[
+                          styles.categoryButtonText,
+                          selectedCategory === category.label &&
+                            styles.categoryButtonTextActive,
+                        ]}
+                      >
                         {category.label}
                       </Text>
                     </TouchableOpacity>
@@ -1284,24 +1668,36 @@ export default function BarberProfile() {
                 {/* Service Items from Selected Category */}
                 {selectedCategory && (
                   <View style={styles.serviceItemsContainer}>
-                    {SERVICE_CATEGORIES.find(c => c.label === selectedCategory)?.values.map((serviceName) => (
+                    {SERVICE_CATEGORIES.find(
+                      (c) => c.label === selectedCategory
+                    )?.values.map((serviceName) => (
                       <TouchableOpacity
                         key={serviceName}
                         style={styles.serviceSelectItem}
                         onPress={() => {
                           if (editingServiceIndex !== null) {
-                            handleServiceChange(editingServiceIndex, 'serviceName', serviceName);
+                            handleServiceChange(
+                              editingServiceIndex,
+                              "serviceName",
+                              serviceName
+                            );
                           } else {
                             setEditServices([
                               ...editServices,
-                              { serviceName, price: "", id: undefined }
+                              { serviceName, price: "", id: undefined },
                             ]);
                             setEditingServiceIndex(editServices.length);
                           }
                         }}
                       >
-                        <Ionicons name="add-circle-outline" size={20} color="#00A8E8" />
-                        <Text style={styles.serviceSelectText}>{serviceName}</Text>
+                        <Ionicons
+                          name="add-circle-outline"
+                          size={20}
+                          color="#00A8E8"
+                        />
+                        <Text style={styles.serviceSelectText}>
+                          {serviceName}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -1319,13 +1715,23 @@ export default function BarberProfile() {
                         keyboardType="decimal-pad"
                         returnKeyType="done"
                         value={editServices[editingServiceIndex]?.price || ""}
-                        onChangeText={(value) => handleServiceChange(editingServiceIndex, 'price', value)}
+                        onChangeText={(value) =>
+                          handleServiceChange(
+                            editingServiceIndex,
+                            "price",
+                            value
+                          )
+                        }
                       />
                       <TouchableOpacity
                         style={styles.priceConfirmButton}
                         onPress={() => setEditingServiceIndex(null)}
                       >
-                        <Ionicons name="checkmark-circle" size={28} color="#00A8E8" />
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={28}
+                          color="#00A8E8"
+                        />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -1487,6 +1893,27 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
+  /* Contact Information */
+  contactSection: {
+    width: "100%",
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    gap: 12,
+    alignItems: "center",
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    justifyContent: "center",
+  },
+  contactText: {
+    fontSize: 14,
+    color: "#555",
+  },
+
   /* Section */
   section: {
     marginHorizontal: 20,
@@ -1631,6 +2058,46 @@ const styles = StyleSheet.create({
     color: "#999",
     textAlign: "center",
     padding: 20,
+  },
+
+  /* Review Card Styles */
+  reviewCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+  },
+  reviewHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 10,
+  },
+  reviewerInfo: {
+    flex: 1,
+    gap: 6,
+  },
+  reviewerName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#222",
+  },
+  ratingStars: {
+    flexDirection: "row",
+    gap: 3,
+    alignItems: "center",
+  },
+  reviewDate: {
+    fontSize: 12,
+    color: "#999",
+    marginTop: 2,
+  },
+  reviewComment: {
+    fontSize: 13,
+    color: "#555",
+    lineHeight: 18,
   },
 
   /* Modal Styles */

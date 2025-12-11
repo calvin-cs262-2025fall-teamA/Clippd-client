@@ -23,7 +23,7 @@ import {
   Dimensions,
   FlatList,
   PanResponder,
-  GestureResponderEvent,
+  // GestureResponderEvent,
   Linking,
 } from "react-native";
 import { ClipperProfile } from "../../type/clippdTypes";
@@ -226,7 +226,7 @@ export default function DetailsPage() {
       const endpoint = `${apiUrl}/clippers/${id}/reviews`;
 
       const requestBody = {
-        clientID: parseInt(user.id),
+        userID: parseInt(user.id),
         clipperID: parseInt(id as string),
         rating: reviewRating,
         comment: reviewText,
@@ -425,10 +425,7 @@ export default function DetailsPage() {
                         setShowPortfolioModal(true);
                       }}
                     >
-                      <Image
-                        source={{ uri: img }}
-                        style={styles.sideImage}
-                      />
+                      <Image source={{ uri: img }} style={styles.sideImage} />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -464,13 +461,31 @@ export default function DetailsPage() {
             <View style={{ flex: 1 }}>
               <Text style={styles.name}>{clippr.name}</Text>
               <TouchableOpacity
-                onPress={() => openGoogleMaps(clippr.address || "", clippr.location)}
+                onPress={() =>
+                  openGoogleMaps(clippr.address || "", clippr.location)
+                }
               >
                 <Text style={styles.locationText}>
                   <Ionicons name="location-outline" size={20} color={"red"} />{" "}
                   {clippr.location}
+                  {"  "}
+                  <Ionicons name="open-outline" size={16} color={"#7d7d7dff"} />
                 </Text>
               </TouchableOpacity>
+
+              {/* Contact Information */}
+              {clippr.emailAddress && (
+                <View style={styles.contactRow}>
+                  <Ionicons name="mail-outline" size={16} color="#666" />
+                  <Text style={styles.contactText}>{clippr.emailAddress}</Text>
+                </View>
+              )}
+              {clippr.phone && (
+                <View style={styles.contactRow}>
+                  <Ionicons name="call-outline" size={16} color="#666" />
+                  <Text style={styles.contactText}>{clippr.phone}</Text>
+                </View>
+              )}
             </View>
             <Text style={styles.rating}>
               <Ionicons name="star" size={20} color="gold" />
@@ -479,11 +494,31 @@ export default function DetailsPage() {
           </View>
         </View>
 
-        {/* <View style={styles.chipContainer}>
-            <View style={styles.chip}>
-              <Text style={styles.chipText}>⭐ {clippr.rating}</Text>
-            </View>
-          </View> */}
+        {/* ---- Services ---- */}
+        {clippr.services && clippr.services.length > 0 && (
+          <View style={styles.servicesContainer}>
+            <Text style={styles.sectionTitle}>Services</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.servicesScroll}
+            >
+              {clippr.services.map((service, index) => (
+                <View key={service.id || index} style={styles.serviceCard}>
+                  <Text style={styles.serviceName}>{service.serviceName}</Text>
+                  <View style={styles.serviceDetails}>
+                    <View style={styles.serviceDetailItem}>
+                      <Text style={styles.serviceDetailText}>
+                        ${service.price || 0}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {/* ---- Reviews ---- */}
         <View style={styles.reviewContainer}>
           <View style={styles.reviewHeaderRow}>
@@ -645,7 +680,9 @@ export default function DetailsPage() {
       >
         <View
           style={styles.modalBackdrop}
-          {...(panResponderRef.current ? panResponderRef.current.panHandlers : {})}
+          {...(panResponderRef.current
+            ? panResponderRef.current.panHandlers
+            : {})}
         >
           <View style={styles.portfolioModalContainer}>
             <TouchableOpacity
@@ -682,8 +719,7 @@ export default function DetailsPage() {
                     // Handle scroll to index failure gracefully
                   }}
                   onMomentumScrollEnd={(event) => {
-                    const contentOffsetX =
-                      event.nativeEvent.contentOffset.x;
+                    const contentOffsetX = event.nativeEvent.contentOffset.x;
                     const screenWidth = Dimensions.get("window").width;
                     const index = Math.round(contentOffsetX / screenWidth);
                     setPortfolioCurrentIndex(index);
@@ -755,8 +791,18 @@ const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 16,
-    color: "#666",
+    color: "#0054caff",
     marginTop: 4,
+  },
+  contactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 6,
+  },
+  contactText: {
+    fontSize: 14,
+    color: "#666",
   },
   rating: {
     fontSize: 18,
@@ -787,6 +833,43 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 14,
     color: "#fff",
+  },
+
+  // --- Services ---
+  servicesContainer: {
+    padding: 20,
+    paddingBottom: 0,
+  },
+  servicesScroll: {
+    marginTop: 12,
+  },
+  serviceCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    padding: 16,
+    marginRight: 12,
+    minWidth: 140,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+  },
+  serviceName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#222",
+    marginBottom: 8,
+  },
+  serviceDetails: {
+    flexDirection: "column",
+    gap: 6,
+  },
+  serviceDetailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  serviceDetailText: {
+    fontSize: 14,
+    color: "#666",
   },
 
   // --- Reviews ---

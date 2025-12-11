@@ -60,7 +60,44 @@ export default function TabLayout() {
         },
       }}
     >
-      {/* Home */}
+      {/* Barber Profile - First tab for Clipper role */}
+      <Tabs.Screen
+        name="barber-profile"
+        options={{
+          title: "You",
+          headerTitleAlign: "center",
+          headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="cut-outline" size={24} color={color} />
+          ),
+          href: user?.role === "Clipper" ? undefined : null,
+        }}
+      />
+
+      {/* Clipper Explore - Second tab for Clipper role */}
+      <Tabs.Screen
+        name="clipper-explore"
+        options={{
+          title: "Explore",
+          headerTitleAlign: "center",
+          headerTitleStyle: {
+            fontSize: 27,
+            fontFamily: "Lato-Bold",
+            color: "#000000ff",
+          },
+          headerLeft: () => (
+            <View style={{ marginLeft: 137 }}>
+              <Scissors color="#ff1a47" size={32} />
+            </View>
+          ),
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="compass-outline" size={24} color={color} />
+          ),
+          href: user?.role === "Clipper" ? undefined : null,
+        }}
+      />
+
+      {/* Home - For Client role only */}
       <Tabs.Screen
         name="index"
         options={{
@@ -79,6 +116,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="home-outline" size={24} color={color} />
           ),
+          href: user?.role === "Clipper" ? null : undefined,
         }}
       />
 
@@ -114,10 +152,11 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="heart-outline" size={24} color={color} />
           ),
+          href: user.role === "Clipper" ? null : undefined,
         }}
       />
 
-      {/* Profile */}
+      {/* Profile - Only visible for Client role */}
       <Tabs.Screen
         name="profile"
         options={{
@@ -128,20 +167,6 @@ export default function TabLayout() {
             <Ionicons name="person-outline" size={24} color={color} />
           ),
           href: user.role === "Clipper" ? null : undefined,
-        }}
-      />
-
-      {/* Barber Profile - Only visible for Clipper role */}
-      <Tabs.Screen
-        name="barber-profile"
-        options={{
-          title: "Profile",
-          headerTitleAlign: "center",
-          headerTitleStyle: { fontSize: 20, fontWeight: "bold" },
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="cut-outline" size={24} color={color} />
-          ),
-          href: user?.role === "Clipper" ? undefined : null,
         }}
       />
     </Tabs>
