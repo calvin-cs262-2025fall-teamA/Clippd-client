@@ -23,7 +23,7 @@ import {
   Dimensions,
   FlatList,
   PanResponder,
-  GestureResponderEvent,
+  // GestureResponderEvent,
   Linking,
 } from "react-native";
 import { ClipperProfile } from "../../type/clippdTypes";
@@ -472,7 +472,7 @@ export default function DetailsPage() {
                   <Ionicons name="open-outline" size={16} color={"#7d7d7dff"} />
                 </Text>
               </TouchableOpacity>
-              
+
               {/* Contact Information */}
               {clippr.emailAddress && (
                 <View style={styles.contactRow}>

@@ -305,7 +305,7 @@ export default function Profile() {
   const [isLastNameFocused, setIsLastNameFocused] = useState(false);
   const [isPhoneNumberFocused, setIsPhoneNumberFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [newPreference, setNewPreference] = useState("");
+  // const [newPreference, setNewPreference] = useState("");
   const [selectedPreferenceCategory, setSelectedPreferenceCategory] = useState<
     string | null
   >(null);
