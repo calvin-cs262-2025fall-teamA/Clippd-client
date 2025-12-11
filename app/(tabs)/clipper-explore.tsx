@@ -1,26 +1,18 @@
 import React, { useEffect } from "react";
 import { ScrollView, View, ActivityIndicator, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Redirect } from "expo-router";
 import Card from "../../components/Card";
 import { useClippd } from "../../contexts/ClippdContext";
-import { useAuth } from "../../contexts/AuthContext";
 import FilterButton from "../components/filter_button";
 
 export default function Home() {
   const { clippers, isClippersLoading, clippersError, fetchClippers } =
     useClippd();
-  const { user } = useAuth();
 
   // Optional manual refresh on mount if not already triggered in provider
   useEffect(() => {
     if (clippers.length === 0) fetchClippers();
   }, [clippers.length, fetchClippers]);
-
-  // Redirect Clippers to their profile page (index is hidden for them anyway)
-  if (user?.role === "Clipper") {
-    return <Redirect href="/(tabs)/barber-profile" />;
-  }
 
   return (
     <SafeAreaView
