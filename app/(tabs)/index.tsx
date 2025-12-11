@@ -1,18 +1,66 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, View, ActivityIndicator, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import Card from "../../components/Card";
 import { useClippd } from "../../contexts/ClippdContext";
+import { useFilter } from "../../contexts/FilterContext";
+import { ClipperProfile } from "../../type/clippdTypes";
 import FilterButton from "../components/filter_button";
 
 export default function Home() {
-  const { clippers, isClippersLoading, clippersError, fetchClippers } =
+  const { clippers, isClippersLoading, clippersError, fetchClippers, getFilteredClippers } =
     useClippd();
+  const { filters, hasActiveFilters } = useFilter();
+  const [displayedClippers, setDisplayedClippers] = useState<ClipperProfile[]>([]);
+  const [isFiltering, setIsFiltering] = useState(false);
 
   // Optional manual refresh on mount if not already triggered in provider
   useEffect(() => {
     if (clippers.length === 0) fetchClippers();
   }, [clippers.length, fetchClippers]);
+
+  // Update displayed clippers when filters change
+  useFocusEffect(
+    React.useCallback(() => {
+      const applyFilters = async () => {
+        setIsFiltering(true);
+        try {
+          console.log("[Home] Applying filters:", {
+            selectedServices: filters.selectedServices,
+            selectedLanguages: filters.selectedLanguages,
+            priceRange: filters.priceRange,
+            totalClippers: clippers.length,
+          });
+          
+          const filtered = await getFilteredClippers(
+            filters.selectedServices,
+            filters.selectedLanguages,
+            filters.priceRange
+          );
+          
+          console.log("[Home] Filtered results:", {
+            count: filtered.length,
+            clippers: filtered.map(c => ({ id: c.id, name: c.name, userId: c.userId })),
+          });
+          
+          setDisplayedClippers(filtered);
+        } catch (error) {
+          console.error("Error applying filters:", error);
+          setDisplayedClippers([]);
+        } finally {
+          setIsFiltering(false);
+        }
+      };
+
+      applyFilters();
+    }, [filters, clippers, getFilteredClippers])
+  );
+
+  // Determine which clippers to display
+  // If filters are active, show only filtered results (even if empty)
+  // If no filters, show all clippers
+  const clippersToDisplay = hasActiveFilters() ? displayedClippers : clippers;
 
   return (
     <SafeAreaView
@@ -24,7 +72,7 @@ export default function Home() {
         <ScrollView
           contentContainerStyle={{ paddingTop: 5, paddingBottom: 65 }}
         >
-          {isClippersLoading && (
+          {(isClippersLoading || isFiltering) && (
             <View style={{ paddingTop: 60 }}>
               <ActivityIndicator size="large" />
             </View>
@@ -35,8 +83,17 @@ export default function Home() {
             </Text>
           )}
           {!isClippersLoading &&
+            !isFiltering &&
             !clippersError &&
-            clippers.map((item) => (
+            clippersToDisplay.length === 0 && (
+              <Text style={{ textAlign: "center", marginTop: 40, color: "#999" }}>
+                No clippers found matching your filters
+              </Text>
+            )}
+          {!isClippersLoading &&
+            !isFiltering &&
+            !clippersError &&
+            clippersToDisplay.map((item) => (
               <Card
                 id={item.id}
                 key={item.id}

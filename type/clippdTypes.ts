@@ -8,6 +8,7 @@ export interface Service {
 
 export interface ClipperProfile {
   id: string;
+  userId?: string | number; // UserAccount ID for language/specialty queries
   name: string;
   location: string;
   images: string[];
