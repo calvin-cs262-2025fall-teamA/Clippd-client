@@ -472,6 +472,20 @@ export default function DetailsPage() {
                   <Ionicons name="open-outline" size={16} color={"#7d7d7dff"} />
                 </Text>
               </TouchableOpacity>
+              
+              {/* Contact Information */}
+              {clippr.emailAddress && (
+                <View style={styles.contactRow}>
+                  <Ionicons name="mail-outline" size={16} color="#666" />
+                  <Text style={styles.contactText}>{clippr.emailAddress}</Text>
+                </View>
+              )}
+              {clippr.phone && (
+                <View style={styles.contactRow}>
+                  <Ionicons name="call-outline" size={16} color="#666" />
+                  <Text style={styles.contactText}>{clippr.phone}</Text>
+                </View>
+              )}
             </View>
             <Text style={styles.rating}>
               <Ionicons name="star" size={20} color="gold" />
@@ -779,6 +793,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#0054caff",
     marginTop: 4,
+  },
+  contactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 6,
+  },
+  contactText: {
+    fontSize: 14,
+    color: "#666",
   },
   rating: {
     fontSize: 18,
