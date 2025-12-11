@@ -23,7 +23,10 @@ interface ClippdContextType {
   // Update clipper rating
   updateClipperRating: (clipperId: string, newRating: number) => void;
   // Update clipper profile
-  updateClipperProfile: (clipperId: string, updatedData: Partial<ClipperProfile>) => void;
+  updateClipperProfile: (
+    clipperId: string,
+    updatedData: Partial<ClipperProfile>
+  ) => void;
 }
 
 export const ClippdContext = createContext<ClippdContextType | undefined>(
@@ -98,9 +101,16 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
       if (!response.ok)
         throw new Error(`Failed to fetch clippers (${response.status})`);
       const raw = await response.json();
+      console.log("[ClippdContext] Raw clipper data from API:", raw);
       // Map API response to ClipperProfile expected by Card
       const mapped: ClipperProfile[] = await Promise.all(
         (raw || []).map(async (c: any) => {
+          console.log("[ClippdContext] Processing clipper:", {
+            id: c.id,
+            firstName: c.firstName,
+            emailAddress: c.emailAddress,
+            phone: c.phone,
+          });
           // Fetch services for this clipper
           let services: Service[] = [];
           try {
@@ -138,11 +148,14 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
             profilePic: c.profileimage || c.profileImage || "",
             bio: c.bio || "", // Use bio from database
             address: c.address || "", // Use address from database (consistent with bio)
+            phone: c.phone || "", // Use phone from database
+            emailAddress: c.emailAddress || c.emailaddress || "", // Use email from database
             reviews: c.reviews || [], // Use reviews from database
             services: services, // Use services from database
           };
         })
       );
+      console.log("[ClippdContext] Mapped clippers with contact info:", mapped);
       setClippers(mapped);
     } catch (error: any) {
       console.error("[ClippdContext] fetchClippers error:", error.message);
@@ -170,9 +183,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
     (clipperId: string, updatedData: Partial<ClipperProfile>) => {
       setClippers((prevClippers) =>
         prevClippers.map((clipper) =>
-          clipper.id === clipperId
-            ? { ...clipper, ...updatedData }
-            : clipper
+          clipper.id === clipperId ? { ...clipper, ...updatedData } : clipper
         )
       );
     },

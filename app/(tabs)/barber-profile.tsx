@@ -239,6 +239,26 @@ function formatRating(rating: number | string | undefined): string {
   return rounded.toFixed(1);
 }
 
+const formatPhoneNumber = (value: string): string => {
+  // Remove all non-digit characters
+  const digits = value.replace(/\D/g, "");
+
+  // If no digits, return empty string
+  if (digits.length === 0) return "";
+
+  // Format: (XXX) XXX-XXXX
+  if (digits.length <= 3) {
+    return `(${digits}`;
+  } else if (digits.length <= 6) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  } else {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(
+      6,
+      10
+    )}`;
+  }
+};
+
 // Service Categories Data
 const SERVICE_CATEGORIES = [
   {
@@ -299,6 +319,8 @@ export default function BarberProfile() {
     address: "",
     city: "",
     state: "",
+    emailAddress: "",
+    phone: "",
     images: [] as string[],
   });
   const [editServices, setEditServices] = useState<
@@ -318,6 +340,10 @@ export default function BarberProfile() {
   const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
   const [isLastNameFocused, setIsLastNameFocused] = useState(false);
   const [isAddressFocused, setIsAddressFocused] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isPhoneFocused, setIsPhoneFocused] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showPortfolioMenu, setShowPortfolioMenu] = useState<number | null>(
     null
@@ -388,9 +414,13 @@ export default function BarberProfile() {
           address: selectedBarber.address || "",
           city: city || "",
           state: state || "",
+          emailAddress: selectedBarber.emailAddress || "",
+          phone: selectedBarber.phone || "",
           images: selectedBarber.images || [],
         });
         console.log("Barber data loaded:", selectedBarber);
+        console.log("Barber email:", selectedBarber.emailAddress);
+        console.log("Barber phone:", selectedBarber.phone);
         console.log("Barber services:", selectedBarber.services);
       }
     }
@@ -410,6 +440,8 @@ export default function BarberProfile() {
         address: barberData.address || "",
         city: city || "",
         state: state || "",
+        emailAddress: barberData.emailAddress || "",
+        phone: barberData.phone || "",
         images: barberData.images || [],
       });
     }
@@ -430,6 +462,8 @@ export default function BarberProfile() {
         address: barberData.address || "",
         city: city || "",
         state: state || "",
+        emailAddress: barberData.emailAddress || "",
+        phone: barberData.phone || "",
         images: barberData.images || [],
       });
     }
@@ -602,6 +636,8 @@ export default function BarberProfile() {
         address: editData.address,
         city: editData.city,
         state: editData.state,
+        emailAddress: editData.emailAddress,
+        phone: editData.phone,
         profileImage: imageUrl, // Send empty string if deleted, new URI if changed, or existing URL
       };
 
@@ -648,6 +684,8 @@ export default function BarberProfile() {
           location: `${responseData.city || editData.city}, ${
             responseData.state || editData.state
           }`,
+          emailAddress: responseData.emailAddress || editData.emailAddress,
+          phone: responseData.phone || editData.phone,
           images: editData.images, // Update portfolio images
         };
         setBarberData(updatedData);
@@ -668,6 +706,8 @@ export default function BarberProfile() {
         address: "",
         city: "",
         state: "",
+        emailAddress: "",
+        phone: "",
         images: [],
       });
     } catch (error) {
@@ -899,27 +939,35 @@ export default function BarberProfile() {
                 {formatRating(barberData.rating)} ({totalReviews} reviews)
               </Text>
             </View>
-            <View style={styles.locationAddressColumn}>
-              <View style={styles.locationContainer}>
-                <Ionicons name="location" size={18} color="#666" />
-                <Text style={styles.locationText}>{barberData.location}</Text>
-              </View>
-
-              {/* Address - using same pattern as Bio */}
-              <View style={styles.addressContainerProfile}>
-                <Ionicons name="location-outline" size={18} color="#666" />
-                <Text style={styles.addressText}>
-                  {barberData.address || "No address provided"}
-                </Text>
-              </View>
-            </View>
           </View>
 
           {/* Bio */}
-          <Text style={styles.bio}>
-            {barberData.bio ||
-              "Specializing in modern cuts and color techniques with 8+ years of experience. Passionate about helping clients look and feel their best."}
-          </Text>
+          <Text style={styles.bio}>{barberData.bio || "Please add a bio"}</Text>
+
+          {/* Contact Information */}
+          <View style={styles.contactSection}>
+            <View style={styles.contactItem}>
+              <Ionicons name="mail" size={18} color="#666" />
+              <Text style={styles.contactText} numberOfLines={1}>
+                {barberData.emailAddress || "No email"}
+              </Text>
+            </View>
+            <View style={styles.contactItem}>
+              <Ionicons name="call" size={16} color="#666" />
+              <Text style={styles.contactText} numberOfLines={1}>
+                {barberData.phone
+                  ? formatPhoneNumber(barberData.phone)
+                  : "Phone number not set"}
+              </Text>
+            </View>
+            <View style={styles.contactItem}>
+              <Ionicons name="location-outline" size={18} color="#666" />
+              <Text style={styles.contactText} numberOfLines={1}>
+                {barberData.address || "No address"},{" "}
+                {barberData.location || ""}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* Services Section */}
@@ -1338,6 +1386,41 @@ export default function BarberProfile() {
                   onBlur={() => setIsAddressFocused(false)}
                   editable={!isLoading}
                 />
+              </View>
+
+              {/* Contact Information Section */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Contact Information</Text>
+
+                {/* Email */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.subLabel}>Email</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Enter your email"
+                    value={editData.emailAddress}
+                    onChangeText={(text) =>
+                      setEditData({ ...editData, emailAddress: text })
+                    }
+                    keyboardType="email-address"
+                    editable={!isLoading}
+                  />
+                </View>
+
+                {/* Phone */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.subLabel}>Phone</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Enter your phone number"
+                    value={editData.phone}
+                    onChangeText={(text) =>
+                      setEditData({ ...editData, phone: text })
+                    }
+                    keyboardType="phone-pad"
+                    editable={!isLoading}
+                  />
+                </View>
               </View>
 
               {/* Buttons */}
@@ -1808,6 +1891,27 @@ const styles = StyleSheet.create({
     color: "#555",
     textAlign: "center",
     lineHeight: 20,
+  },
+
+  /* Contact Information */
+  contactSection: {
+    width: "100%",
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    gap: 12,
+    alignItems: "center",
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    justifyContent: "center",
+  },
+  contactText: {
+    fontSize: 14,
+    color: "#555",
   },
 
   /* Section */

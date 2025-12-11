@@ -22,84 +22,219 @@ import { getApiUrl } from "@/utils/networkConfig";
 
 // US States and Major Cities
 const US_STATES = [
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
-  "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
-  "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
-  "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
-  "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
-  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
-  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia",
-  "Wisconsin", "Wyoming"
+  "Alabama",
+  "Alaska",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia",
+  "Hawaii",
+  "Idaho",
+  "Illinois",
+  "Indiana",
+  "Iowa",
+  "Kansas",
+  "Kentucky",
+  "Louisiana",
+  "Maine",
+  "Maryland",
+  "Massachusetts",
+  "Michigan",
+  "Minnesota",
+  "Mississippi",
+  "Missouri",
+  "Montana",
+  "Nebraska",
+  "Nevada",
+  "New Hampshire",
+  "New Jersey",
+  "New Mexico",
+  "New York",
+  "North Carolina",
+  "North Dakota",
+  "Ohio",
+  "Oklahoma",
+  "Oregon",
+  "Pennsylvania",
+  "Rhode Island",
+  "South Carolina",
+  "South Dakota",
+  "Tennessee",
+  "Texas",
+  "Utah",
+  "Vermont",
+  "Virginia",
+  "Washington",
+  "West Virginia",
+  "Wisconsin",
+  "Wyoming",
 ];
 
 const CITIES_BY_STATE: { [key: string]: string[] } = {
-  "Alabama": ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa"],
-  "Alaska": ["Anchorage", "Juneau", "Fairbanks", "Sitka", "Ketchikan"],
-  "Arizona": ["Phoenix", "Mesa", "Scottsdale", "Chandler", "Tempe"],
-  "Arkansas": ["Little Rock", "Fort Smith", "Fayetteville", "Springdale", "Jonesboro"],
-  "California": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "San Jose"],
-  "Colorado": ["Denver", "Colorado Springs", "Aurora", "Fort Collins", "Pueblo"],
-  "Connecticut": ["Bridgeport", "New Haven", "Hartford", "Stamford", "Waterbury"],
-  "Delaware": ["Wilmington", "Dover", "Newark", "Middletown", "Smyrna"],
-  "Florida": ["Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg"],
-  "Georgia": ["Atlanta", "Augusta", "Savannah", "Athens", "Macon"],
-  "Hawaii": ["Honolulu", "Hilo", "Kailua", "Kaneohe", "Waipahu"],
-  "Idaho": ["Boise", "Nampa", "Meridian", "Idaho Falls", "Pocatello"],
-  "Illinois": ["Chicago", "Aurora", "Rockford", "Joliet", "Naperville"],
-  "Indiana": ["Indianapolis", "Fort Wayne", "Evansville", "South Bend", "Bloomington"],
-  "Iowa": ["Des Moines", "Cedar Rapids", "Davenport", "Sioux City", "Iowa City"],
-  "Kansas": ["Kansas City", "Wichita", "Topeka", "Overland Park", "Lawrence"],
-  "Kentucky": ["Louisville", "Lexington", "Bowling Green", "Owensboro", "Covington"],
-  "Louisiana": ["New Orleans", "Baton Rouge", "Shreveport", "Lafayette", "Lake Charles"],
-  "Maine": ["Portland", "Lewiston", "Bangor", "Augusta", "Waterville"],
-  "Maryland": ["Baltimore", "Frederick", "Rockville", "Gaithersburg", "Bowie"],
-  "Massachusetts": ["Boston", "Worcester", "Springfield", "Lowell", "Cambridge"],
-  "Michigan": ["Detroit", "Grand Rapids", "Warren", "Sterling Heights", "Ann Arbor"],
-  "Minnesota": ["Minneapolis", "St. Paul", "Rochester", "Duluth", "Bloomington"],
-  "Mississippi": ["Jackson", "Gulfport", "Southhaven", "Hattiesburg", "Biloxi"],
-  "Missouri": ["Kansas City", "St. Louis", "Springfield", "Independence", "Columbia"],
-  "Montana": ["Billings", "Missoula", "Great Falls", "Bozeman", "Helena"],
-  "Nebraska": ["Omaha", "Lincoln", "Bellevue", "Grand Island", "Kearney"],
-  "Nevada": ["Las Vegas", "Henderson", "Reno", "North Las Vegas", "Sparks"],
+  Alabama: ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa"],
+  Alaska: ["Anchorage", "Juneau", "Fairbanks", "Sitka", "Ketchikan"],
+  Arizona: ["Phoenix", "Mesa", "Scottsdale", "Chandler", "Tempe"],
+  Arkansas: [
+    "Little Rock",
+    "Fort Smith",
+    "Fayetteville",
+    "Springdale",
+    "Jonesboro",
+  ],
+  California: [
+    "Los Angeles",
+    "San Francisco",
+    "San Diego",
+    "Sacramento",
+    "San Jose",
+  ],
+  Colorado: ["Denver", "Colorado Springs", "Aurora", "Fort Collins", "Pueblo"],
+  Connecticut: ["Bridgeport", "New Haven", "Hartford", "Stamford", "Waterbury"],
+  Delaware: ["Wilmington", "Dover", "Newark", "Middletown", "Smyrna"],
+  Florida: ["Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg"],
+  Georgia: ["Atlanta", "Augusta", "Savannah", "Athens", "Macon"],
+  Hawaii: ["Honolulu", "Hilo", "Kailua", "Kaneohe", "Waipahu"],
+  Idaho: ["Boise", "Nampa", "Meridian", "Idaho Falls", "Pocatello"],
+  Illinois: ["Chicago", "Aurora", "Rockford", "Joliet", "Naperville"],
+  Indiana: [
+    "Indianapolis",
+    "Fort Wayne",
+    "Evansville",
+    "South Bend",
+    "Bloomington",
+  ],
+  Iowa: ["Des Moines", "Cedar Rapids", "Davenport", "Sioux City", "Iowa City"],
+  Kansas: ["Kansas City", "Wichita", "Topeka", "Overland Park", "Lawrence"],
+  Kentucky: [
+    "Louisville",
+    "Lexington",
+    "Bowling Green",
+    "Owensboro",
+    "Covington",
+  ],
+  Louisiana: [
+    "New Orleans",
+    "Baton Rouge",
+    "Shreveport",
+    "Lafayette",
+    "Lake Charles",
+  ],
+  Maine: ["Portland", "Lewiston", "Bangor", "Augusta", "Waterville"],
+  Maryland: ["Baltimore", "Frederick", "Rockville", "Gaithersburg", "Bowie"],
+  Massachusetts: ["Boston", "Worcester", "Springfield", "Lowell", "Cambridge"],
+  Michigan: [
+    "Detroit",
+    "Grand Rapids",
+    "Warren",
+    "Sterling Heights",
+    "Ann Arbor",
+  ],
+  Minnesota: ["Minneapolis", "St. Paul", "Rochester", "Duluth", "Bloomington"],
+  Mississippi: ["Jackson", "Gulfport", "Southhaven", "Hattiesburg", "Biloxi"],
+  Missouri: [
+    "Kansas City",
+    "St. Louis",
+    "Springfield",
+    "Independence",
+    "Columbia",
+  ],
+  Montana: ["Billings", "Missoula", "Great Falls", "Bozeman", "Helena"],
+  Nebraska: ["Omaha", "Lincoln", "Bellevue", "Grand Island", "Kearney"],
+  Nevada: ["Las Vegas", "Henderson", "Reno", "North Las Vegas", "Sparks"],
   "New Hampshire": ["Manchester", "Nashua", "Concord", "Derry", "Rochester"],
   "New Jersey": ["Newark", "Jersey City", "Paterson", "Elizabeth", "Trenton"],
-  "New Mexico": ["Albuquerque", "Las Cruces", "Rio Rancho", "Santa Fe", "Roswell"],
+  "New Mexico": [
+    "Albuquerque",
+    "Las Cruces",
+    "Rio Rancho",
+    "Santa Fe",
+    "Roswell",
+  ],
   "New York": ["New York City", "Buffalo", "Rochester", "Yonkers", "Syracuse"],
-  "North Carolina": ["Charlotte", "Raleigh", "Greensboro", "Durham", "Winston-Salem"],
+  "North Carolina": [
+    "Charlotte",
+    "Raleigh",
+    "Greensboro",
+    "Durham",
+    "Winston-Salem",
+  ],
   "North Dakota": ["Bismarck", "Fargo", "Grand Forks", "Minot", "Williston"],
-  "Ohio": ["Columbus", "Cleveland", "Cincinnati", "Toledo", "Akron"],
-  "Oklahoma": ["Oklahoma City", "Tulsa", "Norman", "Broken Arrow", "Lawton"],
-  "Oregon": ["Portland", "Eugene", "Salem", "Gresham", "Hillsboro"],
-  "Pennsylvania": ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading"],
-  "Rhode Island": ["Providence", "Warwick", "Cranston", "Pawtucket", "Woonsocket"],
-  "South Carolina": ["Charleston", "Columbia", "Greenville", "Summerville", "Goose Creek"],
-  "South Dakota": ["Sioux Falls", "Rapid City", "Aberdeen", "Brookings", "Watertown"],
-  "Tennessee": ["Nashville", "Memphis", "Knoxville", "Chattanooga", "Clarksville"],
-  "Texas": ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth"],
-  "Utah": ["Salt Lake City", "Provo", "Ogden", "Sandy", "Orem"],
-  "Vermont": ["Burlington", "Rutland", "South Burlington", "Montpelier", "Barre"],
-  "Virginia": ["Virginia Beach", "Richmond", "Arlington", "Alexandria", "Roanoke"],
-  "Washington": ["Seattle", "Tacoma", "Vancouver", "Spokane", "Bellevue"],
-  "West Virginia": ["Charleston", "Huntington", "Parkersburg", "Wheeling", "Weirton"],
-  "Wisconsin": ["Milwaukee", "Madison", "Green Bay", "Kenosha", "Racine"],
-  "Wyoming": ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs"],
+  Ohio: ["Columbus", "Cleveland", "Cincinnati", "Toledo", "Akron"],
+  Oklahoma: ["Oklahoma City", "Tulsa", "Norman", "Broken Arrow", "Lawton"],
+  Oregon: ["Portland", "Eugene", "Salem", "Gresham", "Hillsboro"],
+  Pennsylvania: ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading"],
+  "Rhode Island": [
+    "Providence",
+    "Warwick",
+    "Cranston",
+    "Pawtucket",
+    "Woonsocket",
+  ],
+  "South Carolina": [
+    "Charleston",
+    "Columbia",
+    "Greenville",
+    "Summerville",
+    "Goose Creek",
+  ],
+  "South Dakota": [
+    "Sioux Falls",
+    "Rapid City",
+    "Aberdeen",
+    "Brookings",
+    "Watertown",
+  ],
+  Tennessee: [
+    "Nashville",
+    "Memphis",
+    "Knoxville",
+    "Chattanooga",
+    "Clarksville",
+  ],
+  Texas: ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth"],
+  Utah: ["Salt Lake City", "Provo", "Ogden", "Sandy", "Orem"],
+  Vermont: ["Burlington", "Rutland", "South Burlington", "Montpelier", "Barre"],
+  Virginia: [
+    "Virginia Beach",
+    "Richmond",
+    "Arlington",
+    "Alexandria",
+    "Roanoke",
+  ],
+  Washington: ["Seattle", "Tacoma", "Vancouver", "Spokane", "Bellevue"],
+  "West Virginia": [
+    "Charleston",
+    "Huntington",
+    "Parkersburg",
+    "Wheeling",
+    "Weirton",
+  ],
+  Wisconsin: ["Milwaukee", "Madison", "Green Bay", "Kenosha", "Racine"],
+  Wyoming: ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs"],
 };
 
 // Format phone number to (XXX) XXX-XXXX format
 const formatPhoneNumber = (value: string): string => {
   // Remove all non-digit characters
   const digits = value.replace(/\D/g, "");
-  
+
   // If no digits, return empty string
   if (digits.length === 0) return "";
-  
+
   // Format: (XXX) XXX-XXXX
   if (digits.length <= 3) {
     return `(${digits}`;
   } else if (digits.length <= 6) {
     return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
   } else {
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(
+      6,
+      10
+    )}`;
   }
 };
 
@@ -112,27 +247,36 @@ const extractPhoneNumber = (value: string): string => {
 const PREFERENCE_CATEGORIES = [
   {
     label: "Haircut Styles",
-    values: ["Fade", "Taper", "Scissor Cut", "Layer cut", "Buzz Cut", "Trim & Shape up"]
+    values: [
+      "Fade",
+      "Taper",
+      "Scissor Cut",
+      "Layer cut",
+      "Buzz Cut",
+      "Trim & Shape up",
+    ],
   },
   {
     label: "Beard Care",
-    values: ["Beard Trim", "Beard Shaping", "Hot Towel Shave"]
+    values: ["Beard Trim", "Beard Shaping", "Hot Towel Shave"],
   },
   {
     label: "Hair Care",
-    values: ["Hair Treatment", "Scalp Care", "Conditioning"]
+    values: ["Hair Treatment", "Scalp Care", "Conditioning"],
   },
   {
     label: "Styling",
-    values: ["Blowout", "Curling/Waves", "Straightening"]
-  }
+    values: ["Blowout", "Curling/Waves", "Straightening"],
+  },
 ];
 
 export default function Profile() {
   const { user, isLoading, logout } = useAuth();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [isEditContactModalVisible, setIsEditContactModalVisible] = useState(false);
-  const [isEditPreferencesModalVisible, setIsEditPreferencesModalVisible] = useState(false);
+  const [isEditContactModalVisible, setIsEditContactModalVisible] =
+    useState(false);
+  const [isEditPreferencesModalVisible, setIsEditPreferencesModalVisible] =
+    useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
   const [showImageMenu, setShowImageMenu] = useState(false);
   const [baseUrl, setBaseUrl] = useState<string>("");
@@ -162,7 +306,9 @@ export default function Profile() {
   const [isPhoneNumberFocused, setIsPhoneNumberFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [newPreference, setNewPreference] = useState("");
-  const [selectedPreferenceCategory, setSelectedPreferenceCategory] = useState<string | null>(null);
+  const [selectedPreferenceCategory, setSelectedPreferenceCategory] = useState<
+    string | null
+  >(null);
 
   // LOCAL TEST MODE: Set to true to only save images locally (won't persist after app restart)
   const LOCAL_TEST_MODE = true;
@@ -211,9 +357,12 @@ export default function Profile() {
     if (user) {
       // Set default values: first state if state is empty, first city if city is empty
       const defaultState = !state || state.trim() === "" ? US_STATES[0] : state;
-      const defaultCity = !city || city.trim() === "" 
-        ? (CITIES_BY_STATE[defaultState] ? CITIES_BY_STATE[defaultState][0] : "")
-        : city;
+      const defaultCity =
+        !city || city.trim() === ""
+          ? CITIES_BY_STATE[defaultState]
+            ? CITIES_BY_STATE[defaultState][0]
+            : ""
+          : city;
 
       setEditData({
         profilePic: profilePic,
@@ -277,8 +426,14 @@ export default function Profile() {
         email: editContactData.email,
       };
 
-      console.log("[handleSaveContactChanges] Updating contact info with:", updatePayload);
-      console.log("[handleSaveContactChanges] API URL:", `${baseUrl}/auth/user/profile`);
+      console.log(
+        "[handleSaveContactChanges] Updating contact info with:",
+        updatePayload
+      );
+      console.log(
+        "[handleSaveContactChanges] API URL:",
+        `${baseUrl}/auth/user/profile`
+      );
 
       const response = await fetch(`${baseUrl}/auth/user/profile`, {
         method: "PUT",
@@ -290,7 +445,10 @@ export default function Profile() {
       });
 
       const responseText = await response.text();
-      console.log("[handleSaveContactChanges] API Response Status:", response.status);
+      console.log(
+        "[handleSaveContactChanges] API Response Status:",
+        response.status
+      );
       console.log("[handleSaveContactChanges] API Response:", responseText);
 
       if (!response.ok) {
@@ -309,22 +467,29 @@ export default function Profile() {
           phoneNumber: phoneDigits,
           email: editContactData.email,
         };
-        
+
         await SecureStore.setItemAsync("userData", JSON.stringify(updatedUser));
-        console.log("[handleSaveContactChanges] Updated user data in SecureStore:", updatedUser);
+        console.log(
+          "[handleSaveContactChanges] Updated user data in SecureStore:",
+          updatedUser
+        );
       }
 
       Alert.alert("Success", "Contact information updated successfully");
       setIsEditContactModalVisible(false);
-      
+
       // Reset editContactData
       setEditContactData({
         phoneNumber: "",
         email: "",
       });
     } catch (error) {
-      console.error("[handleSaveContactChanges] Error updating contact info:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error(
+        "[handleSaveContactChanges] Error updating contact info:",
+        error
+      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       Alert.alert("Error", `Failed to update contact info: ${errorMessage}`);
     } finally {
       setIsLoading2(false);
@@ -356,8 +521,11 @@ export default function Profile() {
       return;
     }
 
-    console.log("[handleSavePreferencesChanges] Saving preferences:", editPreferencesData);
-    
+    console.log(
+      "[handleSavePreferencesChanges] Saving preferences:",
+      editPreferencesData
+    );
+
     // Update local state
     setPreferences([...editPreferencesData]);
 
@@ -371,7 +539,7 @@ export default function Profile() {
 
   const pickImage = async () => {
     console.log("[pickImage] Starting image picker...");
-    
+
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
@@ -384,7 +552,7 @@ export default function Profile() {
 
       if (!result.canceled && result.assets[0]) {
         console.log("[pickImage] Image selected:", result.assets[0].uri);
-        
+
         if (LOCAL_TEST_MODE) {
           // In test mode, just store the URI directly (won't persist after restart)
           setEditData({
@@ -395,15 +563,20 @@ export default function Profile() {
         } else {
           // In production mode, convert image to base64 for persistence
           try {
-            const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
-              encoding: "base64",
-            });
+            const base64 = await FileSystem.readAsStringAsync(
+              result.assets[0].uri,
+              {
+                encoding: "base64",
+              }
+            );
             const imageData = `data:image/jpeg;base64,${base64}`;
             setEditData({
               ...editData,
               profilePic: imageData,
             });
-            console.log("[pickImage] Production mode - base64 encoded and stored");
+            console.log(
+              "[pickImage] Production mode - base64 encoded and stored"
+            );
           } catch (error) {
             console.error("[pickImage] Error converting to base64:", error);
             Alert.alert("Error", "Failed to process image");
@@ -416,7 +589,7 @@ export default function Profile() {
       console.error("[pickImage] Error opening image picker:", error);
       Alert.alert("Error", "Failed to open image picker");
     }
-    
+
     // Close the menu after selection
     setShowImageMenu(false);
   };
@@ -460,8 +633,14 @@ export default function Profile() {
         profileImage: imageUrl, // Send the new or existing image
       };
 
-      console.log("[handleSaveChanges] Updating customer profile with:", updatePayload);
-      console.log("[handleSaveChanges] API URL:", `${baseUrl}/auth/user/profile`);
+      console.log(
+        "[handleSaveChanges] Updating customer profile with:",
+        updatePayload
+      );
+      console.log(
+        "[handleSaveChanges] API URL:",
+        `${baseUrl}/auth/user/profile`
+      );
 
       const response = await fetch(`${baseUrl}/auth/user/profile`, {
         method: "PUT",
@@ -498,15 +677,18 @@ export default function Profile() {
           state: editData.state,
           profileImage: imageUrl,
         };
-        
+
         await SecureStore.setItemAsync("userData", JSON.stringify(updatedUser));
-        console.log("[handleSaveChanges] Updated user data in SecureStore:", updatedUser);
+        console.log(
+          "[handleSaveChanges] Updated user data in SecureStore:",
+          updatedUser
+        );
       }
 
       Alert.alert("Success", "Profile updated successfully");
       setIsEditModalVisible(false);
       setIsEditingLocation(false);
-      
+
       // Reset editData
       setEditData({
         profilePic: "",
@@ -517,12 +699,13 @@ export default function Profile() {
       });
     } catch (error) {
       console.error("[handleSaveChanges] Error updating profile:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       Alert.alert("Error", `Failed to update profile: ${errorMessage}`);
     } finally {
       setIsLoading2(false);
     }
-  }
+  };
 
   return (
     <>
@@ -544,10 +727,7 @@ export default function Profile() {
           {/* Profile Image */}
           {profilePic ? (
             <View style={styles.profileImageContainer}>
-              <Image
-                source={{ uri: profilePic }}
-                style={styles.profileImage}
-              />
+              <Image source={{ uri: profilePic }} style={styles.profileImage} />
             </View>
           ) : (
             <View style={styles.defaultProfileIcon}>
@@ -558,7 +738,9 @@ export default function Profile() {
           <Text style={styles.name}>
             {firstName && lastName ? `${firstName} ${lastName}` : "Guest User"}
           </Text>
-          <Text style={styles.location}>{city || "City"}, {state || "State"}</Text>
+          <Text style={styles.location}>
+            {city || "City"}, {state || "State"}
+          </Text>
         </View>
 
         {/* Card Row */}
@@ -571,7 +753,12 @@ export default function Profile() {
                 <Ionicons name="pencil" size={18} color="#666" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.field}>Phone: {phoneNumber ? formatPhoneNumber(phoneNumber) : "(555) 123-4567"}</Text>
+            <Text style={styles.field}>
+              Phone:{" "}
+              {phoneNumber
+                ? formatPhoneNumber(phoneNumber)
+                : "Phone number not set"}
+            </Text>
             <Text style={styles.field}>
               Email: {email || (user ? user.email : "customer@email.com")}
             </Text>
@@ -616,13 +803,13 @@ export default function Profile() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView 
+            <ScrollView
               style={styles.modalBody}
               keyboardShouldPersistTaps="handled"
               contentInsetAdjustmentBehavior="automatic"
               contentContainerStyle={
-                isFirstNameFocused || isLastNameFocused 
-                  ? { paddingBottom: 300 } 
+                isFirstNameFocused || isLastNameFocused
+                  ? { paddingBottom: 300 }
                   : { paddingBottom: 20 }
               }
             >
@@ -644,11 +831,13 @@ export default function Profile() {
                   ) : (
                     <View style={styles.imagePickerPlaceholder}>
                       <Ionicons name="person" size={40} color="#999" />
-                      <Text style={styles.imagePickerText}>Tap to select image</Text>
+                      <Text style={styles.imagePickerText}>
+                        Tap to select image
+                      </Text>
                     </View>
                   )}
                 </TouchableOpacity>
-                
+
                 {/* Image Action Menu */}
                 <Modal
                   transparent={true}
@@ -666,18 +855,26 @@ export default function Profile() {
                         style={styles.menuButton}
                         onPress={pickImage}
                       >
-                        <Ionicons name="image-outline" size={24} color="#000000" />
+                        <Ionicons
+                          name="image-outline"
+                          size={24}
+                          color="#000000"
+                        />
                         <Text style={styles.menuButtonText}>Change</Text>
                       </TouchableOpacity>
-                      
+
                       <TouchableOpacity
                         style={[styles.menuButton, styles.deleteMenuButton]}
                         onPress={handleDeleteProfilePic}
                       >
-                        <Ionicons name="trash-outline" size={24} color="#ff1a47" />
+                        <Ionicons
+                          name="trash-outline"
+                          size={24}
+                          color="#ff1a47"
+                        />
                         <Text style={styles.menuButtonText}>Delete</Text>
                       </TouchableOpacity>
-                      
+
                       <TouchableOpacity
                         style={styles.menuCancelButton}
                         onPress={() => setShowImageMenu(false)}
@@ -756,7 +953,11 @@ export default function Profile() {
                         enabled={!isLoading2}
                       >
                         {US_STATES.map((state) => (
-                          <Picker.Item key={state} label={state} value={state} />
+                          <Picker.Item
+                            key={state}
+                            label={state}
+                            value={state}
+                          />
                         ))}
                       </Picker>
                     </View>
@@ -818,18 +1019,20 @@ export default function Profile() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Contact</Text>
-              <TouchableOpacity onPress={() => setIsEditContactModalVisible(false)}>
+              <TouchableOpacity
+                onPress={() => setIsEditContactModalVisible(false)}
+              >
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView 
+            <ScrollView
               style={styles.modalBody}
               keyboardShouldPersistTaps="handled"
               contentInsetAdjustmentBehavior="automatic"
               contentContainerStyle={
-                isPhoneNumberFocused || isEmailFocused 
-                  ? { paddingBottom: 300 } 
+                isPhoneNumberFocused || isEmailFocused
+                  ? { paddingBottom: 300 }
                   : { paddingBottom: 20 }
               }
             >
@@ -842,7 +1045,10 @@ export default function Profile() {
                   value={editContactData.phoneNumber}
                   onChangeText={(text) => {
                     const formatted = formatPhoneNumber(text);
-                    setEditContactData({ ...editContactData, phoneNumber: formatted });
+                    setEditContactData({
+                      ...editContactData,
+                      phoneNumber: formatted,
+                    });
                   }}
                   onFocus={() => setIsPhoneNumberFocused(true)}
                   onBlur={() => setIsPhoneNumberFocused(false)}
@@ -910,15 +1116,17 @@ export default function Profile() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Preferences</Text>
-              <TouchableOpacity onPress={() => {
-                setIsEditPreferencesModalVisible(false);
-                setSelectedPreferenceCategory(null);
-              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsEditPreferencesModalVisible(false);
+                  setSelectedPreferenceCategory(null);
+                }}
+              >
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView 
+            <ScrollView
               style={styles.modalBody}
               keyboardShouldPersistTaps="handled"
               contentInsetAdjustmentBehavior="automatic"
@@ -927,7 +1135,7 @@ export default function Profile() {
               {/* Current Preferences List */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Your Preferences</Text>
-                
+
                 {editPreferencesData.length === 0 ? (
                   <Text style={styles.emptyText}>No preferences added yet</Text>
                 ) : (
@@ -936,7 +1144,9 @@ export default function Profile() {
                       <View key={index} style={styles.preferenceEntry}>
                         <View style={styles.preferenceMainRow}>
                           <View style={styles.preferenceInfoContainer}>
-                            <Text style={styles.preferenceNameText}>{pref}</Text>
+                            <Text style={styles.preferenceNameText}>
+                              {pref}
+                            </Text>
                           </View>
                           <TouchableOpacity
                             style={styles.deletePreferenceButton}
@@ -954,7 +1164,7 @@ export default function Profile() {
               {/* Category Selection Section */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Add Preferences</Text>
-                
+
                 {/* Category Buttons */}
                 <View style={styles.categoryButtonsContainer}>
                   {PREFERENCE_CATEGORIES.map((category) => (
@@ -962,14 +1172,24 @@ export default function Profile() {
                       key={category.label}
                       style={[
                         styles.categoryButton,
-                        selectedPreferenceCategory === category.label && styles.categoryButtonActive
+                        selectedPreferenceCategory === category.label &&
+                          styles.categoryButtonActive,
                       ]}
-                      onPress={() => setSelectedPreferenceCategory(selectedPreferenceCategory === category.label ? null : category.label)}
+                      onPress={() =>
+                        setSelectedPreferenceCategory(
+                          selectedPreferenceCategory === category.label
+                            ? null
+                            : category.label
+                        )
+                      }
                     >
-                      <Text style={[
-                        styles.categoryButtonText,
-                        selectedPreferenceCategory === category.label && styles.categoryButtonTextActive
-                      ]}>
+                      <Text
+                        style={[
+                          styles.categoryButtonText,
+                          selectedPreferenceCategory === category.label &&
+                            styles.categoryButtonTextActive,
+                        ]}
+                      >
                         {category.label}
                       </Text>
                     </TouchableOpacity>
@@ -979,14 +1199,22 @@ export default function Profile() {
                 {/* Preference Items from Selected Category */}
                 {selectedPreferenceCategory && (
                   <View style={styles.preferenceItemsContainer}>
-                    {PREFERENCE_CATEGORIES.find(c => c.label === selectedPreferenceCategory)?.values.map((preferenceName) => (
+                    {PREFERENCE_CATEGORIES.find(
+                      (c) => c.label === selectedPreferenceCategory
+                    )?.values.map((preferenceName) => (
                       <TouchableOpacity
                         key={preferenceName}
                         style={styles.preferenceSelectItem}
                         onPress={() => handleAddPreference(preferenceName)}
                       >
-                        <Ionicons name="add-circle-outline" size={20} color="#ff1a47" />
-                        <Text style={styles.preferenceSelectText}>{preferenceName}</Text>
+                        <Ionicons
+                          name="add-circle-outline"
+                          size={20}
+                          color="#ff1a47"
+                        />
+                        <Text style={styles.preferenceSelectText}>
+                          {preferenceName}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -1020,7 +1248,6 @@ export default function Profile() {
           </View>
         </View>
       </Modal>
-
     </>
   );
 }
@@ -1465,4 +1692,3 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 });
-

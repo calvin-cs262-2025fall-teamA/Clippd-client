@@ -468,6 +468,8 @@ export default function DetailsPage() {
                 <Text style={styles.locationText}>
                   <Ionicons name="location-outline" size={20} color={"red"} />{" "}
                   {clippr.location}
+                  {"  "}
+                  <Ionicons name="open-outline" size={16} color={"#7d7d7dff"} />
                 </Text>
               </TouchableOpacity>
             </View>
@@ -478,11 +480,31 @@ export default function DetailsPage() {
           </View>
         </View>
 
-        {/* <View style={styles.chipContainer}>
-            <View style={styles.chip}>
-              <Text style={styles.chipText}>⭐ {clippr.rating}</Text>
-            </View>
-          </View> */}
+        {/* ---- Services ---- */}
+        {clippr.services && clippr.services.length > 0 && (
+          <View style={styles.servicesContainer}>
+            <Text style={styles.sectionTitle}>Services</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.servicesScroll}
+            >
+              {clippr.services.map((service, index) => (
+                <View key={service.id || index} style={styles.serviceCard}>
+                  <Text style={styles.serviceName}>{service.serviceName}</Text>
+                  <View style={styles.serviceDetails}>
+                    <View style={styles.serviceDetailItem}>
+                      <Text style={styles.serviceDetailText}>
+                        ${service.price || 0}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {/* ---- Reviews ---- */}
         <View style={styles.reviewContainer}>
           <View style={styles.reviewHeaderRow}>
@@ -755,7 +777,7 @@ const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 16,
-    color: "#666",
+    color: "#0054caff",
     marginTop: 4,
   },
   rating: {
@@ -787,6 +809,43 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 14,
     color: "#fff",
+  },
+
+  // --- Services ---
+  servicesContainer: {
+    padding: 20,
+    paddingBottom: 0,
+  },
+  servicesScroll: {
+    marginTop: 12,
+  },
+  serviceCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    padding: 16,
+    marginRight: 12,
+    minWidth: 140,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+  },
+  serviceName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#222",
+    marginBottom: 8,
+  },
+  serviceDetails: {
+    flexDirection: "column",
+    gap: 6,
+  },
+  serviceDetailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  serviceDetailText: {
+    fontSize: 14,
+    color: "#666",
   },
 
   // --- Reviews ---
