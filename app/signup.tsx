@@ -179,11 +179,11 @@ const styles = StyleSheet.create({
   },
   headline: {
     textAlign: "center",
-    marginTop: -100,
+    marginTop: -75,
     marginBottom: 50,
     fontWeight: "700",
     fontStyle: "italic",
-    fontSize: 72,
+    fontSize: 60,
   },
   label: {
     marginLeft: "10%",
@@ -207,7 +207,9 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 6,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20,
+    width: "80%",
+    alignSelf: "center",
   },
   buttonText: {
     color: "white",

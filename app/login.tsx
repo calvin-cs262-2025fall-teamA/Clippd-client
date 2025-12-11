@@ -53,7 +53,15 @@ export default function Login() {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.headline}>SignIn</Text>
+        <View style={styles.headlineContainer}>
+          <Text style={styles.headline}>Clippd</Text>
+          <Ionicons
+            name="cut"
+            size={60}
+            color="black"
+            style={styles.scissorIcon}
+          />
+        </View>
         <View style={styles.formContainer}>
           <Text style={styles.label}>User ID:</Text>
           <TextInput
@@ -126,10 +134,20 @@ const styles = StyleSheet.create({
     marginBottom: 50,
     fontWeight: "700",
     fontStyle: "italic",
-    fontSize: 72,
+    fontSize: 60,
+  },
+  headlineContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+  },
+  scissorIcon: {
+    marginTop: -135,
   },
   label: {
     marginLeft: "10%",
+    fontWeight: "500",
   },
   input: {
     borderWidth: 1,
@@ -169,7 +187,9 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 6,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20,
+    width: "80%",
+    alignSelf: "center",
   },
   buttonText: {
     color: "white",
