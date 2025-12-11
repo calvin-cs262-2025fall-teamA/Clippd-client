@@ -6,18 +6,23 @@ import Card from "../../components/Card";
 import { useClippd } from "../../contexts/ClippdContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFocusEffect } from "@react-navigation/native";
-import Card from "../../components/Card";
-import { useClippd } from "../../contexts/ClippdContext";
 import { useFilter } from "../../contexts/FilterContext";
 import { ClipperProfile } from "../../type/clippdTypes";
 import FilterButton from "../components/filter_button";
 
 export default function Home() {
-  const { clippers, isClippersLoading, clippersError, fetchClippers, getFilteredClippers } =
-    useClippd();
+  const {
+    clippers,
+    isClippersLoading,
+    clippersError,
+    fetchClippers,
+    getFilteredClippers,
+  } = useClippd();
   const { user } = useAuth();
   const { filters, hasActiveFilters } = useFilter();
-  const [displayedClippers, setDisplayedClippers] = useState<ClipperProfile[]>([]);
+  const [displayedClippers, setDisplayedClippers] = useState<ClipperProfile[]>(
+    []
+  );
   const [isFiltering, setIsFiltering] = useState(false);
 
   // Optional manual refresh on mount if not already triggered in provider
@@ -25,10 +30,6 @@ export default function Home() {
     if (clippers.length === 0) fetchClippers();
   }, [clippers.length, fetchClippers]);
 
-  // Redirect Clippers to their profile page (index is hidden for them anyway)
-  if (user?.role === "Clipper") {
-    return <Redirect href="/(tabs)/barber-profile" />;
-  }
   // Update displayed clippers when filters change
   useFocusEffect(
     React.useCallback(() => {
@@ -41,18 +42,22 @@ export default function Home() {
             priceRange: filters.priceRange,
             totalClippers: clippers.length,
           });
-          
+
           const filtered = await getFilteredClippers(
             filters.selectedServices,
             filters.selectedLanguages,
             filters.priceRange
           );
-          
+
           console.log("[Home] Filtered results:", {
             count: filtered.length,
-            clippers: filtered.map(c => ({ id: c.id, name: c.name, userId: c.userId })),
+            clippers: filtered.map((c) => ({
+              id: c.id,
+              name: c.name,
+              userId: c.userId,
+            })),
           });
-          
+
           setDisplayedClippers(filtered);
         } catch (error) {
           console.error("Error applying filters:", error);
@@ -65,6 +70,11 @@ export default function Home() {
       applyFilters();
     }, [filters, clippers, getFilteredClippers])
   );
+
+  // Redirect Clippers to their profile page (index is hidden for them anyway)
+  if (user?.role === "Clipper") {
+    return <Redirect href="/(tabs)/barber-profile" />;
+  }
 
   // Determine which clippers to display
   // If filters are active, show only filtered results (even if empty)
@@ -95,7 +105,9 @@ export default function Home() {
             !isFiltering &&
             !clippersError &&
             clippersToDisplay.length === 0 && (
-              <Text style={{ textAlign: "center", marginTop: 40, color: "#999" }}>
+              <Text
+                style={{ textAlign: "center", marginTop: 40, color: "#999" }}
+              >
                 No clippers found matching your filters
               </Text>
             )}
