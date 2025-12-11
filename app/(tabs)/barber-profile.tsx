@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ClipperProfile, Service } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -107,6 +107,23 @@ function formatRating(rating: number | string | undefined): string {
   return rounded.toFixed(1);
 }
 
+// Format dates from API (createdAt/createdat/date) into MM-dd-yyyy
+function formatDate(dateString: string | undefined): string {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${month}-${day}-${year}`;
+  } catch {
+    return "";
+  }
+}
+
 // Service Categories Data
 const SERVICE_CATEGORIES = [
   {
@@ -166,6 +183,9 @@ export default function BarberProfile() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showPortfolioMenu, setShowPortfolioMenu] = useState<number | null>(null);
   const [baseUrl, setBaseUrl] = useState<string>("");
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [reviewsLoaded, setReviewsLoaded] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -238,6 +258,48 @@ export default function BarberProfile() {
     }
      
   }, [clippers, user]);
+
+  useEffect(() => {
+    // Reset review state when switching to a different clipper
+    setReviews([]);
+    setReviewsLoaded(false);
+  }, [barberData?.id]);
+
+  const loadReviews = useCallback(async () => {
+    if (!barberData?.id || !baseUrl) return;
+
+    try {
+      setIsLoadingReviews(true);
+      const response = await fetch(`${baseUrl}/clippers/${barberData.id}/reviews`);
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        throw new Error(`Failed to load reviews: ${response.status} - ${responseText}`);
+      }
+
+      let parsed: any[] = [];
+      try {
+        const json = responseText ? JSON.parse(responseText) : [];
+        parsed = Array.isArray(json) ? json : [];
+      } catch (parseErr) {
+        console.error("[BarberProfile] Failed to parse reviews response:", parseErr);
+        parsed = [];
+      }
+
+      setReviews(parsed);
+      setReviewsLoaded(true);
+      setBarberData((prev) => (prev ? { ...prev, reviews: parsed } : prev));
+      updateClipperProfile(barberData.id, { reviews: parsed });
+    } catch (error) {
+      console.error("[BarberProfile] Error loading reviews:", error);
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  }, [barberData?.id, baseUrl, updateClipperProfile]);
+
+  useEffect(() => {
+    loadReviews();
+  }, [loadReviews]);
 
   const handleEditPress = () => {
     // Initialize editData with current barberData values
@@ -654,7 +716,8 @@ export default function BarberProfile() {
     );
   }
 
-  const totalReviews = barberData.reviews?.length || 0;
+  const displayedReviews = reviewsLoaded ? reviews : barberData.reviews || [];
+  const totalReviews = displayedReviews.length || 0;
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -824,6 +887,57 @@ export default function BarberProfile() {
             </ScrollView>
           ) : (
             <Text style={styles.noDataText}>No services available</Text>
+          )}
+        </View>
+
+        {/* Reviews Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Client Reviews</Text>
+            {isLoadingReviews && <ActivityIndicator size="small" color="#000000" />}
+          </View>
+
+          {displayedReviews.length > 0 ? (
+            displayedReviews.map((review) => {
+              const reviewDate = formatDate(
+                review.createdat || review.createdAt || review.date
+              );
+
+              return (
+                <View
+                  key={review.id || `${review.reviewerName}-${reviewDate || Math.random()}`}
+                  style={styles.reviewCard}
+                >
+                  <View style={styles.reviewHeader}>
+                    <View style={styles.reviewHeaderLeft}>
+                      <Text style={styles.reviewerName}>
+                        {review.reviewerName || review.clientName || "Client"}
+                      </Text>
+                      {(review.rating || review.rating === 0) && (
+                        <View style={styles.ratingStars}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Ionicons
+                              key={star}
+                              name={star <= review.rating ? "star" : "star-outline"}
+                              size={14}
+                              color={star <= review.rating ? "#FFB800" : "#ccc"}
+                            />
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                    {reviewDate ? (
+                      <Text style={styles.reviewDate}>{reviewDate}</Text>
+                    ) : null}
+                  </View>
+                  <Text style={styles.reviewContent}>
+                    {review.reviewContent || review.comment || "No comment provided."}
+                  </Text>
+                </View>
+              );
+            })
+          ) : (
+            <Text style={styles.noReviewsText}>No reviews yet</Text>
           )}
         </View>
 
@@ -1631,6 +1745,49 @@ const styles = StyleSheet.create({
     color: "#999",
     textAlign: "center",
     padding: 20,
+  },
+  reviewCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+  },
+  reviewHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+    gap: 8,
+  },
+  reviewHeaderLeft: {
+    flex: 1,
+  },
+  ratingStars: {
+    flexDirection: "row",
+    gap: 4,
+    marginTop: 4,
+  },
+  reviewerName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#222",
+  },
+  reviewDate: {
+    fontSize: 12,
+    color: "#888",
+  },
+  reviewContent: {
+    fontSize: 14,
+    color: "#555",
+    lineHeight: 18,
+  },
+  noReviewsText: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    paddingVertical: 6,
   },
 
   /* Modal Styles */
