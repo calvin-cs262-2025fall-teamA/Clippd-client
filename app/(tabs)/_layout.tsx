@@ -134,6 +134,7 @@ export default function TabLayout() {
             <Ionicons name="map-outline" size={24} color={color} />
           ),
           href: user.role === "Clipper" ? null : undefined,
+          enabled: false,
         }}
       />
 
