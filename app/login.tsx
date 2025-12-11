@@ -58,7 +58,7 @@ export default function Login() {
           <Ionicons
             name="cut"
             size={60}
-            color="black"
+            color="#ff1a47"
             style={styles.scissorIcon}
           />
         </View>
@@ -141,6 +141,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 10,
+    marginTop: 90,
   },
   scissorIcon: {
     marginTop: -135,
