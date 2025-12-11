@@ -16,6 +16,8 @@ export interface ClipperProfile {
   profilePic: string;
   bio?: string;
   address?: string;
+  phone?: string;
+  emailAddress?: string;
   reviews?: Review[];
   services?: Service[];
 }

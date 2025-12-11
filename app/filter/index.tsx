@@ -5,7 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
+  // Alert,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,15 +14,34 @@ import { useFilter } from "../../contexts/FilterContext";
 const SERVICE_CATEGORIES = [
   {
     label: "Haircuts",
-    values: ["Fade", "Taper", "Scissor Cut", "Layer cut", "Bob/Long Bob", "Buzz Cut", "Trim & Shape up"],
+    values: [
+      "Fade",
+      "Taper",
+      "Scissor Cut",
+      "Layer cut",
+      "Bob/Long Bob",
+      "Buzz Cut",
+      "Trim & Shape up",
+    ],
   },
   {
     label: "Styling",
-    values: ["Blowout", "Curling/Waves", "Straightening", "Special Event Hairstyle"],
+    values: [
+      "Blowout",
+      "Curling/Waves",
+      "Straightening",
+      "Special Event Hairstyle",
+    ],
   },
   {
     label: "Coloring",
-    values: ["Full Color", "Highlights", "Balayage", "Root Touch-up", "Bleach + Tone"],
+    values: [
+      "Full Color",
+      "Highlights",
+      "Balayage",
+      "Root Touch-up",
+      "Bleach + Tone",
+    ],
   },
   {
     label: "Treatments",
@@ -36,11 +55,23 @@ const SERVICE_CATEGORIES = [
 
 const LANGUAGES = ["Spanish", "Korean", "Nepali"];
 
-const PRICE_RANGES = ["$0 – $20", "$20 – $40", "$40 – $60", "$60 – $100", "$100+"];
+const PRICE_RANGES = [
+  "$0 – $20",
+  "$20 – $40",
+  "$40 – $60",
+  "$60 – $100",
+  "$100+",
+];
 
 export default function FilterScreen() {
   const router = useRouter();
-  const { filters, toggleService, toggleLanguage, setPriceRange, clearFilters } = useFilter();
+  const {
+    filters,
+    toggleService,
+    toggleLanguage,
+    setPriceRange,
+    clearFilters,
+  } = useFilter();
 
   return (
     <>
@@ -60,7 +91,9 @@ export default function FilterScreen() {
               onPress={handleClearFilters}
               style={{ marginRight: 16 }}
             >
-              <Text style={{ color: "#ff1a47", fontSize: 14, fontWeight: "600" }}>
+              <Text
+                style={{ color: "#ff1a47", fontSize: 14, fontWeight: "600" }}
+              >
                 Clear
               </Text>
             </TouchableOpacity>
@@ -141,7 +174,9 @@ function DropdownSection({
   onToggle: (item: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [openCategories, setOpenCategories] = useState<{ [key: number]: boolean }>({});
+  const [openCategories, setOpenCategories] = useState<{
+    [key: number]: boolean;
+  }>({});
 
   const toggleCategory = (categoryIdx: number) => {
     setOpenCategories((prev) => ({
@@ -185,7 +220,9 @@ function DropdownSection({
                 size={18}
                 color="#666"
                 style={{
-                  transform: [{ rotate: openCategories[idx] ? "180deg" : "0deg" }],
+                  transform: [
+                    { rotate: openCategories[idx] ? "180deg" : "0deg" },
+                  ],
                 }}
               />
             </TouchableOpacity>
@@ -200,7 +237,11 @@ function DropdownSection({
                 >
                   <Text style={styles.value}>{v}</Text>
                   {selectedItems.includes(v) && (
-                    <Ionicons name="checkmark-outline" size={20} color="#ff1a47" />
+                    <Ionicons
+                      name="checkmark-outline"
+                      size={20}
+                      color="#ff1a47"
+                    />
                   )}
                 </TouchableOpacity>
               ))}

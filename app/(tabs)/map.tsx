@@ -40,7 +40,7 @@ export default function MapScreen() {
 
     setRegion(updated);
     mapRef.current?.animateToRegion(updated, 450);
-  }, [radiusMiles]);
+  }, [radiusMiles, region]);
 
   // 🔥 Get user GPS location
   useEffect(() => {
@@ -65,7 +65,6 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-
       {/* 🔎 Search Bar */}
       <View style={styles.searchContainer}>
         <GooglePlacesAutocomplete
@@ -74,7 +73,7 @@ export default function MapScreen() {
           fetchDetails={true}
           listViewDisplayed={false}
           GooglePlacesDetailsQuery={{
-            fields: "geometry",   // 🔥 REQUIRED or details.geometry will be null
+            fields: "geometry", // 🔥 REQUIRED or details.geometry will be null
           }}
           onFail={() => {}}
           onNotFound={() => {}}
@@ -151,7 +150,6 @@ export default function MapScreen() {
           thumbTintColor="#FF1744"
         />
       </View>
-
     </View>
   );
 }
