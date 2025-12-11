@@ -27,6 +27,13 @@ interface ClippdContextType {
     clipperId: string,
     updatedData: Partial<ClipperProfile>
   ) => void;
+  updateClipperProfile: (clipperId: string, updatedData: Partial<ClipperProfile>) => void;
+  // Filter clippers
+  getFilteredClippers: (
+    selectedServices: string[],
+    selectedLanguages: string[],
+    priceRange: string | null
+  ) => Promise<ClipperProfile[]>;
 }
 
 export const ClippdContext = createContext<ClippdContextType | undefined>(
@@ -138,6 +145,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
 
           return {
             id: String(c.id),
+            userId: c.userid || c.userID, // Store the UserAccount ID for language queries
             name: [c.firstName || c.firstname, c.lastName || c.lastname]
               .filter(Boolean)
               .join(" "),
@@ -190,6 +198,120 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
     []
   );
 
+  // Filter clippers based on services, languages, and price range
+  const getFilteredClippers = useCallback(
+    async (
+      selectedServices: string[],
+      selectedLanguages: string[],
+      priceRange: string | null
+    ): Promise<ClipperProfile[]> => {
+      // If no filters selected, return all clippers
+      if (
+        selectedServices.length === 0 &&
+        selectedLanguages.length === 0 &&
+        !priceRange
+      ) {
+        return clippers;
+      }
+
+      // Helper function to get price range bounds
+      const getPriceBounds = (
+        range: string
+      ): { min: number; max: number } => {
+        const ranges: {
+          [key: string]: { min: number; max: number };
+        } = {
+          "$0 – $20": { min: 0, max: 20 },
+          "$20 – $40": { min: 20, max: 40 },
+          "$40 – $60": { min: 40, max: 60 },
+          "$60 – $100": { min: 60, max: 100 },
+          "$100+": { min: 100, max: Infinity },
+        };
+        return ranges[range] || { min: 0, max: Infinity };
+      };
+
+      const filtered = await Promise.all(
+        clippers.map(async (clipper) => {
+          // Fetch languages for this clipper using userId (not clipperId)
+          let clipperLanguages: string[] = [];
+          try {
+            if (baseUrl && clipper.userId) {
+              console.log(`[Filter] Fetching languages for userId: ${clipper.userId}, clipper: ${clipper.name}`);
+              const languagesResponse = await fetch(
+                `${baseUrl}/users/${clipper.userId}/languages`
+              );
+              if (languagesResponse.ok) {
+                const rawLanguages = await languagesResponse.json();
+                console.log(`[Filter] Raw language response for ${clipper.name}:`, rawLanguages);
+                
+                clipperLanguages = (rawLanguages || []).map(
+                  (l: any) => l.language
+                );
+                console.log(`[Filter] Parsed languages for ${clipper.name}:`, clipperLanguages);
+              } else {
+                console.warn(`[Filter] Language API error for ${clipper.name}:`, languagesResponse.status);
+              }
+            } else {
+              console.warn(`[Filter] Missing baseUrl or userId for ${clipper.name}`);
+            }
+          } catch (err) {
+            console.warn(
+              `Failed to fetch languages for clipper ${clipper.id}:`,
+              err
+            );
+          }
+
+          // Check language filter
+          if (
+            selectedLanguages.length > 0 &&
+            !selectedLanguages.some((lang) =>
+              clipperLanguages.includes(lang)
+            )
+          ) {
+            console.log(`[Filter] ${clipper.name} filtered out - no matching language. Selected: ${selectedLanguages}, Has: ${clipperLanguages}`);
+            return null;
+          }
+
+          // Check service filter
+          if (selectedServices.length > 0) {
+            const hasService = (clipper.services || []).some((service) =>
+              selectedServices.includes(service.serviceName)
+            );
+            if (!hasService) {
+              return null;
+            }
+          }
+
+          // Check price range filter
+          if (priceRange) {
+            const { min, max } = getPriceBounds(priceRange);
+            const hasServiceInRange = (clipper.services || []).some(
+              (service) => {
+                const price = service.price || 0;
+                return price >= min && price <= max;
+              }
+            );
+            if (!hasServiceInRange) {
+              return null;
+            }
+          }
+
+          return clipper;
+        })
+      );
+
+      return filtered.filter((c) => c !== null) as ClipperProfile[];
+    },
+    [clippers, baseUrl]
+  );
+
+  // Debug: Log filtered clippers
+  useEffect(() => {
+    if (typeof getFilteredClippers === "function") {
+      // This runs after context is ready
+    }
+  }, [getFilteredClippers]);
+
   // Auto-fetch data when baseUrl is ready
   useEffect(() => {
     if (baseUrl) {
@@ -226,6 +348,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
         fetchClippers,
         updateClipperRating,
         updateClipperProfile,
+        getFilteredClippers,
       },
     },
     children
