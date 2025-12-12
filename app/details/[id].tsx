@@ -116,9 +116,6 @@ export default function DetailsPage() {
       const response = await fetch(`${apiUrl}/clippers/${id}/reviews`);
       const responseText = await response.text();
 
-      console.log("[DetailsPage] Response status:", response.status);
-      console.log("[DetailsPage] Response text:", responseText);
-
       if (!response.ok) {
         throw new Error(
           `Failed to load reviews: ${response.status} - ${responseText}`
@@ -126,29 +123,6 @@ export default function DetailsPage() {
       }
 
       const data = JSON.parse(responseText);
-
-      console.log("[DetailsPage] Loaded reviews:", data?.length || 0);
-      console.log("[DetailsPage] ALL reviews:", JSON.stringify(data, null, 2));
-      console.log(
-        "[DetailsPage] Current user:",
-        user ? `ID: ${user.id}, Type: ${typeof user.id}` : "Not logged in"
-      );
-
-      // Log ownership check for each review
-      if (data && Array.isArray(data)) {
-        data.forEach((review, index) => {
-          console.log(
-            `[DetailsPage] Review ${index}: clientid=${
-              review.clientid
-            } (type: ${typeof review.clientid}), userId=${
-              user?.id
-            } (type: ${typeof user?.id}), Match: ${
-              parseInt(user?.id || "0") === review.clientid
-            }`
-          );
-        });
-      }
-
       setReviews(data || []);
     } catch (error) {
       console.error("[DetailsPage] Error loading reviews:", error);
@@ -615,9 +589,7 @@ export default function DetailsPage() {
                           {formatDate(review.createdat)}
                         </Text>
                       )}
-                      {user &&
-                      review.clientid &&
-                      parseInt(user.id) === review.clientid ? (
+                      {user && review.clientID !== undefined && review.clientID !== null && parseInt(user.id || "0") === review.clientID ? (
                         <View style={styles.reviewActions}>
                           <TouchableOpacity
                             onPress={() => handleDeleteReview(review.id)}

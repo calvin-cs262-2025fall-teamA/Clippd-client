@@ -16,21 +16,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [loginID, setLoginID] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (!loginID || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     setIsLoading(true);
     try {
-      await login(email, password);
+      await login(loginID, password);
       router.replace("/" as Href);
     } catch (error: any) {
       Alert.alert("Login Failed", error.message || "Invalid credentials");
@@ -63,15 +63,15 @@ export default function Login() {
           />
         </View>
         <View style={styles.formContainer}>
-          <Text style={styles.label}>User ID:</Text>
+          <Text style={styles.label}>Login ID:</Text>
           <TextInput
-            placeholder="Enter your user ID"
+            placeholder="Enter your login ID"
             placeholderTextColor={"gray"}
             style={styles.input}
-            value={email}
-            onChangeText={setEmail}
+            value={loginID}
+            onChangeText={setLoginID}
             autoCapitalize="none"
-            keyboardType="email-address"
+            keyboardType="default"
           />
 
           <Text style={styles.label}>Password:</Text>

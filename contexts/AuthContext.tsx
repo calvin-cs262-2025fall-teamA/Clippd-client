@@ -3,10 +3,11 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 type AuthContextType = {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (loginID: string, password: string) => Promise<void>;
   signup: (
     firstName: string,
     lastName: string,
+    loginID: string,
     email: string,
     password: string
   ) => Promise<void>;
@@ -20,6 +21,11 @@ type User = {
   firstName: string;
   lastName: string;
   role?: string;
+  phoneNumber?: string;
+  city?: string;
+  state?: string;
+  profileImage?: string;
+  preferences?: string[];
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,17 +59,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (loginID: string, password: string) => {
     try {
       const apiUrl =
         process.env.EXPO_PUBLIC_API_URL ||
         "https://clippdservice-g5fce7cyhshmd9as.eastus2-01.azurewebsites.net";
       console.log("[AuthContext] ========== LOGIN START ==========");
-      console.log("[AuthContext] Email:", email);
+      console.log("[AuthContext] LoginID:", loginID);
       console.log("[AuthContext] Password:", password);
       console.log("[AuthContext] API URL:", apiUrl);
 
-      const requestBody = { loginID: email, passWord: password };
+      const requestBody = { loginID: loginID, passWord: password };
       console.log("[AuthContext] Request body:", JSON.stringify(requestBody));
 
       console.log("[AuthContext] Fetching from:", `${apiUrl}/auth/login`);
@@ -142,12 +148,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (
     firstName: string,
     lastName: string,
+    loginID: string,
     email: string,
     password: string,
     role: string = "Client"
   ) => {
     try {
-      if (!firstName || !lastName || !email || !password) {
+      if (!firstName || !lastName || !loginID || !email || !password) {
         throw new Error("All fields are required");
       }
 
@@ -162,7 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({
             firstName,
             lastName,
-            loginID: email,
+            loginID: loginID,
             passWord: password,
             role: role,
             emailAddress: email,

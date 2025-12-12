@@ -18,16 +18,19 @@ import Ionicons from "@expo/vector-icons/build/Ionicons";
 export default function Signup() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [loginID, setLoginID] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [role, setRole] = useState("Select Role");
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
 
   const handleSignup = async () => {
-    if (!firstName || !lastName || !email || !password) {
+    if (!firstName || !lastName || !loginID || !email || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
@@ -42,9 +45,14 @@ export default function Signup() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match. Please enter the same password in both fields.");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await signup(firstName, lastName, email, password, role);
+      await signup(firstName, lastName, loginID, email, password, role);
       router.replace("/(tabs)" as Href);
     } catch (error: any) {
       Alert.alert("Signup Failed", error.message || "Unable to create account");
@@ -118,15 +126,14 @@ export default function Signup() {
             placeholderTextColor="gray"
           />
 
-          <Text style={styles.label}>Email:</Text>
+          <Text style={styles.label}>Login ID:</Text>
           <TextInput
-            placeholder="Enter your email"
-            placeholderTextColor={"gray"}
             style={styles.input}
-            value={email}
-            onChangeText={setEmail}
+            value={loginID}
+            onChangeText={setLoginID}
+            placeholder="Login ID"
+            placeholderTextColor="gray"
             autoCapitalize="none"
-            keyboardType="email-address"
           />
 
           <Text style={styles.label}>Password:</Text>
@@ -150,6 +157,61 @@ export default function Signup() {
               />
             </TouchableOpacity>
           </View>
+
+          <Text style={styles.label}>Confirm Password:</Text>
+          <View
+            style={[
+              styles.passwordContainer,
+              confirmPassword &&
+                password &&
+                password !== confirmPassword && {
+                  borderColor: "#ff6b6b",
+                },
+            ]}
+          >
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Confirm Password"
+              placeholderTextColor={"gray"}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
+            />
+            <TouchableOpacity
+              style={styles.passwordToggle}
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <Ionicons
+                name={showConfirmPassword ? "eye" : "eye-off"}
+                size={24}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+          {confirmPassword &&
+            password &&
+            password !== confirmPassword && (
+              <View style={styles.errorContainer}>
+                <Ionicons
+                  name="alert-circle"
+                  size={16}
+                  color="#ff6b6b"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.errorText}>Passwords do not match</Text>
+              </View>
+            )}
+
+          <Text style={styles.label}>Email:</Text>
+          <TextInput
+            placeholder="Enter your email"
+            placeholderTextColor={"gray"}
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
         </View>
         <TouchableOpacity
           style={styles.button}
@@ -233,6 +295,18 @@ const styles = StyleSheet.create({
   },
   passwordToggle: {
     padding: 8,
+  },
+  errorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: "10%",
+    marginTop: -5,
+    marginBottom: 10,
+  },
+  errorText: {
+    color: "#ff6b6b",
+    fontSize: 14,
+    fontWeight: "500",
   },
   dropdown: {
     flexDirection: "row",
