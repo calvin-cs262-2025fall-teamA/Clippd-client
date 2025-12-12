@@ -2247,11 +2247,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#222",
-  },
 
   /* Services Scroll Container */
   servicesScrollContainer: {
@@ -2422,37 +2417,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  /* Modal Styles */
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingTop: 16,
-    maxHeight: "95%",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#222",
-  },
-  modalBody: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
   inputGroup: {
     marginBottom: 16,
   },

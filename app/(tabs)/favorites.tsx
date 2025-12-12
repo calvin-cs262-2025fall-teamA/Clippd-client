@@ -1,6 +1,6 @@
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useClippd } from "@/contexts/ClippdContext";
-import { Stack, router } from "expo-router";
+import { Stack } from "expo-router";
 import React, { useState } from "react";
 import {
   ScrollView,
@@ -328,16 +328,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#e0e0e0",
-  },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    backgroundColor: "#fff",
-    alignItems: "flex-start",
-    gap: 12,
   },
   tableRow: {
     flexDirection: "row",
