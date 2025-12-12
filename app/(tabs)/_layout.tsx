@@ -120,7 +120,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Explore (Map) */}
+      {/* Explore (Map) - HIDDEN */}
       <Tabs.Screen
         name="map"
         options={{
@@ -133,8 +133,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="map-outline" size={24} color={color} />
           ),
-          href: user.role === "Clipper" ? null : undefined,
-          enabled: false,
+          href: null,
         }}
       />
 
