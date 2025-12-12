@@ -21,6 +21,11 @@ type User = {
   firstName: string;
   lastName: string;
   role?: string;
+  phoneNumber?: string;
+  city?: string;
+  state?: string;
+  profileImage?: string;
+  preferences?: string[];
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

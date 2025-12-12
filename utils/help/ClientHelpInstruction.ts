@@ -2,7 +2,7 @@ import { FINDING_A_CLIPPER } from "./client/FindingAClipper";
 import { CONTACTING_A_CLIPPER } from "./client/ContactingAClipper";
 import { FAVORITING_A_CLIPPER } from "./client/FavoritingAClipper";
 import { EDITING_YOUR_PROFILE } from "./client/EditingYourProfile";
-import { HelpDocument } from "./FindingAClipper";
+import { HelpDocument } from "./client/FindingAClipper";
 
 export interface ClientHelpInstruction {
   title: string;
