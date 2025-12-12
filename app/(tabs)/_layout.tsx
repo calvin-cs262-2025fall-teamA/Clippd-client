@@ -86,7 +86,7 @@ export default function TabLayout() {
             color: "#000000ff",
           },
           headerLeft: () => (
-            <View style={{ marginLeft: 137 }}>
+            <View style={{ marginLeft: 120 }}>
               <Scissors color="#ff1a47" size={32} />
             </View>
           ),
