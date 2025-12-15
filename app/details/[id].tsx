@@ -589,7 +589,10 @@ export default function DetailsPage() {
                           {formatDate(review.createdat)}
                         </Text>
                       )}
-                      {user && review.clientID !== undefined && review.clientID !== null && parseInt(user.id || "0") === review.clientID ? (
+                      {user &&
+                      review.clientID !== undefined &&
+                      review.clientID !== null &&
+                      parseInt(user.id || "0") === review.clientID ? (
                         <View style={styles.reviewActions}>
                           <TouchableOpacity
                             onPress={() => handleDeleteReview(review.id)}

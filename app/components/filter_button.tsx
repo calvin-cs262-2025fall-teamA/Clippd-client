@@ -1,9 +1,40 @@
+/**
+ * @fileoverview Floating Action Button (FAB) for Filter Navigation
+ *
+ * Provides a prominent, accessible button for opening the filter screen.
+ * Positioned as a floating action button (FAB) in the bottom-right corner
+ * of the home screen. Uses blur effect for modern glass-morphism design.
+ *
+ * Features:
+ * - Glass-morphism design with blur effect
+ * - Positioned as floating action button (FAB)
+ * - Red accent icon color matching brand
+ * - Smooth navigation to filter screen
+ * - Accessibility support
+ *
+ * @component
+ * @returns {React.ReactElement} Floating filter button with navigation
+ *
+ * @example
+ * <FilterButton />
+ * // Renders red filter icon button in bottom-right corner
+ * // Opens /filter screen when tapped
+ */
+
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
+/**
+ * FilterButton Component
+ *
+ * Floating action button for opening filter interface.
+ * Styled with blur effect and positioned at screen bottom-right.
+ *
+ * @returns {React.ReactElement} Absolute-positioned FAB component
+ */
 export default function FilterButton() {
   const router = useRouter();
 

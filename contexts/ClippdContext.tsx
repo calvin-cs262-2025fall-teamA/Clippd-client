@@ -1,3 +1,27 @@
+/**
+ * @fileoverview Clippd Data Management Context
+ *
+ * This module provides application-wide state management for clipper profiles,
+ * services, filters, and user data. It handles all API interactions with the
+ * backend and maintains local caching of clipper information.
+ *
+ * Key responsibilities:
+ * - Fetching and caching clipper profiles from backend
+ * - Managing user data and clipper ratings
+ * - Filtering clippers based on services, languages, and price
+ * - Maintaining loading and error states
+ * - Updating local state when clipper profiles change
+ *
+ * @example
+ * // In root component:
+ * <ClippdProvider>
+ *   <App />
+ * </ClippdProvider>
+ *
+ * // In any component:
+ * const { clippers, fetchClippers, getFilteredClippers } = useClippd();
+ */
+
 import React, {
   createContext,
   ReactNode,
@@ -9,6 +33,20 @@ import React, {
 import { Users, ClipperProfile, Service } from "../type/clippdTypes";
 import { getApiUrl } from "../utils/networkConfig";
 
+/**
+ * @typedef {Object} ClippdContextType
+ * @property {Users[] | null} users - Array of all users from database
+ * @property {Function} setUsers - State setter for users array
+ * @property {Function} refreshUsers - Refetches all users from API
+ * @property {Function} fetchUserById - Fetches single user by ID
+ * @property {ClipperProfile[]} clippers - Array of clipper profiles formatted for UI
+ * @property {boolean} isClippersLoading - Loading state for clipper fetch operation
+ * @property {string | null} clippersError - Error message if clipper fetch fails
+ * @property {Function} fetchClippers - Fetches and caches all clippers from API
+ * @property {Function} updateClipperRating - Updates local rating for a clipper
+ * @property {Function} updateClipperProfile - Updates local clipper profile data
+ * @property {Function} getFilteredClippers - Returns filtered array of clippers based on criteria
+ */
 interface ClippdContextType {
   // Users
   users: Users[] | null;
@@ -27,7 +65,6 @@ interface ClippdContextType {
     clipperId: string,
     updatedData: Partial<ClipperProfile>
   ) => void;
-  updateClipperProfile: (clipperId: string, updatedData: Partial<ClipperProfile>) => void;
   // Filter clippers
   getFilteredClippers: (
     selectedServices: string[],
@@ -40,6 +77,22 @@ export const ClippdContext = createContext<ClippdContextType | undefined>(
   undefined
 );
 
+/**
+ * ClippdProvider Component
+ *
+ * Context provider that manages all clipper and user data for the application.
+ * Handles API calls to fetch clippers, filter results, and update profiles.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {ReactNode} props.children - Child components that consume Clippd context
+ * @returns {React.ReactElement} Provider wrapping children with Clippd context
+ *
+ * @example
+ * <ClippdProvider>
+ *   <Navigation />
+ * </ClippdProvider>
+ */
 export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -217,9 +270,7 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       // Helper function to get price range bounds
-      const getPriceBounds = (
-        range: string
-      ): { min: number; max: number } => {
+      const getPriceBounds = (range: string): { min: number; max: number } => {
         const ranges: {
           [key: string]: { min: number; max: number };
         } = {
@@ -238,23 +289,36 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
           let clipperLanguages: string[] = [];
           try {
             if (baseUrl && clipper.userId) {
-              console.log(`[Filter] Fetching languages for userId: ${clipper.userId}, clipper: ${clipper.name}`);
+              console.log(
+                `[Filter] Fetching languages for userId: ${clipper.userId}, clipper: ${clipper.name}`
+              );
               const languagesResponse = await fetch(
                 `${baseUrl}/users/${clipper.userId}/languages`
               );
               if (languagesResponse.ok) {
                 const rawLanguages = await languagesResponse.json();
-                console.log(`[Filter] Raw language response for ${clipper.name}:`, rawLanguages);
-                
+                console.log(
+                  `[Filter] Raw language response for ${clipper.name}:`,
+                  rawLanguages
+                );
+
                 clipperLanguages = (rawLanguages || []).map(
                   (l: any) => l.language
                 );
-                console.log(`[Filter] Parsed languages for ${clipper.name}:`, clipperLanguages);
+                console.log(
+                  `[Filter] Parsed languages for ${clipper.name}:`,
+                  clipperLanguages
+                );
               } else {
-                console.warn(`[Filter] Language API error for ${clipper.name}:`, languagesResponse.status);
+                console.warn(
+                  `[Filter] Language API error for ${clipper.name}:`,
+                  languagesResponse.status
+                );
               }
             } else {
-              console.warn(`[Filter] Missing baseUrl or userId for ${clipper.name}`);
+              console.warn(
+                `[Filter] Missing baseUrl or userId for ${clipper.name}`
+              );
             }
           } catch (err) {
             console.warn(
@@ -266,11 +330,11 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
           // Check language filter
           if (
             selectedLanguages.length > 0 &&
-            !selectedLanguages.some((lang) =>
-              clipperLanguages.includes(lang)
-            )
+            !selectedLanguages.some((lang) => clipperLanguages.includes(lang))
           ) {
-            console.log(`[Filter] ${clipper.name} filtered out - no matching language. Selected: ${selectedLanguages}, Has: ${clipperLanguages}`);
+            console.log(
+              `[Filter] ${clipper.name} filtered out - no matching language. Selected: ${selectedLanguages}, Has: ${clipperLanguages}`
+            );
             return null;
           }
 

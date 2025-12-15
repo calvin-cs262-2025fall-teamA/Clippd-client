@@ -1,3 +1,29 @@
+/**
+ * @fileoverview Interactive Map Screen for Location-Based Clipper Discovery
+ *
+ * Provides an interactive Google Map where users can:
+ * - View clippers positioned at their business locations
+ * - Search for locations by address
+ * - Adjust search radius (1-100 miles)
+ * - See distance from search center to each clipper
+ * - Tap on clipper markers to see details or navigate to profile
+ *
+ * Features:
+ * - Real-time distance calculations using Haversine formula
+ * - Auto-zoom to fit selected radius
+ * - Current location detection via GPS
+ * - Google Places autocomplete for address search
+ * - Filtered clipper display based on search radius
+ * - Smooth map animations on zoom and pan
+ *
+ * @component
+ * @returns {React.ReactElement} Full-screen interactive map with controls
+ *
+ * @example
+ * // Used in tab navigation
+ * // Users can search addresses and see nearby clippers on map
+ */
+
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import Constants from "expo-constants";
@@ -23,8 +49,7 @@ import {
 } from "../../data/mockClippersWithLocation";
 
 const { width } = Dimensions.get("window");
-const FALLBACK_AVATAR =
-  "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+const FALLBACK_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
 type Region = {
   latitude: number;
@@ -35,12 +60,23 @@ type Region = {
 
 type NearbyClipper = ClipperWithCoords & { distance: number };
 
-const hasCoordinates = (clipper: ClipperProfile): clipper is ClipperWithCoords =>
+const hasCoordinates = (
+  clipper: ClipperProfile
+): clipper is ClipperWithCoords =>
   typeof clipper.latitude === "number" &&
   typeof clipper.longitude === "number" &&
   clipper.latitude !== null &&
   clipper.longitude !== null;
 
+/**
+ * MapScreen Component
+ *
+ * Interactive map-based discovery interface. Displays clippers at their
+ * business locations and allows users to search by address and adjust
+ * search radius. Includes distance calculations and profile navigation.
+ *
+ * @returns {React.ReactElement} Map screen with search bar, radius slider, and markers
+ */
 export default function MapScreen() {
   const [region, setRegion] = useState<Region | null>(null);
   const [radiusMiles, setRadiusMiles] = useState(10);
@@ -51,14 +87,35 @@ export default function MapScreen() {
 
   const apiKey = Constants.expoConfig!.extra!.googleMapsApiKey;
 
+  /**
+   * Converts miles to meters for map distance calculations
+   * @param {number} miles - Distance in miles
+   * @returns {number} Equivalent in meters
+   * @private
+   */
   const milesToMeters = (miles: number) => miles * 1609.34;
 
+  /**
+   * Computes latitude/longitude delta to show entire search radius on map
+   * @param {number} miles - Search radius in miles
+   * @returns {number} Delta for both lat and lon (assumes square region)
+   * @private
+   */
   const computeZoomDelta = (miles: number) => {
     const km = miles * 1.609344;
     const deg = km / 111;
     return deg * 3;
   };
 
+  /**
+   * Calculates distance between two geographic coordinates using Haversine formula
+   * @param {number} lat1 - First location latitude
+   * @param {number} lon1 - First location longitude
+   * @param {number} lat2 - Second location latitude
+   * @param {number} lon2 - Second location longitude
+   * @returns {number} Distance in miles
+   * @private
+   */
   const calculateDistanceMiles = (
     lat1: number,
     lon1: number,
@@ -71,9 +128,7 @@ export default function MapScreen() {
     const dLon = toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) ** 2;
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return earthRadiusMiles * c;
   };

@@ -1,5 +1,37 @@
+/**
+ * @fileoverview Home/Discovery Screen for Clippd Client
+ *
+ * This screen displays a scrollable list of available clippers/barbers.
+ * Clients can view barber profiles, apply filters by service/language/price,
+ * and navigate to detailed profile pages.
+ *
+ * Features:
+ * - Displays all clippers with Card components
+ * - Real-time filtering by services, languages, and price range
+ * - Auto-redirects Clippers to their barber-profile page
+ * - Help instructions modal for client guidance
+ * - Loading and error states
+ * - Search/filter integration with FilterContext
+ *
+ * @component
+ * @returns {React.ReactElement} Home screen with clipper listings
+ *
+ * @example
+ * // Used in tab navigation - auto-loaded
+ * // Clippers are auto-redirected to barber-profile
+ * // Clients see full clipper list with filters
+ */
+
 import React, { useEffect, useState } from "react";
-import { ScrollView, View, ActivityIndicator, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
+import {
+  ScrollView,
+  View,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,6 +44,17 @@ import { ClipperProfile } from "../../type/clippdTypes";
 import FilterButton from "../components/filter_button";
 import { CLIENT_HELP_INSTRUCTION } from "../../utils/help/ClientHelpInstruction";
 
+/**
+ * Home Screen Component
+ *
+ * Main discovery page for clients to browse available clippers.
+ * Handles filter application, loading states, and role-based routing.
+ * Clippers are automatically redirected to their profile page.
+ *
+ * @returns {React.ReactElement|React.ReactNode}
+ *   - Redirect to barber-profile if user is Clipper
+ *   - Home screen with clipper cards if user is Client
+ */
 export default function Home() {
   const {
     clippers,
@@ -105,50 +148,52 @@ export default function Home() {
         edges={["bottom"]}
       >
         <View style={{ flex: 1, position: "relative" }}>
-        {/* Scrollable list of cards */}
-        <ScrollView
-          contentContainerStyle={{ paddingTop: 5, paddingBottom: 65 }}
-        >
-          {(isClippersLoading || isFiltering) && (
-            <View style={{ paddingTop: 60 }}>
-              <ActivityIndicator size="large" />
-            </View>
-          )}
-          {!isClippersLoading && clippersError && (
-            <Text style={{ textAlign: "center", marginTop: 40, color: "#d11" }}>
-              {clippersError}
-            </Text>
-          )}
-          {!isClippersLoading &&
-            !isFiltering &&
-            !clippersError &&
-            clippersToDisplay.length === 0 && (
+          {/* Scrollable list of cards */}
+          <ScrollView
+            contentContainerStyle={{ paddingTop: 5, paddingBottom: 65 }}
+          >
+            {(isClippersLoading || isFiltering) && (
+              <View style={{ paddingTop: 60 }}>
+                <ActivityIndicator size="large" />
+              </View>
+            )}
+            {!isClippersLoading && clippersError && (
               <Text
-                style={{ textAlign: "center", marginTop: 40, color: "#999" }}
+                style={{ textAlign: "center", marginTop: 40, color: "#d11" }}
               >
-                No clippers found matching your filters
+                {clippersError}
               </Text>
             )}
-          {!isClippersLoading &&
-            !isFiltering &&
-            !clippersError &&
-            clippersToDisplay.map((item) => (
-              <Card
-                id={item.id}
-                key={item.id}
-                name={item.name}
-                location={item.location}
-                images={item.images}
-                rating={item.rating}
-                profilePic={item.profilePic}
-              />
-            ))}
-        </ScrollView>
+            {!isClippersLoading &&
+              !isFiltering &&
+              !clippersError &&
+              clippersToDisplay.length === 0 && (
+                <Text
+                  style={{ textAlign: "center", marginTop: 40, color: "#999" }}
+                >
+                  No clippers found matching your filters
+                </Text>
+              )}
+            {!isClippersLoading &&
+              !isFiltering &&
+              !clippersError &&
+              clippersToDisplay.map((item) => (
+                <Card
+                  id={item.id}
+                  key={item.id}
+                  name={item.name}
+                  location={item.location}
+                  images={item.images}
+                  rating={item.rating}
+                  profilePic={item.profilePic}
+                />
+              ))}
+          </ScrollView>
 
-        {/* Floating Filter Button (logic lives inside FilterButton.tsx) */}
-        <FilterButton />
-      </View>
-    </SafeAreaView>
+          {/* Floating Filter Button (logic lives inside FilterButton.tsx) */}
+          <FilterButton />
+        </View>
+      </SafeAreaView>
 
       {/* Help Modal */}
       <Modal
@@ -163,9 +208,7 @@ export default function Home() {
               <Text style={styles.modalTitle}>
                 {CLIENT_HELP_INSTRUCTION.documents[selectedHelpSection].title}
               </Text>
-              <TouchableOpacity
-                onPress={() => setIsHelpModalVisible(false)}
-              >
+              <TouchableOpacity onPress={() => setIsHelpModalVisible(false)}>
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
@@ -176,7 +219,10 @@ export default function Home() {
             >
               {/* Overview */}
               <Text style={styles.overviewText}>
-                {CLIENT_HELP_INSTRUCTION.documents[selectedHelpSection].overview}
+                {
+                  CLIENT_HELP_INSTRUCTION.documents[selectedHelpSection]
+                    .overview
+                }
               </Text>
 
               {/* Table of Contents */}
@@ -187,8 +233,7 @@ export default function Home() {
                     key={index}
                     style={[
                       styles.tocItem,
-                      selectedHelpSection === index &&
-                        styles.tocItemActive,
+                      selectedHelpSection === index && styles.tocItemActive,
                     ]}
                     onPress={() => setSelectedHelpSection(index)}
                   >
@@ -216,9 +261,7 @@ export default function Home() {
                   ].steps.map((step, idx) => (
                     <View key={idx} style={styles.tableRow}>
                       <View style={styles.stepNumber}>
-                        <Text style={styles.stepNumberText}>
-                          {step.number}
-                        </Text>
+                        <Text style={styles.stepNumberText}>{step.number}</Text>
                       </View>
                       <Text style={styles.stepInstruction}>
                         {step.instruction}
@@ -233,8 +276,7 @@ export default function Home() {
                 <TouchableOpacity
                   style={[
                     styles.navButton,
-                    selectedHelpSection === 0 &&
-                      styles.navButtonDisabled,
+                    selectedHelpSection === 0 && styles.navButtonDisabled,
                   ]}
                   onPress={() =>
                     setSelectedHelpSection(selectedHelpSection - 1)
@@ -244,9 +286,7 @@ export default function Home() {
                   <Ionicons
                     name="chevron-back"
                     size={20}
-                    color={
-                      selectedHelpSection === 0 ? "#ccc" : "#ff1a47"
-                    }
+                    color={selectedHelpSection === 0 ? "#ccc" : "#ff1a47"}
                   />
                   <Text style={styles.navButtonText}>Back</Text>
                 </TouchableOpacity>

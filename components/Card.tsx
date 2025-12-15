@@ -1,3 +1,34 @@
+/**
+ * @fileoverview Clipper Profile Card Component
+ *
+ * Reusable card component that displays a clipper's basic information
+ * in a horizontal scrollable format. Used on home screen to show
+ * clipper profiles with image, name, rating, location, and services.
+ *
+ * Features:
+ * - Profile image with fallback
+ * - Star rating display
+ * - Location and distance info
+ * - Horizontal scrollable services list
+ * - Favorite/unfavorite toggle
+ * - Navigation to detailed profile view
+ *
+ * @component
+ *
+ * @example
+ * <Card
+ *   id="1"
+ *   name="Ben Nelson"
+ *   profileImage="https://example.com/image.jpg"
+ *   location={{ city: "Grand Rapids", state: "MI" }}
+ *   rating={4.5}
+ *   reviewCount={12}
+ *   services={["Men's Cut", "Fade"]}
+ *   onToggleFavorite={() => {}}
+ *   isFavorite={false}
+ * />
+ */
+
 import { ClipperProfile } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -15,26 +46,59 @@ import {
 const screenWidth = Dimensions.get("window").width;
 
 /**
- * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
- * 예: 4.0 → "4", 4.5 → "4.5", 4.33 → "4.3"
+ * Formats rating for display
+ *
+ * Converts rating to string representation. If the rating has no decimal part
+ * (e.g., 4.0), displays as integer (4). Otherwise rounds to 1 decimal place (4.5).
+ *
+ * @param {number | string | undefined} rating - The rating value to format
+ * @returns {string} Formatted rating string, or empty string if invalid
+ *
+ * @example
+ * formatRating(4.0)   // "4"
+ * formatRating(4.5)   // "4.5"
+ * formatRating(4.33)  // "4.3"
+ * formatRating(undefined) // ""
+ *
+ * @private
  */
 function formatRating(rating: number | string | undefined): string {
   if (!rating) return "";
   const num = typeof rating === "string" ? parseFloat(rating) : rating;
   if (isNaN(num)) return "";
-  
+
   // Round to 1 decimal place
   const rounded = Math.round(num * 10) / 10;
-  
+
   // If no decimal part, return as integer
   if (rounded % 1 === 0) {
     return rounded.toString();
   }
-  
+
   // Otherwise return with 1 decimal place
   return rounded.toFixed(1);
 }
 
+/**
+ * Card Component - Clipper Profile Card
+ *
+ * Displays a horizontal card with clipper information. Includes image,
+ * rating, location, and services. Tapping opens detailed profile view.
+ *
+ * @param {Object} props - Component props
+ * @param {string} props.id - Unique clipper ID
+ * @param {string} props.name - Clipper's display name
+ * @param {string} [props.profileImage] - URL to profile image
+ * @param {Object} props.location - Location info
+ * @param {string} props.location.city - City name
+ * @param {string} props.location.state - State abbreviation
+ * @param {number | string} [props.rating] - Average rating (1-5)
+ * @param {number} [props.reviewCount=0] - Total number of reviews
+ * @param {string[]} [props.services=[]] - Array of service names offered
+ * @param {Function} [props.onToggleFavorite] - Callback when favorite toggled
+ * @param {boolean} [props.isFavorite=false] - Whether clipper is favorited
+ * @returns {React.ReactElement} Card component displaying clipper info
+ */
 export default function Card({
   id,
   name,
@@ -127,7 +191,9 @@ export default function Card({
 
           <View style={styles.ratingBlock}>
             <Ionicons name="star" size={16} color="gold" />
-            {rating && <Text style={styles.ratingText}>{formatRating(rating)}</Text>}
+            {rating && (
+              <Text style={styles.ratingText}>{formatRating(rating)}</Text>
+            )}
           </View>
         </View>
       </TouchableOpacity>

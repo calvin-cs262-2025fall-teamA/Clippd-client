@@ -902,7 +902,7 @@ export default function BarberProfile() {
       >
         {/* Logout and Help Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.helpButton}
             onPress={() => setIsHelpModalVisible(true)}
           >
@@ -1789,9 +1789,7 @@ export default function BarberProfile() {
               <Text style={styles.modalTitle}>
                 {CLIPPER_HELP_INSTRUCTION.documents[selectedHelpSection].title}
               </Text>
-              <TouchableOpacity
-                onPress={() => setIsHelpModalVisible(false)}
-              >
+              <TouchableOpacity onPress={() => setIsHelpModalVisible(false)}>
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
@@ -1802,7 +1800,10 @@ export default function BarberProfile() {
             >
               {/* Overview */}
               <Text style={styles.overviewText}>
-                {CLIPPER_HELP_INSTRUCTION.documents[selectedHelpSection].overview}
+                {
+                  CLIPPER_HELP_INSTRUCTION.documents[selectedHelpSection]
+                    .overview
+                }
               </Text>
 
               {/* Table of Contents */}
@@ -1813,8 +1814,7 @@ export default function BarberProfile() {
                     key={index}
                     style={[
                       styles.tocItem,
-                      selectedHelpSection === index &&
-                        styles.tocItemActive,
+                      selectedHelpSection === index && styles.tocItemActive,
                     ]}
                     onPress={() => setSelectedHelpSection(index)}
                   >
@@ -1834,7 +1834,10 @@ export default function BarberProfile() {
               {/* Steps Table */}
               <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>
-                  {CLIPPER_HELP_INSTRUCTION.documents[selectedHelpSection].title}
+                  {
+                    CLIPPER_HELP_INSTRUCTION.documents[selectedHelpSection]
+                      .title
+                  }
                 </Text>
                 <View style={styles.stepsTable}>
                   {CLIPPER_HELP_INSTRUCTION.documents[
@@ -1842,9 +1845,7 @@ export default function BarberProfile() {
                   ].steps.map((step, idx) => (
                     <View key={idx} style={styles.tableRow}>
                       <View style={styles.stepNumber}>
-                        <Text style={styles.stepNumberText}>
-                          {step.number}
-                        </Text>
+                        <Text style={styles.stepNumberText}>{step.number}</Text>
                       </View>
                       <Text style={styles.stepInstruction}>
                         {step.instruction}
@@ -1859,8 +1860,7 @@ export default function BarberProfile() {
                 <TouchableOpacity
                   style={[
                     styles.navButton,
-                    selectedHelpSection === 0 &&
-                      styles.navButtonDisabled,
+                    selectedHelpSection === 0 && styles.navButtonDisabled,
                   ]}
                   onPress={() =>
                     setSelectedHelpSection(selectedHelpSection - 1)
@@ -1870,9 +1870,7 @@ export default function BarberProfile() {
                   <Ionicons
                     name="chevron-back"
                     size={20}
-                    color={
-                      selectedHelpSection === 0 ? "#ccc" : "#ff1a47"
-                    }
+                    color={selectedHelpSection === 0 ? "#ccc" : "#ff1a47"}
                   />
                   <Text style={styles.navButtonText}>Back</Text>
                 </TouchableOpacity>
