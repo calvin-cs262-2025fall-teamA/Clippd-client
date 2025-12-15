@@ -133,7 +133,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="map-outline" size={24} color={color} />
           ),
-          href: null,
+          href: user.role === "Clipper" ? null : undefined,
         }}
       />
 

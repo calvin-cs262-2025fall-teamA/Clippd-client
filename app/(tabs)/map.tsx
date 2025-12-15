@@ -2,66 +2,161 @@ import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import Constants from "expo-constants";
 import * as Location from "expo-location";
-import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import MapView, { Circle } from "react-native-maps";
+import MapView, { Callout, Circle, Marker } from "react-native-maps";
+import { useRouter } from "expo-router";
+
+import { useClippd } from "@/contexts/ClippdContext";
+import { ClipperProfile } from "@/type/clippdTypes";
+import {
+  ClipperWithCoords,
+  mockClippersWithLocation,
+} from "../../data/mockClippersWithLocation";
 
 const { width } = Dimensions.get("window");
+const FALLBACK_AVATAR =
+  "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+type Region = {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+};
+
+type NearbyClipper = ClipperWithCoords & { distance: number };
+
+const hasCoordinates = (clipper: ClipperProfile): clipper is ClipperWithCoords =>
+  typeof clipper.latitude === "number" &&
+  typeof clipper.longitude === "number" &&
+  clipper.latitude !== null &&
+  clipper.longitude !== null;
 
 export default function MapScreen() {
-  const [region, setRegion] = useState(null);
+  const [region, setRegion] = useState<Region | null>(null);
   const [radiusMiles, setRadiusMiles] = useState(10);
-  const mapRef = useRef(null);
+  const mapRef = useRef<MapView | null>(null);
   const searchRef = useRef(null);
+  const { clippers, isClippersLoading, fetchClippers } = useClippd();
+  const router = useRouter();
 
   const apiKey = Constants.expoConfig!.extra!.googleMapsApiKey;
 
   const milesToMeters = (miles: number) => miles * 1609.34;
 
-  // 🔥 Convert radius → zoom level (bigger multiplier = more zoom-out)
   const computeZoomDelta = (miles: number) => {
     const km = miles * 1.609344;
     const deg = km / 111;
-    return deg * 3; // zoom out enough to fit entire circle
+    return deg * 3;
   };
 
-  // 🔥 Auto-zoom when radius changes
-  useEffect(() => {
-    if (!region) return;
+  const calculateDistanceMiles = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const earthRadiusMiles = 3958.8;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return earthRadiusMiles * c;
+  };
 
+  const clippersWithCoords = useMemo<ClipperWithCoords[]>(() => {
+    const hydrated = (clippers || []).filter(hasCoordinates);
+    return [...hydrated, ...mockClippersWithLocation];
+  }, [clippers]);
+
+  const nearbyClippers = useMemo<NearbyClipper[]>(() => {
+    if (!region) return [];
+    return clippersWithCoords
+      .map((clipper) => {
+        const distance = calculateDistanceMiles(
+          region.latitude,
+          region.longitude,
+          clipper.latitude,
+          clipper.longitude
+        );
+        return { ...clipper, distance };
+      })
+      .filter((clipper) => clipper.distance <= radiusMiles)
+      .sort((a, b) => a.distance - b.distance);
+  }, [clippersWithCoords, radiusMiles, region]);
+
+  const centerMapOn = (latitude: number, longitude: number) => {
     const delta = computeZoomDelta(radiusMiles);
-
-    const updated = {
-      ...region,
+    const nextRegion = {
+      latitude,
+      longitude,
       latitudeDelta: delta,
       longitudeDelta: delta,
     };
+    setRegion(nextRegion);
+    mapRef.current?.animateToRegion(nextRegion, 450);
+  };
 
-    setRegion(updated);
-    mapRef.current?.animateToRegion(updated, 450);
-  }, [radiusMiles, region]);
+  useEffect(() => {
+    if (clippers.length === 0) {
+      fetchClippers();
+    }
+  }, [clippers.length, fetchClippers]);
 
-  // 🔥 Get user GPS location
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permission to access location was denied");
-        return;
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          centerMapOn(
+            mockClippersWithLocation[0].latitude,
+            mockClippersWithLocation[0].longitude
+          );
+          return;
+        }
+
+        const current = await Location.getCurrentPositionAsync({});
+        centerMapOn(current.coords.latitude, current.coords.longitude);
+      } catch (error) {
+        centerMapOn(
+          mockClippersWithLocation[0].latitude,
+          mockClippersWithLocation[0].longitude
+        );
       }
-
-      let current = await Location.getCurrentPositionAsync({});
-      const userRegion = {
-        latitude: current.coords.latitude,
-        longitude: current.coords.longitude,
-        latitudeDelta: 0.04,
-        longitudeDelta: 0.04,
-      };
-
-      setRegion(userRegion);
     })();
   }, []);
+
+  useEffect(() => {
+    setRegion((prev) => {
+      if (!prev) return prev;
+      const delta = computeZoomDelta(radiusMiles);
+      const next = {
+        ...prev,
+        latitudeDelta: delta,
+        longitudeDelta: delta,
+      };
+      mapRef.current?.animateToRegion(next, 450);
+      return next;
+    });
+  }, [radiusMiles]);
+
+  const openClipperProfile = (clipperId: string) => {
+    router.push(`/details/${clipperId}`);
+  };
 
   return (
     <View style={styles.container}>
@@ -73,26 +168,14 @@ export default function MapScreen() {
           fetchDetails={true}
           listViewDisplayed={false}
           GooglePlacesDetailsQuery={{
-            fields: "geometry", // 🔥 REQUIRED or details.geometry will be null
+            fields: "geometry",
           }}
           onFail={() => {}}
           onNotFound={() => {}}
           onPress={(data, details) => {
             if (!details?.geometry?.location) return;
-
             const { lat, lng } = details.geometry.location;
-
-            const newRegion = {
-              latitude: lat,
-              longitude: lng,
-              latitudeDelta: 0.04,
-              longitudeDelta: 0.04,
-            };
-
-            setRegion(newRegion);
-            mapRef.current?.animateToRegion(newRegion, 1000);
-
-            // 🔥 HIDE DROPDOWN COMPLETELY
+            centerMapOn(lat, lng);
             searchRef.current?.clear();
             searchRef.current?.setAddressText("");
             searchRef.current?.blur();
@@ -109,29 +192,81 @@ export default function MapScreen() {
       </View>
 
       {/* 🗺 Map + Circle + Center Pin */}
-      {region && (
+      {region ? (
         <>
           <MapView
             ref={mapRef}
             style={styles.map}
-            initialRegion={region}
+            region={region}
             showsUserLocation={true}
             showsMyLocationButton={true}
-            onRegionChangeComplete={(reg) => setRegion(reg)}
+            onRegionChangeComplete={(reg) =>
+              setRegion((prev) => ({
+                ...(prev || reg),
+                latitude: reg.latitude,
+                longitude: reg.longitude,
+              }))
+            }
           >
             <Circle
               center={region}
               radius={milesToMeters(radiusMiles)}
-              fillColor="rgba(255, 50, 50, 0.15)"
-              strokeColor="rgba(255, 50, 50, 0.8)"
+              fillColor="rgba(255, 169, 0, 0.2)"
+              strokeColor="#ffae00"
+              strokeWidth={2}
             />
+
+            {nearbyClippers.map((clipper) => (
+              <Marker
+                key={clipper.id}
+                coordinate={{
+                  latitude: clipper.latitude,
+                  longitude: clipper.longitude,
+                }}
+                onPress={() => centerMapOn(clipper.latitude, clipper.longitude)}
+              >
+                <View style={styles.pin}>
+                  <View style={styles.pinInner}>
+                    <Image
+                      source={{ uri: clipper.profilePic || FALLBACK_AVATAR }}
+                      style={styles.pinAvatar}
+                    />
+                  </View>
+                  <View style={styles.pinTip} />
+                </View>
+                <Callout tooltip onPress={() => openClipperProfile(clipper.id)}>
+                  <View style={styles.callout}>
+                    <Text style={styles.calloutName}>{clipper.name}</Text>
+                    <Text style={styles.calloutMeta}>
+                      {clipper.location} · {clipper.distance.toFixed(1)} mi
+                    </Text>
+                    <View style={styles.calloutRatingRow}>
+                      <Ionicons name="star" size={14} color="#ffae00" />
+                      <Text style={styles.calloutRating}>{clipper.rating}</Text>
+                    </View>
+                  </View>
+                </Callout>
+              </Marker>
+            ))}
           </MapView>
 
-          {/* 📍 Center Pin */}
           <View pointerEvents="none" style={styles.centerPinContainer}>
-            <Ionicons name="location-sharp" size={32} color="#FF1744" />
+            <Ionicons name="location-sharp" size={32} color="#00c2ff" />
+          </View>
+
+          <View style={styles.counterChip}>
+            <Text style={styles.counterText}>
+              {isClippersLoading
+                ? "Loading nearby clippers..."
+                : `${nearbyClippers.length} clippers within ${radiusMiles} mi`}
+            </Text>
           </View>
         </>
+      ) : (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#ffae00" />
+          <Text style={styles.loadingText}>Finding your location...</Text>
+        </View>
       )}
 
       {/* 🎚 Radius Slider */}
@@ -145,9 +280,9 @@ export default function MapScreen() {
           step={1}
           value={radiusMiles}
           onValueChange={setRadiusMiles}
-          minimumTrackTintColor="#FF1744"
-          maximumTrackTintColor="#ccc"
-          thumbTintColor="#FF1744"
+          minimumTrackTintColor="#ffae00"
+          maximumTrackTintColor="#d7d7d7"
+          thumbTintColor="#ffae00"
         />
       </View>
     </View>
@@ -167,13 +302,17 @@ const styles = StyleSheet.create({
   },
 
   inputContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    height: 50,
+    backgroundColor: "#f8f8f8",
+    borderRadius: 14,
+    height: 52,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
 
   input: {
-    height: 50,
+    height: 52,
     fontSize: 16,
   },
 
@@ -208,5 +347,87 @@ const styles = StyleSheet.create({
     left: "50%",
     transform: [{ translateX: -16 }, { translateY: -32 }],
     zIndex: 20,
+  },
+
+  pin: {
+    alignItems: "center",
+  },
+  pinInner: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: "#fff",
+    borderWidth: 3,
+    borderColor: "#ffae00",
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pinAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  pinTip: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 9,
+    borderRightWidth: 9,
+    borderTopWidth: 12,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: "#ffae00",
+    marginTop: -2,
+  },
+  callout: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 10,
+    minWidth: 180,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  calloutName: {
+    fontWeight: "700",
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  calloutMeta: {
+    color: "#555",
+    marginBottom: 6,
+  },
+  calloutRatingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 2,
+  },
+  calloutRating: {
+    fontWeight: "600",
+    color: "#1c1c1c",
+    marginLeft: 6,
+  },
+  counterChip: {
+    position: "absolute",
+    bottom: 160,
+    alignSelf: "center",
+    backgroundColor: "rgba(0,0,0,0.7)",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  counterText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 16,
   },
 });

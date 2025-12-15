@@ -150,6 +150,8 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
               .filter(Boolean)
               .join(" "),
             location: [c.city, c.state].filter(Boolean).join(", "),
+            latitude: c.latitude ?? null,
+            longitude: c.longitude ?? null,
             images: c.images || [], // Use images from database
             rating:
               typeof c.rating === "string" ? c.rating : String(c.rating ?? "0"),

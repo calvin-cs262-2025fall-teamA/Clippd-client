@@ -11,6 +11,8 @@ export interface ClipperProfile {
   userId?: string | number; // UserAccount ID for language/specialty queries
   name: string;
   location: string;
+  latitude?: number | null;
+  longitude?: number | null;
   images: string[];
   rating: string;
   profilePic: string;
