@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Favorites card component for displaying clipper in favorites list
+ * @description Compact card displaying clipper information (name, location, rating)
+ * with profile picture in favorites view
+ * @version 1.0.0
+ */
+
 import { ClipperProfile } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
@@ -8,6 +15,9 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
  * 예: 4.0 → "4", 4.5 → "4.5", 4.33 → "4.3"
+ * @function formatRating
+ * @param {number|string|undefined} rating - The rating value to format
+ * @returns {string} Formatted rating string
  */
 function formatRating(rating: number | string | undefined): string {
   if (!rating) return "";
@@ -26,6 +36,17 @@ function formatRating(rating: number | string | undefined): string {
   return rounded.toFixed(1);
 }
 
+/**
+ * Favorites card component for displaying clipper in list view
+ * @component
+ * @param {ClipperProfile} props - Clipper profile data
+ * @param {string} props.id - Clipper ID
+ * @param {string} props.name - Clipper name
+ * @param {string} props.location - Clipper location
+ * @param {number} props.rating - Clipper rating
+ * @param {string} props.profilePic - Clipper profile picture URL
+ * @returns {JSX.Element} Compact card component for favorites list
+ */
 export default function SmallCard({
   id,
   name,

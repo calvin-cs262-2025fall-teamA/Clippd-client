@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Filter screen component for Clippd application
+ * @description Provides filtering interface for searching and filtering clippers
+ * by services, languages, price ranges, and ratings
+ * @version 1.0.0
+ */
+
 import React, { useState } from "react";
 import {
   View,
@@ -11,6 +18,10 @@ import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useFilter } from "../../contexts/FilterContext";
 
+/**
+ * Service categories with available service options
+ * @type {Array<{label: string, values: string[]}>}
+ */
 const SERVICE_CATEGORIES = [
   {
     label: "Haircuts",
@@ -53,8 +64,16 @@ const SERVICE_CATEGORIES = [
   },
 ];
 
+/**
+ * Available languages for filtering
+ * @type {string[]}
+ */
 const LANGUAGES = ["Spanish", "Korean", "Nepali"];
 
+/**
+ * Price range options for filtering
+ * @type {string[]}
+ */
 const PRICE_RANGES = [
   "$0 – $20",
   "$20 – $40",
@@ -63,6 +82,11 @@ const PRICE_RANGES = [
   "$100+",
 ];
 
+/**
+ * Filter screen component for searching and filtering clippers
+ * @component
+ * @returns {JSX.Element} Filter screen with service, language, price, and rating options
+ */
 export default function FilterScreen() {
   const router = useRouter();
   const {

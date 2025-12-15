@@ -1,6 +1,22 @@
+/**
+ * @fileoverview Authentication context for user login/signup/logout
+ * @description Provides authentication state and methods for managing user sessions
+ * Stores user data and tokens in secure storage
+ * @version 1.0.0
+ */
+
 import * as SecureStore from "expo-secure-store";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
+/**
+ * Authentication context type definition
+ * @typedef {Object} AuthContextType
+ * @property {User|null} user - Current authenticated user
+ * @property {Function} login - Login function
+ * @property {Function} signup - Signup function
+ * @property {Function} logout - Logout function
+ * @property {boolean} isLoading - Loading state
+ */
 type AuthContextType = {
   user: User | null;
   login: (loginID: string, password: string) => Promise<void>;
@@ -15,6 +31,20 @@ type AuthContextType = {
   isLoading: boolean;
 };
 
+/**
+ * User data type
+ * @typedef {Object} User
+ * @property {string} id - User ID
+ * @property {string} email - User email
+ * @property {string} firstName - First name
+ * @property {string} lastName - Last name
+ * @property {string} [role] - User role (Client or Clipper)
+ * @property {string} [phoneNumber] - Phone number
+ * @property {string} [city] - City
+ * @property {string} [state] - State
+ * @property {string} [profileImage] - Profile image URL
+ * @property {string[]} [preferences] - User preferences
+ */
 type User = {
   id: string;
   email: string;
@@ -30,6 +60,13 @@ type User = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Authentication provider component
+ * @component
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ * @returns {JSX.Element} Provider wrapping children with auth context
+ */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -221,6 +258,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+
+/**
+ * Custom hook to use authentication context
+ * @function useAuth
+ * @returns {AuthContextType} Authentication context with user, login, signup, logout, isLoading
+ * @throws {Error} Throws error if used outside of AuthProvider
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

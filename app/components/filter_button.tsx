@@ -1,9 +1,21 @@
+/**
+ * @fileoverview Floating action button for accessing filter screen
+ * @description Blurred floating button component that navigates to filter page
+ * for searching and filtering clippers
+ * @version 1.0.0
+ */
+
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
+/**
+ * Floating action button component for filter access
+ * @component
+ * @returns {JSX.Element} Floating button with blur effect
+ */
 export default function FilterButton() {
   const router = useRouter();
 

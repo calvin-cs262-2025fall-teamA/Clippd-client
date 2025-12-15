@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Home/Browse screen component for client users
+ * @description Main screen for clients to browse and filter clippers
+ * Displays clipper cards with filtering capabilities and help system
+ * @version 1.0.0
+ */
+
 import React, { useEffect, useState } from "react";
 import { ScrollView, View, ActivityIndicator, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,6 +19,11 @@ import { ClipperProfile } from "../../type/clippdTypes";
 import FilterButton from "../components/filter_button";
 import { CLIENT_HELP_INSTRUCTION } from "../../utils/help/ClientHelpInstruction";
 
+/**
+ * Home screen component for browsing clippers
+ * @component
+ * @returns {JSX.Element} Home screen with clipper cards and filtering
+ */
 export default function Home() {
   const {
     clippers,

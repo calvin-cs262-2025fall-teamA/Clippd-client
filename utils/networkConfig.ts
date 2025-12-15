@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Network configuration and API URL management
+ * @description Handles API URL detection and caching for network requests
+ * Uses Azure production URL as primary endpoint with environment variable override support
+ * @version 1.0.0
+ */
+
 // Cache: Store the found URL to avoid re-initialization
 let cachedApiUrl: string | null = null;
 let lastDetectionTime: number = 0;
@@ -10,6 +17,10 @@ const CACHE_DURATION_MS = 10 * 1000; // 10 second cache duration (for testing)
  * 1. If explicit environment variable is set (non-empty), use it
  * 2. If cached URL is available and fresh, use it
  * 3. Use Azure production URL (no local network detection)
+ * 
+ * @async
+ * @function getApiUrl
+ * @returns {Promise<string>} The API URL endpoint
  */
 export async function getApiUrl(): Promise<string> {
   // If cached URL exists and is still valid, use it

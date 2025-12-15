@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Clippd context for managing clipper data
+ * @description Provides clipper profiles, filtering, and related data management
+ * Handles fetching clippers from API and updating local state
+ * @version 1.0.0
+ */
+
 import React, {
   createContext,
   ReactNode,
@@ -9,6 +16,21 @@ import React, {
 import { Users, ClipperProfile, Service } from "../type/clippdTypes";
 import { getApiUrl } from "../utils/networkConfig";
 
+/**
+ * Clippd context type definition
+ * @typedef {Object} ClippdContextType
+ * @property {Users[]|null} users - List of all users
+ * @property {Function} setUsers - Set users state
+ * @property {Function} refreshUsers - Refresh users from API
+ * @property {Function} fetchUserById - Fetch user by ID
+ * @property {ClipperProfile[]} clippers - List of clipper profiles
+ * @property {boolean} isClippersLoading - Loading state
+ * @property {string|null} clippersError - Error message
+ * @property {Function} fetchClippers - Fetch clippers from API
+ * @property {Function} updateClipperRating - Update clipper rating
+ * @property {Function} updateClipperProfile - Update clipper profile data
+ * @property {Function} getFilteredClippers - Get filtered clippers
+ */
 interface ClippdContextType {
   // Users
   users: Users[] | null;
@@ -357,6 +379,12 @@ export const ClippdProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
+/**
+ * Custom hook to use Clippd context
+ * @function useClippd
+ * @returns {ClippdContextType} Clippd context with clipper data and methods
+ * @throws {Error} Throws error if used outside of ClippdProvider
+ */
 export function useClippd() {
   const ctx = useContext(ClippdContext);
   if (!ctx) throw new Error("useClippd must be used within ClippdProvider");

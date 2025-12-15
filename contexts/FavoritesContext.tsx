@@ -1,6 +1,21 @@
+/**
+ * @fileoverview Favorites context for managing favorite clippers
+ * @description Provides favorites state and methods for adding/removing favorites
+ * Persists favorites to secure storage
+ * @version 1.0.0
+ */
+
 import * as SecureStore from "expo-secure-store";
 import { createContext, useContext, useEffect, useState } from 'react';
 
+/**
+ * Favorites context type definition
+ * @typedef {Object} FavoritesContextType
+ * @property {string[]} favorites - Array of favorite clipper IDs
+ * @property {Function} addFavorite - Add a clipper to favorites
+ * @property {Function} removeFavorite - Remove a clipper from favorites
+ * @property {Function} isFavorited - Check if clipper is favorited
+ */
 type FavoritesContextType = {
     favorites: string[];
     addFavorite: (id: string) => void;
@@ -10,6 +25,13 @@ type FavoritesContextType = {
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
+/**
+ * Favorites provider component
+ * @component
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ * @returns {JSX.Element} Provider wrapping children with favorites context
+ */
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     const [favorites, setFavorites] = useState<string[]>([]);
 
@@ -53,6 +75,12 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
+/**
+ * Custom hook to use Favorites context
+ * @function useFavorites
+ * @returns {FavoritesContextType} Favorites context with favorites list and methods
+ * @throws {Error} Throws error if used outside of FavoritesProvider
+ */
 export const useFavorites = () => {
     const context = useContext(FavoritesContext);
     if (!context) {

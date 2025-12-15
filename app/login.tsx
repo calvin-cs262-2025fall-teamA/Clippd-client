@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Login screen component for Clippd application
+ * @description Provides user authentication interface with login ID and password fields
+ * Includes password visibility toggle and navigation to signup screen
+ * @version 1.0.0
+ */
+
 import { Href, router } from "expo-router";
 import { useState } from "react";
 import {
@@ -15,6 +22,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
 
+/**
+ * Login screen component for user authentication
+ * @component
+ * @returns {JSX.Element} Login screen with form inputs and authentication
+ */
 export default function Login() {
   const [loginID, setLoginID] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +34,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
+  /**
+   * Handles login form submission
+   * @async
+   * @function handleLogin
+   * @returns {Promise<void>}
+   */
   const handleLogin = async () => {
     if (!loginID || !password) {
       Alert.alert("Error", "Please fill in all fields");
@@ -39,6 +57,11 @@ export default function Login() {
     }
   };
 
+  /**
+   * Navigates to signup screen
+   * @function handleSignup
+   * @returns {void}
+   */
   const handleSignup = () => {
     router.push("signup" as Href);
   };

@@ -1,8 +1,28 @@
+/**
+ * @fileoverview Help document: Finding a Clipper (Clipper)
+ * @description Instructions for clippers on how to find and explore other clippers
+ * @version 1.0.0
+ */
+
+/**
+ * Help instruction step
+ * @typedef {Object} HelpStep
+ * @property {number} number - Step number
+ * @property {string} instruction - Step instruction text
+ */
 export interface HelpStep {
   number: number;
   instruction: string;
 }
 
+/**
+ * Help document structure
+ * @typedef {Object} HelpDocument
+ * @property {string} id - Document ID
+ * @property {string} title - Document title
+ * @property {string} overview - Document overview/description
+ * @property {HelpStep[]} steps - Array of instruction steps
+ */
 export interface HelpDocument {
   id: string;
   title: string;
@@ -10,6 +30,10 @@ export interface HelpDocument {
   steps: HelpStep[];
 }
 
+/**
+ * Finding a Clipper help document for clippers
+ * @type {HelpDocument}
+ */
 export const FINDING_A_CLIPPER: HelpDocument = {
   id: "finding-a-clipper",
   title: "Finding a Clipper",

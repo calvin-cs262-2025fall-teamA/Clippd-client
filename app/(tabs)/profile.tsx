@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Client profile screen component
+ * @description User profile management screen for clients including profile editing,
+ * location management, and help system
+ * @version 1.0.0
+ */
+
 import { Stack, router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {

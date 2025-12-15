@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Clipper/Barber profile management screen component
+ * @description Comprehensive profile management for clippers including profile editing,
+ * service management, portfolio management, and review viewing
+ * @version 1.0.0
+ */
+
 import { useClippd } from "@/contexts/ClippdContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ClipperProfile, Service } from "@/type/clippdTypes";

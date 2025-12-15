@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Card component for displaying clipper profile
+ * @description Displays clipper information including profile picture, name, location,
+ * rating, and image gallery with pagination
+ * @version 1.0.0
+ */
+
 import { ClipperProfile } from "@/type/clippdTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -17,6 +24,9 @@ const screenWidth = Dimensions.get("window").width;
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
  * 예: 4.0 → "4", 4.5 → "4.5", 4.33 → "4.3"
+ * @function formatRating
+ * @param {number|string|undefined} rating - The rating value to format
+ * @returns {string} Formatted rating string
  */
 function formatRating(rating: number | string | undefined): string {
   if (!rating) return "";
@@ -35,6 +45,18 @@ function formatRating(rating: number | string | undefined): string {
   return rounded.toFixed(1);
 }
 
+/**
+ * Card component for displaying clipper profile with image gallery
+ * @component
+ * @param {ClipperProfile} props - Clipper profile data
+ * @param {string} props.id - Clipper ID
+ * @param {string} props.name - Clipper name
+ * @param {string} props.location - Clipper location
+ * @param {string[]} props.images - Array of image URLs
+ * @param {number} props.rating - Clipper rating
+ * @param {string} props.profilePic - Clipper profile picture URL
+ * @returns {JSX.Element} Card component with clipper information
+ */
 export default function Card({
   id,
   name,

@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Signup screen component for Clippd application
+ * @description Provides user registration interface with form fields for user information,
+ * role selection, and password confirmation. Includes validation and error handling
+ * @version 1.0.0
+ */
+
 import { Href, router } from "expo-router";
 import { useState } from "react";
 import {
@@ -15,6 +22,11 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 
+/**
+ * Signup screen component for user registration
+ * @component
+ * @returns {JSX.Element} Signup form with user registration
+ */
 export default function Signup() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -29,6 +41,12 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
 
+  /**
+   * Handles signup form submission with validation
+   * @async
+   * @function handleSignup
+   * @returns {Promise<void>}
+   */
   const handleSignup = async () => {
     if (!firstName || !lastName || !loginID || !email || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all fields");
