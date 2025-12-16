@@ -86,7 +86,6 @@ export interface ClipperProfile {
  * @property {string} emailAddress - Email address
  * @property {string} [phone] - Phone number
  */
- */
 export interface Review {
   id: number;
   clientID?: number;

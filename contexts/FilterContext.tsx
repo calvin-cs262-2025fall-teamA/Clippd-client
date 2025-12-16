@@ -121,25 +121,6 @@ export const FilterProvider: React.FC<{ children: ReactNode }> = ({
  * @returns {FilterContextType} Filter context with filters and filter methods
  * @throws {Error} Throws error if used outside of FilterProvider
  */
-export const useFilter = () => {
-
-  return React.createElement(
-    FilterContext.Provider,
-    {
-      value: {
-        filters,
-        setFilters,
-        toggleService,
-        toggleLanguage,
-        setPriceRange,
-        clearFilters,
-        hasActiveFilters,
-      },
-    },
-    children
-  );
-};
-
 export function useFilter() {
   const ctx = useContext(FilterContext);
   if (!ctx) throw new Error("useFilter must be used within FilterProvider");
