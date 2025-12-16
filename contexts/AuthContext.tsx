@@ -18,7 +18,7 @@
  * </AuthProvider>
  * 
  * // In components:
- * const { user, login, logout, isLoading } = useAuth();
+ * const { user, login, logout, isLoading } = useAuth(); 
  */
 
 import * as SecureStore from "expo-secure-store";
