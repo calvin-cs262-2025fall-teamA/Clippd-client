@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Clipper detail screen component
+ * @description Displays comprehensive information about a specific clipper including
+ * profile, services, portfolio, reviews, and booking functionality
+ * @version 1.0.0
+ */
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useClippd } from "@/contexts/ClippdContext";
 import { useFavorites } from "@/contexts/FavoritesContext";
@@ -30,6 +37,9 @@ import { ClipperProfile } from "../../type/clippdTypes";
 
 /**
  * Formats rating: if decimal part is 0, show as integer, otherwise round to 1 decimal place
+ * @function formatRating
+ * @param {number|string|undefined} rating - The rating value to format
+ * @returns {string} Formatted rating string
  */
 function formatRating(rating: number | string | undefined): string {
   if (!rating) return "";
@@ -45,6 +55,9 @@ function formatRating(rating: number | string | undefined): string {
 
 /**
  * Formats date as MM-dd-yyyy
+ * @function formatDate
+ * @param {string|undefined} dateString - The date string to format
+ * @returns {string} Formatted date string
  */
 function formatDate(dateString: string | undefined): string {
   if (!dateString) return "";
@@ -602,7 +615,7 @@ export default function DetailsPage() {
                     </View>
                   </View>
                   <Text style={styles.reviewContent}>
-                    {review.reviewContent || review.comment}
+                    {review.reviewContent}
                   </Text>
                 </View>
               )

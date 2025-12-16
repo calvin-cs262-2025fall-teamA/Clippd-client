@@ -1,5 +1,15 @@
+/**
+ * @fileoverview Help document: Favoriting a Clipper (Client)
+ * @description Instructions for clients on how to favorite clippers
+ * @version 1.0.0
+ */
+
 import { HelpDocument } from "./FindingAClipper";
 
+/**
+ * Favoriting a Clipper help document for clients
+ * @type {HelpDocument}
+ */
 export const FAVORITING_A_CLIPPER: HelpDocument = {
   id: "favoriting-a-clipper",
   title: "Favoriting a Clipper",

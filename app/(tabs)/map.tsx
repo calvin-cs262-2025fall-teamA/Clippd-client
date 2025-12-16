@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Map/Location-based search screen component
+ * @description Displays clippers on a map with location-based filtering,
+ * search by location, and radius adjustment
+ * @version 1.0.0
+ */
+
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import Constants from "expo-constants";

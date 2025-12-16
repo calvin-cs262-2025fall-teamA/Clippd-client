@@ -1,5 +1,15 @@
+/**
+ * @fileoverview Help document: Editing Your Profile (Clipper)
+ * @description Instructions for clippers on how to edit their profile
+ * @version 1.0.0
+ */
+
 import { HelpDocument } from "./FindingAClipper";
 
+/**
+ * Editing Your Profile help document for clippers
+ * @type {HelpDocument}
+ */
 export const EDITING_YOUR_PROFILE: HelpDocument = {
   id: "editing-your-profile",
   title: "Editing your Profile",

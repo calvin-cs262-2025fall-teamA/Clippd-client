@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Home/Browse screen component for client users
+ * @description Main screen for clients to browse and filter clippers
+ * Displays clipper cards with filtering capabilities and help system
+ * @version 1.0.0
+ */
+
 import React, { useEffect, useState } from "react";
 import { ScrollView, View, ActivityIndicator, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -6,12 +13,16 @@ import { Ionicons } from "@expo/vector-icons";
 import Card from "../../components/Card";
 import { useClippd } from "../../contexts/ClippdContext";
 import { useAuth } from "../../contexts/AuthContext";
-import { useFocusEffect } from "@react-navigation/native";
 import { useFilter } from "../../contexts/FilterContext";
 import { ClipperProfile } from "../../type/clippdTypes";
 import FilterButton from "../components/filter_button";
 import { CLIENT_HELP_INSTRUCTION } from "../../utils/help/ClientHelpInstruction";
 
+/**
+ * Home screen component for browsing clippers
+ * @component
+ * @returns {JSX.Element} Home screen with clipper cards and filtering
+ */
 export default function Home() {
   const {
     clippers,
@@ -34,46 +45,47 @@ export default function Home() {
     if (clippers.length === 0) fetchClippers();
   }, [clippers.length, fetchClippers]);
 
-  // Update displayed clippers when filters change
-  useFocusEffect(
-    React.useCallback(() => {
-      const applyFilters = async () => {
-        setIsFiltering(true);
-        try {
-          console.log("[Home] Applying filters:", {
-            selectedServices: filters.selectedServices,
-            selectedLanguages: filters.selectedLanguages,
-            priceRange: filters.priceRange,
-            totalClippers: clippers.length,
-          });
+  // Update displayed clippers ONLY when filters actually change
+  useEffect(() => {
+    const applyFilters = async () => {
+      setIsFiltering(true);
+      try {
+        console.log("[Home] Applying filters:", {
+          selectedServices: filters.selectedServices,
+          selectedLanguages: filters.selectedLanguages,
+          priceRange: filters.priceRange,
+          totalClippers: clippers.length,
+        });
 
-          const filtered = await getFilteredClippers(
-            filters.selectedServices,
-            filters.selectedLanguages,
-            filters.priceRange
-          );
+        const filtered = await getFilteredClippers(
+          filters.selectedServices,
+          filters.selectedLanguages,
+          filters.priceRange
+        );
 
-          console.log("[Home] Filtered results:", {
-            count: filtered.length,
-            clippers: filtered.map((c) => ({
-              id: c.id,
-              name: c.name,
-              userId: c.userId,
-            })),
-          });
+        console.log("[Home] Filtered results:", {
+          count: filtered.length,
+          clippers: filtered.map((c) => ({
+            id: c.id,
+            name: c.name,
+            userId: c.userId,
+          })),
+        });
 
-          setDisplayedClippers(filtered);
-        } catch (error) {
-          console.error("Error applying filters:", error);
-          setDisplayedClippers([]);
-        } finally {
-          setIsFiltering(false);
-        }
-      };
+        setDisplayedClippers(filtered);
+      } catch (error) {
+        console.error("Error applying filters:", error);
+        setDisplayedClippers([]);
+      } finally {
+        setIsFiltering(false);
+      }
+    };
 
+    // Only apply filters if we have clippers data
+    if (clippers.length > 0) {
       applyFilters();
-    }, [filters, clippers, getFilteredClippers])
-  );
+    }
+  }, [filters.selectedServices, filters.selectedLanguages, filters.priceRange, clippers.length, getFilteredClippers]);
 
   // Redirect Clippers to their profile page (index is hidden for them anyway)
   if (user?.role === "Clipper") {

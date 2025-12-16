@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Filter context for managing clipper search filters
+ * @description Provides filter state and methods for managing service, language, and price filters
+ * @version 1.0.0
+ */
+
 import React, {
   createContext,
   ReactNode,
@@ -6,6 +12,13 @@ import React, {
   useCallback,
 } from "react";
 
+/**
+ * Filter state type definition
+ * @typedef {Object} FilterState
+ * @property {string[]} selectedServices - Array of selected service names
+ * @property {string[]} selectedLanguages - Array of selected language names
+ * @property {string|null} priceRange - Selected price range
+ */
 export interface FilterState {
   selectedServices: string[]; // e.g., ["Fade", "Taper"]
   selectedLanguages: string[]; // e.g., ["Spanish", "Korean"]
@@ -28,6 +41,13 @@ export const FilterContext = createContext<FilterContextType | undefined>(
   undefined
 );
 
+/**
+ * Filter provider component
+ * @component
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ * @returns {JSX.Element} Provider wrapping children with filter context
+ */
 export const FilterProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -78,10 +98,9 @@ export const FilterProvider: React.FC<{ children: ReactNode }> = ({
     );
   }, [filters]);
 
-  return React.createElement(
-    FilterContext.Provider,
-    {
-      value: {
+  return (
+    <FilterContext.Provider
+      value={{
         filters,
         setFilters,
         toggleService,
@@ -89,12 +108,19 @@ export const FilterProvider: React.FC<{ children: ReactNode }> = ({
         setPriceRange,
         clearFilters,
         hasActiveFilters,
-      },
-    },
-    children
+      }}
+    >
+      {children}
+    </FilterContext.Provider>
   );
 };
 
+/**
+ * Custom hook to use Filter context
+ * @function useFilter
+ * @returns {FilterContextType} Filter context with filters and filter methods
+ * @throws {Error} Throws error if used outside of FilterProvider
+ */
 export function useFilter() {
   const ctx = useContext(FilterContext);
   if (!ctx) throw new Error("useFilter must be used within FilterProvider");

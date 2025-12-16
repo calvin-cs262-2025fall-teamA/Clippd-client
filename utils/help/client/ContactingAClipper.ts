@@ -1,5 +1,15 @@
+/**
+ * @fileoverview Help document: Contacting a Clipper (Client)
+ * @description Instructions for clients on how to contact clippers
+ * @version 1.0.0
+ */
+
 import { HelpDocument } from "./FindingAClipper";
 
+/**
+ * Contacting a Clipper help document for clients
+ * @type {HelpDocument}
+ */
 export const CONTACTING_A_CLIPPER: HelpDocument = {
   id: "contacting-a-clipper",
   title: "Contacting a Clipper",

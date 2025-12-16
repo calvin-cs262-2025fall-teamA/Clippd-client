@@ -1,5 +1,15 @@
+/**
+ * @fileoverview Help document: Managing Your Services (Clipper)
+ * @description Instructions for clippers on how to manage their services
+ * @version 1.0.0
+ */
+
 import { HelpDocument } from "./FindingAClipper";
 
+/**
+ * Managing Your Services help document for clippers
+ * @type {HelpDocument}
+ */
 export const MANAGING_YOUR_SERVICES: HelpDocument = {
   id: "managing-your-services",
   title: "Managing your Services",

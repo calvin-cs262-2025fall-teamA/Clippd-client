@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Tab navigation layout component
+ * @description Main navigation layout that renders different tabs based on user role
+ * (Clipper users: barber-profile, clipper-explore; Client users: index, map, favorites)
+ * @version 1.0.0
+ */
+
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
@@ -6,6 +13,11 @@ import { Scissors } from "lucide-react-native";
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
 
+/**
+ * Tab layout component that manages navigation and screen configuration
+ * @component
+ * @returns {JSX.Element} Tab navigation layout with role-based screen visibility
+ */
 export default function TabLayout() {
   const { user, isLoading } = useAuth();
 

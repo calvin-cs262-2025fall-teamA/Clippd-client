@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Favorites screen component for client users
+ * @description Displays list of favorited clippers with help system
+ * Allows users to view their favorite clippers and access instructional content
+ * @version 1.0.0
+ */
+
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useClippd } from "@/contexts/ClippdContext";
 import { Stack } from "expo-router";
@@ -15,6 +22,11 @@ import { Ionicons } from "@expo/vector-icons";
 import FavoritesCard from "../../components/FavoritesCard";
 import { CLIENT_HELP_INSTRUCTION } from "../../utils/help/ClientHelpInstruction";
 
+/**
+ * Favorites screen component for viewing favorited clippers
+ * @component
+ * @returns {JSX.Element} Favorites screen with list of favorite clippers
+ */
 export default function Favorites() {
   const { favorites } = useFavorites();
   const { clippers } = useClippd();

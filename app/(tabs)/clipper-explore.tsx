@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Clipper explore/browse screen component
+ * @description Screen for clippers to browse other clippers and explore
+ * portfolio styles with filtering and help system
+ * @version 1.0.0
+ */
+
 import React, { useEffect, useState } from "react";
 import { ScrollView, View, ActivityIndicator, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
