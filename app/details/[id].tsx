@@ -615,7 +615,7 @@ export default function DetailsPage() {
                     </View>
                   </View>
                   <Text style={styles.reviewContent}>
-                    {review.reviewContent || review.comment}
+                    {review.reviewContent}
                   </Text>
                 </View>
               )
